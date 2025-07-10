@@ -1,0 +1,4 @@
+All rights reserved.
+
+This project and its source code are the intellectual property of Szilveszter Németh(Synel96).
+No part of this project may be copied, reused, or modified without explicit permission.
