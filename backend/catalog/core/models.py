@@ -8,6 +8,7 @@ class Overlord(models.Model):
     name = models.CharField(max_length=100)
     avatar = models.ImageField(upload_to='overlords/', blank=True, null=True)
     bio = models.TextField(blank=True)
+    breed = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.slave.username})"
@@ -63,3 +64,15 @@ class Whisker(models.Model):
 
     def __str__(self):
         return f"{self.from_overlord.name} whiskers {self.to_overlord.name}"
+
+
+
+class Notification(models.Model):
+    overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=255)
+    link = models.URLField(blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.overlord.name}: {self.message}"
