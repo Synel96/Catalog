@@ -17,7 +17,7 @@ function App() {
         {/* Alkalmazáson belüli routok */}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Welcome />} />
+          <Route path="/" element={<LoginPage />} />
           {/* A Register oldalra mutató útvonal csak akkor kerüljön ide,
               ha már elkészítetted a Register komponenst */}
         </Routes>
