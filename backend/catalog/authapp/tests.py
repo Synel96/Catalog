@@ -4,12 +4,12 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 
-class AuthTests(APITestCase):
 
+class AuthTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpass123')
 
-    def test_login_successful(self):
+    def test_login_successful(self): 
         url = reverse('token_obtain_pair')
         response = self.client.post(url, {'username': 'testuser', 'password': 'testpass123'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -30,3 +30,25 @@ class AuthTests(APITestCase):
         response = self.client.post(refresh_url, {'refresh': refresh_token})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
+
+    # 🔽 REGISTRATION TESTS
+    def test_register_successful(self):
+        url = reverse('register')  # biztosítsd, hogy ezt a nevet használod a urls.py-ban
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@example.com',
+            'password': 'newpassword123'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(User.objects.filter(username='newuser').exists())
+
+    def test_register_duplicate_username(self):
+        url = reverse('register')
+        data = {
+            'username': 'testuser',  
+            'email': 'duplicate@example.com',
+            'password': 'somepass123'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
