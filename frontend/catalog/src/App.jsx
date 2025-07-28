@@ -1,32 +1,28 @@
-import { useState } from "react";
-import "./App.css";
+import React from "react";
+import { CssBaseline, CssVarsProvider } from "@mui/joy";
+import theme from "./theme";
+import Navbar from "./components/navbar/Navbar";
+import { HashRouter, Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/Login";
+import Welcome from "./components/login/Welcome";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <CssVarsProvider theme={theme}>
+      <CssBaseline />
+      <HashRouter>
+        {/* Navigációs sáv */}
+        <Navbar />
+
+        {/* Alkalmazáson belüli routok */}
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<Welcome />} />
+          {/* A Register oldalra mutató útvonal csak akkor kerüljön ide,
+              ha már elkészítetted a Register komponenst */}
+        </Routes>
+      </HashRouter>
+    </CssVarsProvider>
   );
 }
 
