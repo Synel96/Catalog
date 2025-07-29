@@ -10,6 +10,7 @@ import {
   Sheet,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../../services/auth/authService"; // 🔁 import service
 
 const Register = () => {
   const navigate = useNavigate();
@@ -37,8 +38,12 @@ const Register = () => {
       return;
     }
 
-    // TODO: Axios POST request ide jön
-    console.log("Registering with:", formData);
+    try {
+      await registerUser(formData); // 🔁 axios POST
+      navigate("/login");
+    } catch (err) {
+      setError(err.response?.data?.error || "Registration failed.");
+    }
   };
 
   return (

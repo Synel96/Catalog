@@ -1,11 +1,23 @@
-// src/components/navbar/Navbar.jsx
-import React from "react";
-import { Sheet, Container, Box, Button, Menu, MenuItem } from "@mui/joy";
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  Sheet,
+  Container,
+  Menu,
+  MenuItem,
+  IconButton,
+} from "@mui/joy";
 import { Link } from "react-router-dom";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const { user, logout, isAuthenticated } = useAuthStore();
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -17,7 +29,6 @@ const Navbar = () => {
 
   return (
     <Sheet
-      variant="soft"
       sx={{
         backgroundColor: "#ffe6e6",
         position: "sticky",
@@ -37,7 +48,7 @@ const Navbar = () => {
           px: { xs: 2, sm: 4 },
         }}
       >
-        {/* Brand (clickable logo directs to Login page) */}
+        {/* Brand logo */}
         <Link to="/login" style={{ textDecoration: "none" }}>
           <Box
             component="img"
@@ -58,8 +69,20 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Menu dropdown & News button */}
+        {/* Right-side controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {isAuthenticated && (
+            <Typography level="body-md" sx={{ fontWeight: "md" }}>
+              Welcome, {user?.username}
+            </Typography>
+          )}
+
+          {isAuthenticated && (
+            <IconButton color="neutral" variant="outlined">
+              <NotificationsIcon />
+            </IconButton>
+          )}
+
           <Button
             variant="solid"
             color="primary"
@@ -68,6 +91,7 @@ const Navbar = () => {
           >
             Menu
           </Button>
+
           <Menu
             anchorEl={anchorEl}
             open={open}
@@ -76,23 +100,57 @@ const Navbar = () => {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
-              Login
-            </MenuItem>
-            <MenuItem component={Link} to="/register" onClick={handleMenuClose}>
-              Register
-            </MenuItem>
+            {isAuthenticated ? (
+              <>
+                <MenuItem
+                  component={Link}
+                  to="/webshop"
+                  onClick={handleMenuClose}
+                >
+                  Webshop
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/my-slave"
+                  onClick={handleMenuClose}
+                >
+                  My Slave
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/street"
+                  onClick={handleMenuClose}
+                >
+                  Street
+                </MenuItem>
+                <MenuItem
+                  onClick={() => {
+                    logout();
+                    handleMenuClose();
+                  }}
+                >
+                  Logout
+                </MenuItem>
+              </>
+            ) : (
+              <>
+                <MenuItem
+                  component={Link}
+                  to="/login"
+                  onClick={handleMenuClose}
+                >
+                  Login
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/register"
+                  onClick={handleMenuClose}
+                >
+                  Register
+                </MenuItem>
+              </>
+            )}
           </Menu>
-
-          <Button
-            component={Link}
-            to="/news"
-            variant="solid"
-            color="primary"
-            sx={{ fontSize: { xs: "0.8rem", sm: "1rem" }, px: 2, py: 1 }}
-          >
-            Mews
-          </Button>
         </Box>
       </Container>
     </Sheet>

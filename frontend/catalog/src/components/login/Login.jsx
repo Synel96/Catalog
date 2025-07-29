@@ -10,10 +10,14 @@ import {
   Sheet,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../services/auth/authService";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -24,8 +28,15 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login with:", formData);
-    // Ide jön az axios POST és a JWT mentés
+    setError("");
+
+    try {
+      const { access, refresh, user } = await loginUser(formData);
+      login(user, access, refresh); // mentés zustandba
+      navigate("/my-slave"); // vagy bárhová
+    } catch (err) {
+      setError(err.detail || "Login failed.");
+    }
   };
 
   return (
@@ -36,7 +47,6 @@ const Login = () => {
         alignItems: "center",
         minHeight: "100vh",
         px: 2,
-        // backgroundColor removed to let theme's global background show
       }}
     >
       <Sheet
@@ -52,6 +62,7 @@ const Login = () => {
         <Typography level="h4" textAlign="center" mb={2}>
           Login
         </Typography>
+
         <form onSubmit={handleSubmit}>
           <FormControl required>
             <FormLabel>Username</FormLabel>
@@ -73,6 +84,12 @@ const Login = () => {
               placeholder="Enter your password"
             />
           </FormControl>
+
+          {error && (
+            <Typography color="danger" level="body-sm" mt={1}>
+              {error}
+            </Typography>
+          )}
 
           <Button type="submit" fullWidth sx={{ mt: 3 }}>
             Login
