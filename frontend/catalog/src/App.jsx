@@ -5,6 +5,7 @@ import Navbar from "./components/navbar/Navbar";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Welcome from "./components/login/Welcome";
+import RegisterPage from "./pages/Register";
 
 function App() {
   return (
@@ -18,8 +19,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<LoginPage />} />
-          {/* A Register oldalra mutató útvonal csak akkor kerüljön ide,
-              ha már elkészítetted a Register komponenst */}
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </HashRouter>
     </CssVarsProvider>

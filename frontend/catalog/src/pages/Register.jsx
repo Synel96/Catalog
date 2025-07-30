@@ -1,9 +1,9 @@
-// src/pages/Login.jsx
 import React from "react";
 import { Box } from "@mui/joy";
-import LoginForm from "../components/login/Login";
+import RegisterForm from "../components/register/Register";
 import Welcome from "../components/login/Welcome";
-const LoginPage = () => {
+
+const Register = () => {
   return (
     <Box
       sx={{
@@ -34,10 +34,10 @@ const LoginPage = () => {
           p: 2,
         }}
       >
-        <LoginForm />
+        <RegisterForm />
       </Box>
     </Box>
   );
 };
 
-export default LoginPage;
+export default Register;

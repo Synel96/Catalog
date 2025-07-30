@@ -1,23 +1,43 @@
-// src/components/navbar/Navbar.jsx
-import React from "react";
-import { Sheet, Container, Box, Button, Menu, MenuItem } from "@mui/joy";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Typography,
+  Sheet,
+  Container,
+  Menu,
+  MenuItem,
+  IconButton,
+} from "@mui/joy";
+import { Link, useNavigate } from "react-router-dom";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Navbar = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
 
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const isMenuOpen = Boolean(anchorEl);
+  const { user, logout, isAuthenticated } = useAuthStore();
+
+  const handleMenuToggle = (event) => {
+    setAnchorEl((prev) => (prev ? null : event.currentTarget));
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+    navigate("/login");
+  };
+
+  const username = user?.username || "";
+
   return (
     <Sheet
-      variant="soft"
       sx={{
         backgroundColor: "#ffe6e6",
         position: "sticky",
@@ -37,8 +57,8 @@ const Navbar = () => {
           px: { xs: 2, sm: 4 },
         }}
       >
-        {/* Brand (clickable logo directs to Login page) */}
-        <Link to="/login" style={{ textDecoration: "none" }}>
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: "none" }}>
           <Box
             component="img"
             src="/brand.png"
@@ -58,41 +78,89 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Menu dropdown & News button */}
+        {/* Right controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {isAuthenticated && (
+            <>
+              <Typography
+                level="body-md"
+                sx={{ fontWeight: "md", color: "#000" }}
+              >
+                Welcome, {username}!
+              </Typography>
+
+              <IconButton color="neutral" variant="outlined">
+                <NotificationsIcon />
+              </IconButton>
+            </>
+          )}
+
           <Button
             variant="solid"
             color="primary"
-            onClick={handleMenuClick}
+            onClick={handleMenuToggle}
             sx={{ fontSize: { xs: "0.8rem", sm: "1rem" }, px: 2, py: 1 }}
           >
             Menu
           </Button>
+
           <Menu
             anchorEl={anchorEl}
-            open={open}
+            open={isMenuOpen}
             onClose={handleMenuClose}
             placement="bottom-end"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
-              Login
+            {/* Always visible menu item */}
+            <MenuItem component={Link} to="/mews" onClick={handleMenuClose}>
+              Mews
             </MenuItem>
-            <MenuItem component={Link} to="/register" onClick={handleMenuClose}>
-              Register
-            </MenuItem>
-          </Menu>
 
-          <Button
-            component={Link}
-            to="/news"
-            variant="solid"
-            color="primary"
-            sx={{ fontSize: { xs: "0.8rem", sm: "1rem" }, px: 2, py: 1 }}
-          >
-            Mews
-          </Button>
+            {isAuthenticated ? (
+              <>
+                <MenuItem
+                  component={Link}
+                  to="/webshop"
+                  onClick={handleMenuClose}
+                >
+                  Webshop
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/my-slave"
+                  onClick={handleMenuClose}
+                >
+                  My Slave
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/street"
+                  onClick={handleMenuClose}
+                >
+                  Street
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </>
+            ) : (
+              <>
+                <MenuItem
+                  component={Link}
+                  to="/login"
+                  onClick={handleMenuClose}
+                >
+                  Login
+                </MenuItem>
+                <MenuItem
+                  component={Link}
+                  to="/register"
+                  onClick={handleMenuClose}
+                >
+                  Register
+                </MenuItem>
+              </>
+            )}
+          </Menu>
         </Box>
       </Container>
     </Sheet>

@@ -10,15 +10,17 @@ import {
   Sheet,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../services/auth/authService";
-import { useAuthStore } from "../../store/useAuthStore";
-import { getCurrentUser } from "../../services/auth/userService";
+import { registerUser } from "../../services/auth/authService"; // 🔁 import service
 
-const Login = () => {
-  const [formData, setFormData] = useState({ username: "", password: "" });
-  const [error, setError] = useState("");
+const Register = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -31,13 +33,16 @@ const Login = () => {
     e.preventDefault();
     setError("");
 
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     try {
-      const { access, refresh } = await loginUser(formData);
-      const user = await getCurrentUser(access);
-      login({ user, access, refresh });
-      navigate("/my-slave");
+      await registerUser(formData); // 🔁 axios POST
+      navigate("/login");
     } catch (err) {
-      setError(err.detail || "Login failed.");
+      setError(err.response?.data?.error || "Registration failed.");
     }
   };
 
@@ -53,7 +58,7 @@ const Login = () => {
     >
       <Sheet
         sx={{
-          width: { xs: "100%", sm: 360 },
+          width: { xs: "100%", sm: 400 },
           mx: "auto",
           p: 4,
           borderRadius: "md",
@@ -62,18 +67,28 @@ const Login = () => {
         }}
       >
         <Typography level="h4" textAlign="center" mb={2}>
-          Login
+          Register
         </Typography>
 
         <form onSubmit={handleSubmit}>
           <FormControl required>
-            <FormLabel>Username</FormLabel>
+            <FormLabel>Slavename</FormLabel>
             <Input
               name="username"
               value={formData.username}
               onChange={handleChange}
               placeholder="Enter your username"
-              autoComplete="username"
+            />
+          </FormControl>
+
+          <FormControl required sx={{ mt: 2 }}>
+            <FormLabel>Email</FormLabel>
+            <Input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
             />
           </FormControl>
 
@@ -85,25 +100,35 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              autoComplete="current-password"
+            />
+          </FormControl>
+
+          <FormControl required sx={{ mt: 2 }}>
+            <FormLabel>Confirm Password</FormLabel>
+            <Input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm your password"
             />
           </FormControl>
 
           {error && (
-            <Typography color="danger" level="body-sm" mt={1}>
+            <Typography level="body-sm" color="danger" mt={1}>
               {error}
             </Typography>
           )}
 
           <Button type="submit" fullWidth sx={{ mt: 3 }}>
-            Login
+            Register
           </Button>
         </form>
 
         <Typography level="body-sm" textAlign="center" mt={2}>
-          Don’t have an account?{" "}
-          <JoyLink onClick={() => navigate("/register")} underline="hover">
-            Register
+          Already have an account?{" "}
+          <JoyLink onClick={() => navigate("/login")} underline="hover">
+            Login
           </JoyLink>
         </Typography>
       </Sheet>
@@ -111,4 +136,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

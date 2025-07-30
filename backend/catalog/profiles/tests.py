@@ -46,3 +46,9 @@ class OverlordViewSetTest(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_get_current_user_profile(self):
+        response = self.client.get('/api/profiles/me/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.user.username)
+        self.assertIn('id', response.data)
+        self.assertNotIn('password', response.data)
