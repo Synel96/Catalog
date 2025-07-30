@@ -9,23 +9,32 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/joy";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const navigate = useNavigate();
 
+  const isMenuOpen = Boolean(anchorEl);
   const { user, logout, isAuthenticated } = useAuthStore();
 
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleMenuToggle = (event) => {
+    setAnchorEl((prev) => (prev ? null : event.currentTarget));
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = () => {
+    logout();
+    handleMenuClose();
+    navigate("/login");
+  };
+
+  const username = user?.username || "";
 
   return (
     <Sheet
@@ -48,8 +57,8 @@ const Navbar = () => {
           px: { xs: 2, sm: 4 },
         }}
       >
-        {/* Brand logo */}
-        <Link to="/login" style={{ textDecoration: "none" }}>
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: "none" }}>
           <Box
             component="img"
             src="/brand.png"
@@ -69,24 +78,27 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Right-side controls */}
+        {/* Right controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {isAuthenticated && (
-            <Typography level="body-md" sx={{ fontWeight: "md" }}>
-              Welcome, {user?.username}
-            </Typography>
-          )}
+            <>
+              <Typography
+                level="body-md"
+                sx={{ fontWeight: "md", color: "#000" }}
+              >
+                Welcome, {username}!
+              </Typography>
 
-          {isAuthenticated && (
-            <IconButton color="neutral" variant="outlined">
-              <NotificationsIcon />
-            </IconButton>
+              <IconButton color="neutral" variant="outlined">
+                <NotificationsIcon />
+              </IconButton>
+            </>
           )}
 
           <Button
             variant="solid"
             color="primary"
-            onClick={handleMenuClick}
+            onClick={handleMenuToggle}
             sx={{ fontSize: { xs: "0.8rem", sm: "1rem" }, px: 2, py: 1 }}
           >
             Menu
@@ -94,12 +106,17 @@ const Navbar = () => {
 
           <Menu
             anchorEl={anchorEl}
-            open={open}
+            open={isMenuOpen}
             onClose={handleMenuClose}
             placement="bottom-end"
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
+            {/* Always visible menu item */}
+            <MenuItem component={Link} to="/mews" onClick={handleMenuClose}>
+              Mews
+            </MenuItem>
+
             {isAuthenticated ? (
               <>
                 <MenuItem
@@ -123,14 +140,7 @@ const Navbar = () => {
                 >
                   Street
                 </MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    logout();
-                    handleMenuClose();
-                  }}
-                >
-                  Logout
-                </MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </>
             ) : (
               <>

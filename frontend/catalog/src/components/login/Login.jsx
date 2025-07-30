@@ -12,6 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/auth/authService";
 import { useAuthStore } from "../../store/useAuthStore";
+import { getCurrentUser } from "../../services/auth/userService";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -31,9 +32,10 @@ const Login = () => {
     setError("");
 
     try {
-      const { access, refresh, user } = await loginUser(formData);
-      login(user, access, refresh); // mentés zustandba
-      navigate("/my-slave"); // vagy bárhová
+      const { access, refresh } = await loginUser(formData);
+      const user = await getCurrentUser(access);
+      login({ user, access, refresh });
+      navigate("/my-slave");
     } catch (err) {
       setError(err.detail || "Login failed.");
     }
@@ -71,6 +73,7 @@ const Login = () => {
               value={formData.username}
               onChange={handleChange}
               placeholder="Enter your username"
+              autoComplete="username"
             />
           </FormControl>
 
@@ -82,6 +85,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
+              autoComplete="current-password"
             />
           </FormControl>
 

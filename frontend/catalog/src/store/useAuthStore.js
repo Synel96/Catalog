@@ -6,14 +6,15 @@ export const useAuthStore = create((set) => ({
   refreshToken: null,
   isAuthenticated: false,
 
-  login: ({ user, access, refresh }) =>
+  login: ({ user, access, refresh }) => {
+    console.log("Zustand login called with user:", user);
     set({
       user,
       accessToken: access,
       refreshToken: refresh,
       isAuthenticated: true,
-    }),
-
+    });
+  },
   logout: () =>
     set({
       user: null,

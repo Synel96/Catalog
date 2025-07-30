@@ -3,9 +3,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.auth.models import User
-
-from core.models import Overlord
+from rest_framework.views import APIView
 from .serializers import OverlordSerializer, UserSerializer
+from core.models import Overlord
 
 
 class OverlordViewSet(viewsets.ModelViewSet):
@@ -23,9 +23,11 @@ class OverlordViewSet(viewsets.ModelViewSet):
         serializer.save(slave=self.request.user)
 
 
-class MeViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
+class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return User.objects.filter(id=self.request.user.id)
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+
