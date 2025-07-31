@@ -10,7 +10,7 @@ const handleSubmit = async (e) => {
     const { access, refresh } = await loginUser(formData);
     const user = await getCurrentUser(access);
     login(user, access, refresh);
-    navigate("/");
+    navigate("/my-slave");
   } catch (error) {
     console.error("Login failed:", error.response?.data || error.message);
   }
