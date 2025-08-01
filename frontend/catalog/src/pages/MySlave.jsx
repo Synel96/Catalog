@@ -1,27 +1,49 @@
 import { Box } from "@mui/joy";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import SnackbarMessage from "../components/login/SnackbarMessage";
 import MySlaveSection from "../components/myslave/MySlaveSection";
 
 const MySlave = () => {
+  const location = useLocation();
+  const [showSnackbar, setShowSnackbar] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.fromLogin) {
+      setShowSnackbar(true);
+    }
+  }, [location.state]);
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: 4,
-        px: { xs: 2, md: 6 },
-        py: 4,
-      }}
-    >
-      {/* Bal oldal: Slave profil */}
-      <Box sx={{ width: 400, flexShrink: 0 }}>
-        <MySlaveSection />
+    <>
+      {/* Layout */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 4,
+          px: { xs: 2, md: 6 },
+          py: 4,
+        }}
+      >
+        {/* Left side: Slave profile */}
+        <Box sx={{ width: 400, flexShrink: 0 }}>
+          <MySlaveSection />
+        </Box>
+
+        {/* Right side: Overlords carousel (coming soon) */}
+        <Box sx={{ flex: 1 }}>{/* Placeholder for right side */}</Box>
       </Box>
 
-      {/* Jobb oldal: ide jön majd a MyOverlordsCarousel */}
-      <Box sx={{ flex: 1 }}>{/* Placeholder jobb oldalra */}</Box>
-    </Box>
+      {/* ✅ Joy UI Snackbar */}
+      <SnackbarMessage
+        open={showSnackbar}
+        onClose={() => setShowSnackbar(false)}
+        message="Login successful!"
+      />
+    </>
   );
 };
 

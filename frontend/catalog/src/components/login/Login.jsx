@@ -32,15 +32,12 @@ const Login = () => {
     setError("");
 
     try {
-      // Beléptetés – HTTPOnly cookie beállítása backend oldalon
       await loginUser(formData);
-
-      // User lekérdezés cookie alapján
       const user = await getCurrentUser();
-
-      // Zustand frissítése
       login({ user });
-      navigate("/my-slave");
+
+      // ✅ átadjuk a login infót a következő oldalnak
+      navigate("/my-slave", { state: { fromLogin: true } });
     } catch (err) {
       setError(err?.detail || "Login failed.");
     }
