@@ -14,8 +14,7 @@ class OverlordSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
 
     overlords = OverlordSerializer(many=True, read_only=True)
-    avatar = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = User
         fields = [
@@ -31,8 +30,4 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'date_joined', 'overlords']
 
-    def get_avatar(self, obj):
-        request = self.context.get('request')
-        if obj.avatar and hasattr(obj.avatar, 'url'):
-            return request.build_absolute_uri(obj.avatar.url)
-        return None  
+    

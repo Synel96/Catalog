@@ -1,7 +1,7 @@
 import { Box } from "@mui/joy";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import SnackbarMessage from "../components/login/SnackbarMessage";
+import SnackbarMessage from "../components/snackbar/SnackbarMessage";
 import MySlaveSection from "../components/myslave/MySlaveSection";
 
 const MySlave = () => {
@@ -11,6 +11,9 @@ const MySlave = () => {
   useEffect(() => {
     if (location.state?.fromLogin) {
       setShowSnackbar(true);
+
+      // ✅ töröljük a state-et, hogy frissítéskor ne jelenjen meg újra
+      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 

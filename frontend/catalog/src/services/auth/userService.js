@@ -12,3 +12,17 @@ export const getCurrentUser = async () => {
     throw error.response?.data || { detail: "Failed to fetch user data." };
   }
 };
+
+export const updateCurrentUser = async (formData) => {
+  try {
+    const response = await axios.patch(`${API_URL}/profiles/me/`, formData, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { detail: "Failed to update user data." };
+  }
+};
