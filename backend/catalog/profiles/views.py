@@ -6,12 +6,14 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from .serializers import OverlordSerializer, UserSerializer
 from core.models import Overlord
+from authapp.authentication import CookieJWTAuthentication
 
 User = get_user_model()
 
 
 class OverlordViewSet(viewsets.ModelViewSet):
     serializer_class = OverlordSerializer
+    authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ['name', 'breed', 'slave__username']
@@ -40,14 +42,15 @@ class OverlordViewSet(viewsets.ModelViewSet):
 
 
 class MeView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     def patch(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        serializer = UserSerializer(request.user, data=request.data, partial=True, context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)

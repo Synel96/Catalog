@@ -10,10 +10,13 @@ import {
   Sheet,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../../services/auth/authService"; // 🔁 import service
+import { registerUser } from "../../services/auth/authService";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Register = () => {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -39,10 +42,11 @@ const Register = () => {
     }
 
     try {
-      await registerUser(formData); // 🔁 axios POST
-      navigate("/login");
+      const user = await registerUser(formData); // 🍪 cookie-t a böngésző kapja
+      login({ user }); // csak a user-t mentjük Zustandba
+      navigate("/myslave");
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed.");
+      setError(err.detail || "Registration failed.");
     }
   };
 

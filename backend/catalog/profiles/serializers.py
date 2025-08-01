@@ -12,8 +12,9 @@ class OverlordSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    overlords = OverlordSerializer(many=True, read_only=True)
 
+    overlords = OverlordSerializer(many=True, read_only=True)
+    
     class Meta:
         model = User
         fields = [
@@ -28,3 +29,5 @@ class UserSerializer(serializers.ModelSerializer):
             'overlords',
         ]
         read_only_fields = ['id', 'date_joined', 'overlords']
+
+    

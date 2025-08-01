@@ -11,8 +11,8 @@ import {
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../services/auth/authService";
-import { useAuthStore } from "../../store/useAuthStore";
 import { getCurrentUser } from "../../services/auth/userService";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -32,12 +32,14 @@ const Login = () => {
     setError("");
 
     try {
-      const { access, refresh } = await loginUser(formData);
-      const user = await getCurrentUser(access);
-      login({ user, access, refresh });
-      navigate("/my-slave");
+      await loginUser(formData);
+      const user = await getCurrentUser();
+      login({ user });
+
+      // ✅ átadjuk a login infót a következő oldalnak
+      navigate("/my-slave", { state: { fromLogin: true } });
     } catch (err) {
-      setError(err.detail || "Login failed.");
+      setError(err?.detail || "Login failed.");
     }
   };
 

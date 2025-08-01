@@ -12,6 +12,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useAuthStore } from "../../store/useAuthStore";
+import { logoutUser } from "../../services/auth/authService";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -28,8 +29,13 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      await logoutUser(); // 🔐 backend sütik törlése
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+    logout(); // 🔁 frontend Zustand reset
     handleMenuClose();
     navigate("/login");
   };
@@ -57,7 +63,6 @@ const Navbar = () => {
           px: { xs: 2, sm: 4 },
         }}
       >
-        {/* Logo */}
         <Link to="/" style={{ textDecoration: "none" }}>
           <Box
             component="img"
@@ -78,7 +83,6 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Right controls */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           {isAuthenticated && (
             <>
@@ -112,7 +116,6 @@ const Navbar = () => {
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "right" }}
           >
-            {/* Always visible menu item */}
             <MenuItem component={Link} to="/mews" onClick={handleMenuClose}>
               Mews
             </MenuItem>

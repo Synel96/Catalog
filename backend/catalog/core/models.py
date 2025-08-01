@@ -7,12 +7,15 @@ from .managers import CustomUserManager
 def user_avatar_upload_path(instance, filename):
     return f'avatars/{instance.username}/{filename}'
 
+def overlord_avatar_upload_path(self, filename):
+    return f'overlords/{self.slave.username}/{self.name}/{filename}'
+
 
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
     email = models.EmailField(unique=True)
     bio = models.TextField(blank=True)
-    avatar = models.ImageField(upload_to=user_avatar_upload_path, blank=True, null=True)
+    avatar = models.ImageField(upload_to=user_avatar_upload_path,default='placeholders/slave_placeholder.png', blank=True, null=True)
 
     def __str__(self):
         return self.username
@@ -22,10 +25,9 @@ class Overlord(models.Model):
     slave = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='overlords')
     name = models.CharField(max_length=100)
 
-    def overlord_avatar_upload_path(self, filename):
-        return f'overlords/{self.slave.username}/{self.name}/{filename}'
+   
 
-    avatar = models.ImageField(upload_to=overlord_avatar_upload_path, blank=True, null=True)
+    avatar = models.ImageField(upload_to=overlord_avatar_upload_path,default='placeholders/overlord_placeholder.png', blank=True, null=True)
     bio = models.TextField(blank=True)
     breed = models.CharField(max_length=100, blank=True)
 

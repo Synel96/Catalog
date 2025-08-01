@@ -1,17 +1,16 @@
-import { loginUser } from "../../services/auth/loginService";
-import { getCurrentUser } from "../../services/auth/userService";
-import { useAuthStore } from "../../store/useAuthStore";
+import axios from "axios";
 
-const login = useAuthStore((state) => state.login);
+const API_URL = import.meta.env.VITE_API_URL;
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+export const loginUser = async (credentials) => {
   try {
-    const { access, refresh } = await loginUser(formData);
-    const user = await getCurrentUser(access);
-    login(user, access, refresh);
-    navigate("/");
+    const response = await axios.post(`${API_URL}/auth/login/`, credentials, {
+      withCredentials: true, // 🔑 Engedélyezi a HTTPOnly sütik küldését és fogadását
+    });
+
+    // Feltételezve, hogy a backend visszaadja a bejelentkezett user objektumot
+    return response.data;
   } catch (error) {
-    console.error("Login failed:", error.response?.data || error.message);
+    throw error.response?.data || { detail: "Login failed." };
   }
 };

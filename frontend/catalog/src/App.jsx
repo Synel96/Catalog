@@ -6,6 +6,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
 import Welcome from "./components/login/Welcome";
 import RegisterPage from "./pages/Register";
+import MySlave from "./pages/MySlave";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/my-slave" element={<MySlave />} />
         </Routes>
       </HashRouter>
     </CssVarsProvider>
