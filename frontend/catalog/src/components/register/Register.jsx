@@ -11,11 +11,10 @@ import {
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../../services/auth/authService";
-import { useAuthStore } from "../../store/useAuthStore";
+import SnackbarMessage from "../snackbar/SnackbarMessage"; // importáld be
 
 const Register = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -24,6 +23,7 @@ const Register = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -42,9 +42,11 @@ const Register = () => {
     }
 
     try {
-      const user = await registerUser(formData); // 🍪 cookie-t a böngésző kapja
-      login({ user }); // csak a user-t mentjük Zustandba
-      navigate("/myslave");
+      await registerUser(formData);
+      setSnackbarOpen(true);
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (err) {
       setError(err.detail || "Registration failed.");
     }
@@ -136,6 +138,12 @@ const Register = () => {
           </JoyLink>
         </Typography>
       </Sheet>
+
+      <SnackbarMessage
+        open={snackbarOpen}
+        onClose={() => setSnackbarOpen(false)}
+        message="Registration successful! Please check your email to activate your account."
+      />
     </Box>
   );
 };

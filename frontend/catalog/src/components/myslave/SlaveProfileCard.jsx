@@ -38,7 +38,9 @@ const SlaveProfileCard = () => {
   const avatarUrl =
     user?.avatar?.startsWith("http") || user?.avatar?.startsWith("data:")
       ? user.avatar
-      : `${API_URL}${user?.avatar || "/media/avatars/default_slave.png"}`;
+      : `${API_URL}${
+          user?.avatar || "/media/placeholders/slave_placeholder.png"
+        }`;
 
   if (!user) return null;
 
