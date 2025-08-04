@@ -10,8 +10,10 @@ import {
   Stack,
 } from "@mui/joy";
 import { Edit } from "lucide-react";
+import { useStreetStore } from "../../store/useStreetStore";
+import { useNavigate } from "react-router-dom";
 
-import ImageViewerModal from "./ImageViewerModal"; // Importáld be a modalt
+import ImageViewerModal from "./ImageViewerModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,7 +21,11 @@ const OverlordCarousel = ({ overlords = [], onEdit, onCreate }) => {
   const length = overlords.length;
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Állapotok a képnézegető modal kezeléséhez
+  const navigate = useNavigate();
+  const setSelectedOverlord = useStreetStore(
+    (state) => state.setSelectedOverlord
+  );
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState({ src: null, alt: "" });
 
@@ -165,9 +171,10 @@ const OverlordCarousel = ({ overlords = [], onEdit, onCreate }) => {
             color="primary"
             fullWidth
             size="md"
-            onClick={() =>
-              alert(`Go to the Street with ${currentOverlord.name}`)
-            }
+            onClick={() => {
+              setSelectedOverlord(currentOverlord);
+              navigate("/street");
+            }}
           >
             Go to the Street with {currentOverlord.name}
           </Button>

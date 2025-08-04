@@ -4,7 +4,7 @@ import theme from "./theme";
 import Navbar from "./components/navbar/Navbar";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/Login";
-import Welcome from "./components/login/Welcome";
+import Street from "./pages/Street";
 import RegisterPage from "./pages/Register";
 import MySlave from "./pages/MySlave";
 
@@ -13,15 +13,14 @@ function App() {
     <CssVarsProvider theme={theme}>
       <CssBaseline />
       <HashRouter>
-        {/* Navigációs sáv */}
         <Navbar />
 
-        {/* Alkalmazáson belüli routok */}
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/my-slave" element={<MySlave />} />
+          <Route path="/street" element={<Street />} />
         </Routes>
       </HashRouter>
     </CssVarsProvider>
