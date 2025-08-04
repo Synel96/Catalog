@@ -1,3 +1,4 @@
+// src/components/navbar/Navbar.jsx
 import React, { useState, useCallback } from "react";
 import {
   Box,
@@ -6,16 +7,13 @@ import {
   Sheet,
   Container,
   IconButton,
-  Input,
   Avatar,
   Stack,
-  useColorScheme,
 } from "@mui/joy";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
+import SearchBar from "./SearchBar";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useStreetStore } from "../../store/useStreetStore";
 import { logoutUser } from "../../services/auth/authService";
@@ -27,7 +25,6 @@ const PLACEHOLDER_AVATAR = "/media/placeholders/overlord_placeholder.png";
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -70,15 +67,24 @@ const Navbar = () => {
 
   const username = user?.username || "";
 
-  const toggleMobileSearch = () => {
-    setMobileSearchOpen((o) => !o);
-    if (!mobileSearchOpen) {
+  // Enterre vagy submitre hívódó fallback: nem navigál automatikusan
+  const handleSearch = useCallback((term) => {
+    console.log("Keresés:", term);
+  }, []);
+
+  // Kiválasztott overlord profiljára navigálás
+  const handleSelect = useCallback(
+    (item) => {
+      if (!item) return;
       setSearchTerm("");
-    }
-  };
+      navigate(`/overlords/${item.id}`);
+    },
+    [navigate]
+  );
 
   return (
     <Sheet
+      component="header"
       sx={{
         backgroundColor: "#ffe6e6",
         position: "sticky",
@@ -87,7 +93,6 @@ const Navbar = () => {
         borderBottom: "1px solid",
         borderColor: "divider",
       }}
-      component="header"
     >
       <Container
         maxWidth="lg"
@@ -122,7 +127,7 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Közép – Street nézet */}
+        {/* Street nézetben kereső + overlord info */}
         {isOnStreet ? (
           <Stack
             direction="row"
@@ -136,83 +141,20 @@ const Navbar = () => {
               gap: { xs: 1, sm: 2 },
             }}
           >
-            {/* Kereső: desktopon input; mobilon csak ikon */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                minWidth: 0,
-              }}
-            >
-              {/* Desktop input */}
-              <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                <Input
-                  placeholder="Search..."
-                  size="sm"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  aria-label="Search"
-                  sx={{
-                    maxWidth: 300,
-                    transition: "width .2s ease",
-                    "&:focus-visible": {
-                      boxShadow: "0 0 0 3px rgba(0,123,255,0.5)",
-                    },
-                  }}
-                />
-              </Box>
-
-              {/* Mobil ikon + expand */}
-              <Box
-                sx={{
-                  display: { xs: "flex", sm: "none" },
-                  alignItems: "center",
-                  position: "relative",
-                  minWidth: 0,
-                }}
-              >
-                {!mobileSearchOpen && (
-                  <IconButton
-                    aria-label="Open search"
-                    onClick={toggleMobileSearch}
-                    variant="outlined"
-                    size="sm"
-                  >
-                    <SearchIcon />
-                  </IconButton>
-                )}
-                {mobileSearchOpen && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      width: "100%",
-                    }}
-                  >
-                    <Input
-                      placeholder="Search..."
-                      size="sm"
-                      autoFocus
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      aria-label="Search"
-                      sx={{ flexGrow: 1 }}
-                    />
-                    <IconButton
-                      aria-label="Close search"
-                      size="sm"
-                      onClick={toggleMobileSearch}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                )}
-              </Box>
+            {/* SearchBar csak street nézetben */}
+            <Box sx={{ minWidth: 0, display: "flex", alignItems: "center" }}>
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSearch={handleSearch}
+                onSelect={handleSelect}
+                searchUrl={`${API_URL}/profiles/overlords/`}
+                placeholder="Search Overlords..."
+                currentUser={user}
+              />
             </Box>
 
-            {/* Avatar (mobilon csak kép, felirat desktopon) */}
+            {/* Avatar + felirat */}
             <Box
               sx={{
                 display: "flex",
@@ -223,14 +165,14 @@ const Navbar = () => {
             >
               <Avatar
                 src={
-                  selectedOverlord.avatar?.startsWith("http") ||
-                  selectedOverlord.avatar?.startsWith("data:")
+                  selectedOverlord?.avatar?.startsWith("http") ||
+                  selectedOverlord?.avatar?.startsWith("data:")
                     ? selectedOverlord.avatar
                     : `${API_URL}${
-                        selectedOverlord.avatar || PLACEHOLDER_AVATAR
+                        selectedOverlord?.avatar || PLACEHOLDER_AVATAR
                       }`
                 }
-                alt={selectedOverlord.name}
+                alt={selectedOverlord?.name || ""}
                 sx={{
                   width: 40,
                   height: 40,
@@ -248,15 +190,14 @@ const Navbar = () => {
               <Typography
                 sx={{
                   fontWeight: "bold",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: 160,
-                  display: { xs: "none", sm: "block" }, // mobilon nincs felirat
+                  color: "#000",
+                  whiteSpace: "normal",
+                  overflow: "visible",
+                  textOverflow: "unset",
+                  display: { xs: "none", sm: "block" },
                 }}
-                noWrap
               >
-                On the Street with: {selectedOverlord.name}
+                On the Street with: {selectedOverlord?.name}
               </Typography>
             </Box>
 
@@ -265,10 +206,7 @@ const Navbar = () => {
               color="neutral"
               startDecorator={<HomeIcon />}
               onClick={handleGoHome}
-              sx={{
-                whiteSpace: "nowrap",
-                flexShrink: 0,
-              }}
+              sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
               aria-label="Go Home"
             >
               Go Home
@@ -278,7 +216,7 @@ const Navbar = () => {
           <Box sx={{ flexGrow: 1, minWidth: 0 }} />
         )}
 
-        {/* Jobb oldal */}
+        {/* Jobb oldal (menu, welcome, notif) */}
         <Box
           sx={{
             display: "flex",
