@@ -1,3 +1,4 @@
+// src/components/navbar/Navbar.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -5,14 +6,13 @@ import {
   Typography,
   Sheet,
   Container,
-  Menu,
-  MenuItem,
   IconButton,
 } from "@mui/joy";
 import { Link, useNavigate } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useAuthStore } from "../../store/useAuthStore";
 import { logoutUser } from "../../services/auth/authService";
+import CustomMenu from "./Menu";
 
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -31,11 +31,11 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logoutUser(); // 🔐 backend sütik törlése
+      await logoutUser();
     } catch (err) {
       console.error("Logout error:", err);
     }
-    logout(); // 🔁 frontend Zustand reset
+    logout();
     handleMenuClose();
     navigate("/login");
   };
@@ -74,7 +74,7 @@ const Navbar = () => {
               objectFit: "contain",
               borderRadius: "md",
               boxShadow: "sm",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+              transition: "transform 0.2s ease, boxShadow 0.2s ease",
               "&:hover": {
                 transform: "scale(1.05)",
                 boxShadow: "md",
@@ -108,62 +108,13 @@ const Navbar = () => {
             Menu
           </Button>
 
-          <Menu
+          <CustomMenu
             anchorEl={anchorEl}
-            open={isMenuOpen}
+            isOpen={isMenuOpen}
             onClose={handleMenuClose}
-            placement="bottom-end"
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem component={Link} to="/mews" onClick={handleMenuClose}>
-              Mews
-            </MenuItem>
-
-            {isAuthenticated ? (
-              <>
-                <MenuItem
-                  component={Link}
-                  to="/webshop"
-                  onClick={handleMenuClose}
-                >
-                  Webshop
-                </MenuItem>
-                <MenuItem
-                  component={Link}
-                  to="/my-slave"
-                  onClick={handleMenuClose}
-                >
-                  My Slave
-                </MenuItem>
-                <MenuItem
-                  component={Link}
-                  to="/street"
-                  onClick={handleMenuClose}
-                >
-                  Street
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-              </>
-            ) : (
-              <>
-                <MenuItem
-                  component={Link}
-                  to="/login"
-                  onClick={handleMenuClose}
-                >
-                  Login
-                </MenuItem>
-                <MenuItem
-                  component={Link}
-                  to="/register"
-                  onClick={handleMenuClose}
-                >
-                  Register
-                </MenuItem>
-              </>
-            )}
-          </Menu>
+            isAuthenticated={isAuthenticated}
+            onLogout={handleLogout}
+          />
         </Box>
       </Container>
     </Sheet>
