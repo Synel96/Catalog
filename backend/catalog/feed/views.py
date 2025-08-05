@@ -2,6 +2,9 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 
 from core.models import Post, Reaction, Comment, Whisker, Notification, Overlord
 from .serializers import (
@@ -33,7 +36,20 @@ class PostViewSet(viewsets.ModelViewSet):
         overlord = serializer.validated_data["overlord"]
         if overlord.slave != self.request.user:
             raise ValidationError("You can only post as your own overlords.")
-        serializer.save()
+
+        post = serializer.save()
+
+        # ⬇️ Realtime WebSocket broadcast a "feed_updates" csatornára
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "feed_updates",  # A frontend is ehhez csatlakozik majd
+            {
+                "type": "send_post_update",
+                "message": "New post created",
+                "overlord": overlord.id,
+                "post_id": post.id,
+            },
+        )
 
     @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
     def by_overlord(self, request, pk=None):

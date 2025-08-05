@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'authapp',
     'feed',
     'profiles',
+    "channels",
+
 ]
 
 MIDDLEWARE = [
@@ -167,3 +169,12 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_CREDENTIALS = True
+
+ASGI_APPLICATION = "catalog.asgi.application"
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}

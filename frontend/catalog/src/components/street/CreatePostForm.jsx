@@ -12,6 +12,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import PetsIcon from "@mui/icons-material/Pets";
 import { useStreetStore } from "../../store/useStreetStore";
 import { uploadPost } from "../../services/posts/postService";
+import { useOverlordPostsStore } from "../../store/usePostStore"; // ⬅️ importáld a zustand store-t
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,6 +20,7 @@ const CreatePostForm = () => {
   const overlord = useStreetStore((state) => state.selectedOverlord);
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
+  const { refetchPosts } = useOverlordPostsStore(); // ⬅️ destrukturáljuk a refetch metódust
 
   const handleImageChange = (e) => {
     if (e.target.files.length > 0) {
@@ -34,9 +36,14 @@ const CreatePostForm = () => {
     formData.append("content", content);
     if (image) formData.append("image", image);
 
-    await uploadPost(formData);
-    setContent("");
-    setImage(null);
+    try {
+      await uploadPost(formData);
+      setContent("");
+      setImage(null);
+      await refetchPosts(overlord.id); // ⬅️ refetch a postok újratöltéséhez
+    } catch (err) {
+      console.error("Post upload failed:", err);
+    }
   };
 
   if (!overlord) return null;
@@ -51,8 +58,8 @@ const CreatePostForm = () => {
         p: 3,
         borderRadius: "md",
         width: "100%",
-        backgroundColor: "#fff", // fehér háttér
-        boxShadow: "md", // finom árnyék
+        backgroundColor: "#fff",
+        boxShadow: "md",
       }}
     >
       <Avatar
