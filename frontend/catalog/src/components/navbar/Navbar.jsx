@@ -10,7 +10,7 @@ import {
   Avatar,
   Stack,
 } from "@mui/joy";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchBar from "./SearchBar";
@@ -27,12 +27,12 @@ const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const navigate = useNavigate();
-  const location = useLocation();
 
   const isMenuOpen = Boolean(anchorEl);
   const { user, logout, isAuthenticated } = useAuthStore();
 
   const selectedOverlord = useStreetStore((state) => state.selectedOverlord);
+  const isOnStreet = useStreetStore((state) => state.isOnStreet);
   const clearSelectedOverlord = useStreetStore(
     (state) => state.clearSelectedOverlord
   );
@@ -42,6 +42,7 @@ const Navbar = () => {
       prev === event.currentTarget ? null : event.currentTarget
     );
   };
+
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = async () => {
@@ -56,12 +57,9 @@ const Navbar = () => {
   };
 
   const handleGoHome = () => {
-    clearSelectedOverlord();
+    clearSelectedOverlord(); // állítja isOnStreet-et is
     navigate("/my-slave");
   };
-
-  const isOnStreet =
-    location.pathname.startsWith("/street") && selectedOverlord;
 
   const username = user?.username || "";
 
