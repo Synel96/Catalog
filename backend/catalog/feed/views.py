@@ -35,6 +35,12 @@ class PostViewSet(viewsets.ModelViewSet):
             raise ValidationError("You can only post as your own overlords.")
         serializer.save()
 
+    @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
+    def by_overlord(self, request, pk=None):
+        posts = Post.objects.filter(overlord__id=pk)
+        serializer = self.get_serializer(posts, many=True)
+        return Response(serializer.data)
+
 
 class ReactionViewSet(viewsets.ModelViewSet):
     serializer_class = ReactionSerializer

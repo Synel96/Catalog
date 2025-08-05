@@ -17,6 +17,7 @@ import {
   deleteWhisker,
 } from "../services/overlords/whiskersService";
 import { getOverlordById } from "../services/overlords/overlordsService";
+import OverlordPostFeed from "../components/overlord/OverlordPostFeed";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -25,10 +26,8 @@ const Overlord = () => {
   const navigate = useNavigate();
 
   const [overlord, setOverlord] = useState(null);
-  const [posts, setPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingOverlord, setLoadingOverlord] = useState(true);
-  const [loadingPosts, setLoadingPosts] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState(null);
 
@@ -70,22 +69,6 @@ const Overlord = () => {
       .catch((e) => setError(e.message))
       .finally(() => setLoadingOverlord(false));
   }, [id]);
-
-  useEffect(() => {
-    if (!overlord) return;
-    setLoadingPosts(true);
-    fetch(`${API_URL}/profiles/overlords/${id}/posts/`, {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load posts");
-        return res.json();
-      })
-      .then((data) => setPosts(data))
-      .catch(() => {})
-      .finally(() => setLoadingPosts(false));
-  }, [overlord, id]);
 
   useEffect(() => {
     if (overlord && currentOverlordId && overlord.id !== currentOverlordId) {
@@ -185,20 +168,9 @@ const Overlord = () => {
 
         <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
           <Typography level="h4">Posts</Typography>
-          {loadingPosts && <CircularProgress size="sm" />}
         </Box>
 
-        <Box>
-          {loadingPosts ? (
-            <Typography level="body-sm">Loading...</Typography>
-          ) : posts.length === 0 ? (
-            <Typography level="body-sm">No posts available.</Typography>
-          ) : (
-            <Typography level="body-md">
-              {posts.length} posts loaded (list coming soon)
-            </Typography>
-          )}
-        </Box>
+        <OverlordPostFeed overlordId={parseInt(id)} />
       </Container>
     </Sheet>
   );

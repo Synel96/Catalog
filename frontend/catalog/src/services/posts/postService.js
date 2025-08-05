@@ -27,3 +27,18 @@ export const fetchStreetPosts = async () => {
     throw error;
   }
 };
+
+export const fetchPostsByOverlordId = async (overlordId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/feed/posts/by-overlord/${overlordId}/`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch posts by overlord ID:", error);
+    throw error;
+  }
+};
