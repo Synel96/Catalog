@@ -1,3 +1,4 @@
+// src/components/snackbar/SnackbarMessage.jsx
 import { Box, Alert, IconButton } from "@mui/joy";
 import CloseIcon from "@mui/icons-material/Close";
 

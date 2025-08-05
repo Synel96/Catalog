@@ -1,4 +1,3 @@
-// src/pages/Overlord.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -10,7 +9,14 @@ import {
   CircularProgress,
   Divider,
 } from "@mui/joy";
-import ProfileHeader from "../components/overlord/ProfileHeader"; // ha máshol van, igazítsd az importot
+import ProfileHeader from "../components/overlord/ProfileHeader";
+import { useStreetStore } from "../store/useStreetStore";
+import { useWhiskerStore } from "../store/useWhiskerStore";
+import {
+  createWhisker,
+  deleteWhisker,
+} from "../services/overlords/whiskersService";
+import { getOverlordById } from "../services/overlords/overlordsService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,7 +32,11 @@ const Overlord = () => {
   const [loadingUser, setLoadingUser] = useState(true);
   const [error, setError] = useState(null);
 
-  // Jelenlegi user lekérése
+  const streetOverlord = useStreetStore((state) => state.selectedOverlord);
+  const { isWhiskered, fetchWhiskerStatus } = useWhiskerStore();
+
+  const currentOverlordId = streetOverlord?.id || null;
+
   useEffect(() => {
     setLoadingUser(true);
     fetch(`${API_URL}/profiles/me/`, {
@@ -34,17 +44,14 @@ const Overlord = () => {
       headers: { Accept: "application/json" },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Nem sikerült a felhasználó lekérése");
+        if (!res.ok) throw new Error("Failed to fetch user");
         return res.json();
       })
       .then((data) => setCurrentUser(data))
-      .catch(() => {
-        // ha nem sikerül, akkor nem vagy bejelentkezve vagy más baj van
-      })
+      .catch(() => {})
       .finally(() => setLoadingUser(false));
   }, []);
 
-  // Overlord adatok lekérése
   useEffect(() => {
     if (!id) return;
     setLoadingOverlord(true);
@@ -53,7 +60,7 @@ const Overlord = () => {
       headers: { Accept: "application/json" },
     })
       .then((res) => {
-        if (!res.ok) throw new Error(`Hiba: ${res.status}`);
+        if (!res.ok) throw new Error(`Error: ${res.status}`);
         return res.json();
       })
       .then((data) => {
@@ -64,7 +71,6 @@ const Overlord = () => {
       .finally(() => setLoadingOverlord(false));
   }, [id]);
 
-  // Kapcsolódó posztok lekérése
   useEffect(() => {
     if (!overlord) return;
     setLoadingPosts(true);
@@ -73,18 +79,44 @@ const Overlord = () => {
       headers: { Accept: "application/json" },
     })
       .then((res) => {
-        if (!res.ok) throw new Error("Nem lehet lekérni a posztokat");
+        if (!res.ok) throw new Error("Failed to load posts");
         return res.json();
       })
       .then((data) => setPosts(data))
-      .catch(() => {
-        // nem kritikus
-      })
+      .catch(() => {})
       .finally(() => setLoadingPosts(false));
   }, [overlord, id]);
 
+  useEffect(() => {
+    if (overlord && currentOverlordId && overlord.id !== currentOverlordId) {
+      fetchWhiskerStatus(currentOverlordId, overlord.id);
+    }
+  }, [overlord, currentOverlordId, fetchWhiskerStatus]);
+
   const isOwnOverlord =
     currentUser && overlord && overlord.slave === currentUser.id;
+
+  const handleWhisker = async () => {
+    try {
+      await createWhisker(currentOverlordId, overlord.id);
+      const updated = await getOverlordById(overlord.id);
+      setOverlord(updated);
+      fetchWhiskerStatus(currentOverlordId, overlord.id);
+    } catch (err) {
+      console.error("Whisker failed", err);
+    }
+  };
+
+  const handleUnwhisker = async () => {
+    try {
+      await deleteWhisker(currentOverlordId, overlord.id);
+      const updated = await getOverlordById(overlord.id);
+      setOverlord(updated);
+      fetchWhiskerStatus(currentOverlordId, overlord.id);
+    } catch (err) {
+      console.error("Unwhisker failed", err);
+    }
+  };
 
   if (loadingOverlord || loadingUser) {
     return (
@@ -98,13 +130,13 @@ const Overlord = () => {
     return (
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Typography level="h4" sx={{ mb: 2 }} color="danger">
-          Overlord nem található
+          Overlord not found
         </Typography>
         <Typography level="body-md" sx={{ mb: 3 }}>
           {error}
         </Typography>
         <Button variant="outlined" onClick={() => navigate(-1)}>
-          Vissza
+          Back
         </Button>
       </Container>
     );
@@ -113,30 +145,28 @@ const Overlord = () => {
   if (!overlord) return null;
 
   return (
-    <Sheet
-      sx={{
-        minHeight: "100vh",
-        backgroundColor: "#f9f9fa",
-        py: 4,
-      }}
-    >
+    <Sheet sx={{ minHeight: "100vh", backgroundColor: "#f9f9fa", py: 4 }}>
       <Container maxWidth="lg">
-        {/* Oldal címe + visszagomb */}
         <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
           <Typography level="h2" sx={{ flexGrow: 1 }}>
             Overlord
           </Typography>
           <Button size="sm" variant="outlined" onClick={() => navigate(-1)}>
-            Vissza
+            Back
           </Button>
         </Box>
 
         <Divider sx={{ mb: 4 }} />
 
-        {/* Profil fejléc */}
         <Box sx={{ mb: 4 }}>
           <ProfileHeader
             overlord={overlord}
+            currentOverlordId={currentOverlordId}
+            showWhiskerButtons={
+              overlord.id !== currentOverlordId // csak akkor, ha nem az utcán lévő
+            }
+            onWhisker={handleWhisker}
+            onUnwhisker={handleUnwhisker}
             actions={
               isOwnOverlord ? (
                 <Button
@@ -144,7 +174,7 @@ const Overlord = () => {
                   size="sm"
                   onClick={() => navigate(`/overlords/${id}/edit`)}
                 >
-                  Szerkesztés
+                  Edit
                 </Button>
               ) : null
             }
@@ -153,20 +183,19 @@ const Overlord = () => {
 
         <Divider sx={{ mb: 4 }} />
 
-        {/* Posztok listája */}
         <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography level="h4">Posztok</Typography>
+          <Typography level="h4">Posts</Typography>
           {loadingPosts && <CircularProgress size="sm" />}
         </Box>
 
         <Box>
           {loadingPosts ? (
-            <Typography level="body-sm">Betöltés...</Typography>
+            <Typography level="body-sm">Loading...</Typography>
           ) : posts.length === 0 ? (
-            <Typography level="body-sm">Nincsenek posztok.</Typography>
+            <Typography level="body-sm">No posts available.</Typography>
           ) : (
             <Typography level="body-md">
-              {posts.length} poszt betöltve (itt lesz a lista)
+              {posts.length} posts loaded (list coming soon)
             </Typography>
           )}
         </Box>

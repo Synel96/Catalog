@@ -1,5 +1,4 @@
-// src/components/overlord/ProfileHeader.jsx
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -11,13 +10,15 @@ import {
   useTheme,
 } from "@mui/joy";
 import whiskerIcon from "../../assets/whisker.png";
-import { useStreetStore } from "../../store/useStreetStore"; // ✅ új import
+import { useStreetStore } from "../../store/useStreetStore";
+import { useSnackbarStore } from "../../store/snackbarStore";
+import ImageViewerModal from "../myoverlords/ImageViewerModal";
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PLACEHOLDER_OVERLORD = "/media/placeholders/overlord_placeholder.png";
 
 /** Avatar fallback */
-const AvatarWithFallback = ({ src, alt, size = 100, ...rest }) => {
+const AvatarWithFallback = ({ src, alt, size = 100, onClick, ...rest }) => {
   const resolve = (val) => {
     if (!val) return `${API_URL}${PLACEHOLDER_OVERLORD}`;
     if (val.startsWith("http") || val.startsWith("data:")) return val;
@@ -29,12 +30,19 @@ const AvatarWithFallback = ({ src, alt, size = 100, ...rest }) => {
       src={resolve(src)}
       alt={alt}
       size="xl"
+      onClick={onClick}
       sx={{
         width: size,
         height: size,
         flexShrink: 0,
         border: "2px solid",
         borderColor: "divider",
+        transition: "transform 0.3s ease, filter 0.3s ease",
+        cursor: "pointer",
+        "&:hover": {
+          transform: "scale(1.05)",
+          filter: "brightness(1.1)",
+        },
       }}
       {...rest}
     />
@@ -45,29 +53,53 @@ AvatarWithFallback.propTypes = {
   src: PropTypes.string,
   alt: PropTypes.string,
   size: PropTypes.number,
+  onClick: PropTypes.func,
 };
 
-/**
- * ProfileHeader
- */
+/** ProfileHeader */
 const ProfileHeader = ({
   overlord,
   actions = null,
-  currentOverlordId = null,
-  isWhiskered = false,
-  onToggleWhisker = null,
+  onWhisker = null,
+  onUnwhisker = null,
 }) => {
   if (!overlord) return null;
 
   const theme = useTheme();
-  const whiskeredByCount = overlord.whiskered_by_count ?? 0;
-  const whiskeringCount = overlord.whiskering_count ?? 0;
-
-  const isSelf = currentOverlordId && overlord.id === currentOverlordId;
-
-  // ✅ Street overlord ellenőrzés
   const streetOverlord = useStreetStore((state) => state.selectedOverlord);
+  const showSnackbar = useSnackbarStore((state) => state.showSnackbar);
   const isStreetOverlord = streetOverlord && overlord.id === streetOverlord.id;
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleWhisker = async () => {
+    try {
+      await onWhisker();
+      showSnackbar("Whiskered this overlord successfully!", "success");
+    } catch (error) {
+      if (error?.response?.data?.detail?.includes("already exists")) {
+        showSnackbar("You are already whiskering this overlord.", "warning");
+      } else {
+        showSnackbar("Failed to whisker overlord.", "danger");
+      }
+    }
+  };
+
+  const handleUnwhisker = async () => {
+    try {
+      await onUnwhisker();
+      showSnackbar("Unwhiskered this overlord successfully!", "success");
+    } catch (error) {
+      if (error?.response?.data?.detail?.includes("not found")) {
+        showSnackbar(
+          "Cannot unwhisker an overlord you are not whiskering.",
+          "warning"
+        );
+      } else {
+        showSnackbar("Failed to unwhisker overlord.", "danger");
+      }
+    }
+  };
 
   return (
     <Box
@@ -84,6 +116,7 @@ const ProfileHeader = ({
           src={overlord.avatar}
           alt={overlord.name}
           size={100}
+          onClick={() => setModalOpen(true)}
         />
       </Box>
 
@@ -110,71 +143,81 @@ const ProfileHeader = ({
               flexWrap: "wrap",
             }}
           >
-            {/* ✅ Gomb csak ha nem self és nem street overlord */}
-            {!isSelf && !isStreetOverlord && (
-              <Tooltip
-                title={isWhiskered ? "Whisker eltávolítása" : "Whiskerelés"}
-              >
-                <span>
-                  <Button
-                    size="sm"
-                    variant={isWhiskered ? "solid" : "soft"}
-                    color={isWhiskered ? "danger" : "primary"}
-                    onClick={() => {
-                      if (onToggleWhisker) {
-                        onToggleWhisker(overlord);
-                      }
-                    }}
-                    startDecorator={
-                      <Box
-                        component="img"
-                        src={whiskerIcon}
-                        alt="Whisker"
-                        sx={{
-                          width: 18,
-                          height: 18,
-                          filter: isWhiskered
-                            ? "none"
-                            : "grayscale(40%) contrast(1)",
-                        }}
-                      />
-                    }
-                    sx={{
-                      whiteSpace: "nowrap",
-                      fontWeight: "md",
-                      px: 1.5,
-                      py: 0.75,
-                      display: {
-                        xs: "inline-flex",
-                        sm: "inline-flex",
-                      },
-                      position: "relative",
-                      animation: !isWhiskered ? "pulse 2s infinite" : "none",
-                      "@keyframes pulse": {
-                        "0%": {
-                          boxShadow: `0 0 0 0 rgba(0,123,255,0.4)`,
-                        },
-                        "70%": {
-                          boxShadow: `0 0 0 8px rgba(0,123,255,0)`,
-                        },
-                        "100%": {
-                          boxShadow: `0 0 0 0 rgba(0,123,255,0)`,
-                        },
-                      },
-                    }}
-                  >
-                    <Box
-                      component="span"
+            {!isStreetOverlord && (
+              <>
+                <Tooltip title="Whisker this Overlord">
+                  <span>
+                    <Button
+                      size="sm"
+                      variant="soft"
+                      color="primary"
+                      onClick={handleWhisker}
                       sx={{
-                        ml: 0.5,
-                        display: { xs: "none", sm: "inline" },
+                        position: "relative",
+                        zIndex: 1,
+                        "&::after": {
+                          content: '""',
+                          position: "absolute",
+                          top: "-6px",
+                          left: "-6px",
+                          right: "-6px",
+                          bottom: "-6px",
+                          borderRadius: "8px",
+                          boxShadow: "0 0 0 0 rgba(0, 128, 255, 0.5)",
+                          animation: "pulseEffect 1.8s infinite ease-in-out",
+                          zIndex: -1,
+                        },
+                        "@keyframes pulseEffect": {
+                          "0%": {
+                            boxShadow: "0 0 0 0 rgba(0, 128, 255, 0.5)",
+                          },
+                          "70%": {
+                            boxShadow: "0 0 0 10px rgba(0, 128, 255, 0)",
+                          },
+                          "100%": {
+                            boxShadow: "0 0 0 0 rgba(0, 128, 255, 0)",
+                          },
+                        },
                       }}
+                      startDecorator={
+                        <Box
+                          component="img"
+                          src={whiskerIcon}
+                          alt="Whisker"
+                          sx={{
+                            width: 18,
+                            height: 18,
+                            filter: "grayscale(40%) contrast(1)",
+                          }}
+                        />
+                      }
                     >
-                      {isWhiskered ? "Unwhisker" : "Whisker"}
-                    </Box>
-                  </Button>
-                </span>
-              </Tooltip>
+                      Whisker
+                    </Button>
+                  </span>
+                </Tooltip>
+
+                <Tooltip title="Unwhisker this Overlord">
+                  <span>
+                    <Button
+                      size="sm"
+                      variant="solid"
+                      color="danger"
+                      onClick={handleUnwhisker}
+                      startDecorator={
+                        <Box
+                          component="img"
+                          src={whiskerIcon}
+                          alt="Unwhisker"
+                          sx={{ width: 18, height: 18 }}
+                        />
+                      }
+                    >
+                      Unwhisker
+                    </Button>
+                  </span>
+                </Tooltip>
+              </>
             )}
 
             {actions && <Box>{actions}</Box>}
@@ -191,10 +234,10 @@ const ProfileHeader = ({
             </Typography>
           )}
           <Typography level="body-md">
-            <strong>Whiskered by:</strong> {whiskeredByCount}
+            <strong>Whiskered by:</strong> {overlord.whiskered_by_count ?? "0"}
           </Typography>
           <Typography level="body-md">
-            <strong>Whiskering:</strong> {whiskeringCount}
+            <strong>Whiskering:</strong> {overlord.whiskering_count ?? "0"}
           </Typography>
         </Stack>
 
@@ -204,6 +247,18 @@ const ProfileHeader = ({
           </Typography>
         )}
       </Box>
+
+      {/* Modal image viewer */}
+      <ImageViewerModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        src={
+          overlord.avatar?.startsWith("http")
+            ? overlord.avatar
+            : `${API_URL}/${overlord.avatar || PLACEHOLDER_OVERLORD}`
+        }
+        alt={overlord.name}
+      />
     </Box>
   );
 };
@@ -220,9 +275,8 @@ ProfileHeader.propTypes = {
     whiskering_count: PropTypes.number,
   }).isRequired,
   actions: PropTypes.node,
-  currentOverlordId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  isWhiskered: PropTypes.bool,
-  onToggleWhisker: PropTypes.func,
+  onWhisker: PropTypes.func,
+  onUnwhisker: PropTypes.func,
 };
 
 export default ProfileHeader;

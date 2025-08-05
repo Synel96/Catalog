@@ -25,7 +25,6 @@ const PLACEHOLDER_AVATAR = "/media/placeholders/overlord_placeholder.png";
 const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-
   const navigate = useNavigate();
 
   const isMenuOpen = Boolean(anchorEl);
@@ -52,12 +51,13 @@ const Navbar = () => {
       console.error("Logout error:", err);
     }
     logout();
+    clearSelectedOverlord(); // ⬅️ cicát is hazaviszi logoutkor
     handleMenuClose();
     navigate("/login");
   };
 
   const handleGoHome = () => {
-    clearSelectedOverlord(); // állítja isOnStreet-et is
+    clearSelectedOverlord();
     navigate("/my-slave");
   };
 

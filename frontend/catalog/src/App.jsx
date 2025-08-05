@@ -8,6 +8,7 @@ import Street from "./pages/Street";
 import RegisterPage from "./pages/Register";
 import MySlave from "./pages/MySlave";
 import Overlord from "./pages/Overlord";
+import SnackbarMessage from "./components/snackbar/SnackbarMessage"; // ✅ snackbar import
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
       <CssBaseline />
       <HashRouter>
         <Navbar />
+
+        {/* ✅ SnackbarMessage globálisan elérhető */}
+        <SnackbarMessage />
 
         <Routes>
           <Route path="/login" element={<LoginPage />} />

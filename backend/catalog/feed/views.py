@@ -1,5 +1,8 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+
 from core.models import Post, Reaction, Comment, Whisker, Notification, Overlord
 from .serializers import (
     PostSerializer,
@@ -39,7 +42,6 @@ class ReactionViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # csak azok a reakciók, amiket a user saját overlordjaikkal adtak
         return Reaction.objects.filter(overlord__slave=self.request.user)
 
     def perform_create(self, serializer):
@@ -52,8 +54,7 @@ class ReactionViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
-        overlord = serializer.instance.overlord
-        if overlord.slave != self.request.user:
+        if serializer.instance.overlord.slave != self.request.user:
             raise ValidationError("You can only modify your own reactions.")
         serializer.save()
 
@@ -78,14 +79,38 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def perform_update(self, serializer):
-        overlord = serializer.instance.overlord
-        if overlord.slave != self.request.user:
+        if serializer.instance.overlord.slave != self.request.user:
             raise ValidationError("You can only modify your own comments.")
         serializer.save()
 
     def perform_destroy(self, instance):
         if instance.overlord.slave != self.request.user:
             raise ValidationError("You can only delete your own comments.")
+        instance.delete()
+
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    serializer_class = NotificationSerializer
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Notification.objects.filter(overlord__slave=self.request.user)
+
+    def perform_create(self, serializer):
+        overlord = serializer.validated_data.get("overlord")
+        if overlord.slave != self.request.user:
+            raise ValidationError("You can only create notifications for your own overlords.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if serializer.instance.overlord.slave != self.request.user:
+            raise ValidationError("You can only update your own notifications.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.overlord.slave != self.request.user:
+            raise ValidationError("You can only delete your own notifications.")
         instance.delete()
 
 
@@ -108,33 +133,31 @@ class WhiskerViewSet(viewsets.ModelViewSet):
             raise ValidationError("This whiskering already exists.")
         serializer.save()
 
-    def perform_destroy(self, instance):
-        if instance.from_overlord.slave != self.request.user:
-            raise ValidationError("You can only delete your own whiskerings.")
-        instance.delete()
+    @action(detail=False, methods=["get"], url_path="status")
+    def check_whisker_status(self, request):
+        from_id = request.query_params.get("from")
+        to_id = request.query_params.get("to")
+        if not from_id or not to_id:
+            return Response({"detail": "Missing parameters."}, status=400)
 
+        exists = Whisker.objects.filter(from_overlord_id=from_id, to_overlord_id=to_id).exists()
+        return Response({"exists": exists})
 
-class NotificationViewSet(viewsets.ModelViewSet):
-    serializer_class = NotificationSerializer
-    authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    @action(detail=False, methods=["delete"], url_path="remove")
+    def remove_whisker(self, request):
+        from_id = request.query_params.get("from")
+        to_id = request.query_params.get("to")
 
-    def get_queryset(self):
-        return Notification.objects.filter(overlord__slave=self.request.user)
+        if not from_id or not to_id:
+            return Response({"detail": "Missing parameters."}, status=400)
 
-    def perform_create(self, serializer):
-        overlord = serializer.validated_data.get("overlord")
-        if overlord.slave != self.request.user:
-            raise ValidationError("You can only create notifications for your own overlords.")
-        serializer.save()
-
-    def perform_update(self, serializer):
-        overlord = serializer.instance.overlord
-        if overlord.slave != self.request.user:
-            raise ValidationError("You can only update your own notifications.")
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        if instance.overlord.slave != self.request.user:
-            raise ValidationError("You can only delete your own notifications.")
-        instance.delete()
+        try:
+            whisker = Whisker.objects.get(
+                from_overlord__id=from_id,
+                to_overlord__id=to_id,
+                from_overlord__slave=request.user
+            )
+            whisker.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Whisker.DoesNotExist:
+            return Response({"detail": "Whisker not found."}, status=404)

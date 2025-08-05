@@ -58,3 +58,14 @@ export const deleteOverlord = async (id) => {
     throw error.response?.data || { detail: "Failed to delete overlord." };
   }
 };
+
+export const getOverlordById = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/profiles/overlords/${id}/`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { detail: "Failed to fetch overlord." };
+  }
+};
