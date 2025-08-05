@@ -8,6 +8,8 @@ class PostSerializer(serializers.ModelSerializer):
     overlord_name = serializers.CharField(source='overlord.name', read_only=True)
     overlord_avatar = serializers.ImageField(source='overlord.avatar', read_only=True)
     reaction_summary = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False, allow_null=True)
+
 
     def get_reaction_summary(self, obj):
         return (

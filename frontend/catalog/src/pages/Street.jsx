@@ -1,6 +1,7 @@
 // src/pages/Street.jsx
 import React from "react";
 import { Box, Typography } from "@mui/joy";
+import CreatePostForm from "../components/street/CreatePostForm";
 
 const Street = () => {
   return (
@@ -16,7 +17,9 @@ const Street = () => {
         Street
       </Typography>
 
-      <Typography>This is the Street page. Content coming soon!</Typography>
+      <CreatePostForm />
+
+      {/* Itt jöhetnek majd a postok */}
     </Box>
   );
 };
