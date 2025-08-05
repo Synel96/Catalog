@@ -19,6 +19,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
 
 
 class Overlord(models.Model):
@@ -33,6 +34,8 @@ class Overlord(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.slave.username})"
+    
+
 
 
 class Post(models.Model):

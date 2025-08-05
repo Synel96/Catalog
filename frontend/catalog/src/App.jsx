@@ -7,6 +7,7 @@ import LoginPage from "./pages/Login";
 import Street from "./pages/Street";
 import RegisterPage from "./pages/Register";
 import MySlave from "./pages/MySlave";
+import Overlord from "./pages/Overlord";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/my-slave" element={<MySlave />} />
           <Route path="/street" element={<Street />} />
+          <Route path="/overlords/:id" element={<Overlord />} />
         </Routes>
       </HashRouter>
     </CssVarsProvider>

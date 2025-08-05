@@ -1,5 +1,5 @@
 // src/components/navbar/Navbar.jsx
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -37,14 +37,12 @@ const Navbar = () => {
     (state) => state.clearSelectedOverlord
   );
 
-  const handleMenuToggle = useCallback((event) => {
+  const handleMenuToggle = (event) => {
     setAnchorEl((prev) =>
       prev === event.currentTarget ? null : event.currentTarget
     );
-  }, []);
-  const handleMenuClose = useCallback(() => {
-    setAnchorEl(null);
-  }, []);
+  };
+  const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = async () => {
     try {
@@ -67,20 +65,15 @@ const Navbar = () => {
 
   const username = user?.username || "";
 
-  // Enterre vagy submitre hívódó fallback: nem navigál automatikusan
-  const handleSearch = useCallback((term) => {
+  const handleSearch = (term) => {
     console.log("Keresés:", term);
-  }, []);
+  };
 
-  // Kiválasztott overlord profiljára navigálás
-  const handleSelect = useCallback(
-    (item) => {
-      if (!item) return;
-      setSearchTerm("");
-      navigate(`/overlords/${item.id}`);
-    },
-    [navigate]
-  );
+  const handleSelect = (item) => {
+    if (!item) return;
+    setSearchTerm("");
+    navigate(`/overlords/${item.id}`);
+  };
 
   return (
     <Sheet
@@ -106,7 +99,6 @@ const Navbar = () => {
           gap: 1,
         }}
       >
-        {/* Logo */}
         <Link to="/" aria-label="Home">
           <Box
             component="img"
@@ -127,7 +119,6 @@ const Navbar = () => {
           />
         </Link>
 
-        {/* Street nézetben kereső + overlord info */}
         {isOnStreet ? (
           <Stack
             direction="row"
@@ -141,7 +132,6 @@ const Navbar = () => {
               gap: { xs: 1, sm: 2 },
             }}
           >
-            {/* SearchBar csak street nézetben */}
             <Box sx={{ minWidth: 0, display: "flex", alignItems: "center" }}>
               <SearchBar
                 value={searchTerm}
@@ -150,11 +140,9 @@ const Navbar = () => {
                 onSelect={handleSelect}
                 searchUrl={`${API_URL}/profiles/overlords/`}
                 placeholder="Search Overlords..."
-                currentUser={user}
               />
             </Box>
 
-            {/* Avatar + felirat */}
             <Box
               sx={{
                 display: "flex",
@@ -216,7 +204,6 @@ const Navbar = () => {
           <Box sx={{ flexGrow: 1, minWidth: 0 }} />
         )}
 
-        {/* Jobb oldal (menu, welcome, notif) */}
         <Box
           sx={{
             display: "flex",
