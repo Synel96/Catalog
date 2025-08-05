@@ -15,3 +15,15 @@ export const uploadPost = async (formData) => {
     throw error;
   }
 };
+
+export const fetchStreetPosts = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/feed/posts/`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch street posts:", error);
+    throw error;
+  }
+};

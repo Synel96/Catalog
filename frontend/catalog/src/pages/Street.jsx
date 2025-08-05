@@ -2,6 +2,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/joy";
 import CreatePostForm from "../components/street/CreatePostForm";
+import StreetPostFeed from "../components/street/StreetPostFeed"; // 👈 Importáljuk
 
 const Street = () => {
   return (
@@ -19,7 +20,9 @@ const Street = () => {
 
       <CreatePostForm />
 
-      {/* Itt jöhetnek majd a postok */}
+      <Box mt={4}>
+        <StreetPostFeed />
+      </Box>
     </Box>
   );
 };
