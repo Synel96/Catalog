@@ -7,11 +7,11 @@ import {
   Typography,
   Stack,
   Button,
-  IconButton,
   Tooltip,
   useTheme,
 } from "@mui/joy";
 import whiskerIcon from "../../assets/whisker.png";
+import { useStreetStore } from "../../store/useStreetStore"; // ✅ új import
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PLACEHOLDER_OVERLORD = "/media/placeholders/overlord_placeholder.png";
@@ -58,10 +58,16 @@ const ProfileHeader = ({
   onToggleWhisker = null,
 }) => {
   if (!overlord) return null;
+
   const theme = useTheme();
   const whiskeredByCount = overlord.whiskered_by_count ?? 0;
   const whiskeringCount = overlord.whiskering_count ?? 0;
+
   const isSelf = currentOverlordId && overlord.id === currentOverlordId;
+
+  // ✅ Street overlord ellenőrzés
+  const streetOverlord = useStreetStore((state) => state.selectedOverlord);
+  const isStreetOverlord = streetOverlord && overlord.id === streetOverlord.id;
 
   return (
     <Box
@@ -104,16 +110,10 @@ const ProfileHeader = ({
               flexWrap: "wrap",
             }}
           >
-            {/* Whisker gomb: feltűnő, ikon + szöveg (desktop), csak ikon mobilon */}
-            {onToggleWhisker && (
+            {/* ✅ Gomb csak ha nem self és nem street overlord */}
+            {!isSelf && !isStreetOverlord && (
               <Tooltip
-                title={
-                  isSelf
-                    ? "Nem whiskerelheted saját magadat"
-                    : isWhiskered
-                    ? "Whisker eltávolítása"
-                    : "Whiskerelés"
-                }
+                title={isWhiskered ? "Whisker eltávolítása" : "Whiskerelés"}
               >
                 <span>
                   <Button
@@ -121,10 +121,10 @@ const ProfileHeader = ({
                     variant={isWhiskered ? "solid" : "soft"}
                     color={isWhiskered ? "danger" : "primary"}
                     onClick={() => {
-                      if (isSelf) return;
-                      onToggleWhisker(overlord);
+                      if (onToggleWhisker) {
+                        onToggleWhisker(overlord);
+                      }
                     }}
-                    disabled={isSelf}
                     startDecorator={
                       <Box
                         component="img"
@@ -149,16 +149,20 @@ const ProfileHeader = ({
                         sm: "inline-flex",
                       },
                       position: "relative",
-                      // pulse ha még nem whiskerel
                       animation: !isWhiskered ? "pulse 2s infinite" : "none",
                       "@keyframes pulse": {
-                        "0%": { boxShadow: `0 0 0 0 rgba(0,123,255,0.4)` },
-                        "70%": { boxShadow: `0 0 0 8px rgba(0,123,255,0)` },
-                        "100%": { boxShadow: `0 0 0 0 rgba(0,123,255,0)` },
+                        "0%": {
+                          boxShadow: `0 0 0 0 rgba(0,123,255,0.4)`,
+                        },
+                        "70%": {
+                          boxShadow: `0 0 0 8px rgba(0,123,255,0)`,
+                        },
+                        "100%": {
+                          boxShadow: `0 0 0 0 rgba(0,123,255,0)`,
+                        },
                       },
                     }}
                   >
-                    {/* desktopon szöveg; mobilon elrejthetjük a szöveget, csak ikon látszik */}
                     <Box
                       component="span"
                       sx={{
