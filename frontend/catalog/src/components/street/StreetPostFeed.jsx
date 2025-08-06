@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -12,50 +12,36 @@ import {
   Stack,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
-import { fetchStreetPosts } from "../../services/posts/postService";
 import { useStreetStore } from "../../store/useStreetStore";
 import { useFeedSocket } from "../../hooks/useFeedSocket";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 const StreetPostFeed = () => {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const posts = useStreetStore((state) => state.streetPosts);
+  const loading = useStreetStore((state) => state.loading);
+  const fetchStreetPosts = useStreetStore((state) => state.fetchStreetPosts);
   const selectedOverlord = useStreetStore((state) => state.selectedOverlord);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        const data = await fetchStreetPosts();
-        setPosts(data);
-      } catch (error) {
-        console.error("Error loading posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadPosts();
+    fetchStreetPosts();
   }, []);
 
-  // 🔄 WebSocket hook – frissítés új posztnál
-  useFeedSocket((updatedPosts) => {
-    setPosts(updatedPosts);
-  });
+  useFeedSocket(); // WebSocket automatikus frissítés
 
   const handleEdit = (post) => {
     console.log("Edit post:", post);
-    // Itt majd megnyithatsz egy modalt a szerkesztéshez
+    // Ide jöhet a szerkesztő modal
   };
 
   const handleDelete = (postId) => {
     console.log("Delete post ID:", postId);
-    // Itt megerősítés után törölheted a posztot
+    // Törlés logika ide jöhet
   };
 
   if (loading) return <Typography>Loading posts...</Typography>;
-  if (posts.length === 0) return <Typography>No posts yet. 😿</Typography>;
+  if (!posts.length) return <Typography>No posts yet. 😿</Typography>;
 
   return (
     <Box sx={{ mt: 4 }}>
