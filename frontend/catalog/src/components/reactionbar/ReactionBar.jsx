@@ -4,6 +4,7 @@ import Purrfect from "../../assets/reactions/purrfect.png";
 import Hiss from "../../assets/reactions/hiss.png";
 import Ekekek from "../../assets/reactions/ekekek.png";
 import Overnap from "../../assets/reactions/overnap.png";
+import "./ReactionBar.css"; // ➕ Külső CSS az animációkhoz
 
 const iconWidth = 96;
 const iconHeight = 63;
@@ -22,9 +23,9 @@ const ReactionBar = ({ postId }) => {
         display: "flex",
         gap: 1.5,
         mt: 1,
-        overflowX: "auto", // görgethető vízszintesen
-        flexWrap: "nowrap", // egy sorban marad
-        pb: 1, // alsó padding, nehogy levágja
+        overflowX: "auto",
+        flexWrap: "nowrap",
+        pb: 1,
       }}
     >
       {buttons.map(({ src, alt }) => (
@@ -32,6 +33,7 @@ const ReactionBar = ({ postId }) => {
           key={alt}
           variant="soft"
           size="sm"
+          className={`reaction-btn ${alt}`} // ➕ Reakció típusa classként
           sx={{
             px: 1.5,
             py: 1,
@@ -41,7 +43,9 @@ const ReactionBar = ({ postId }) => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            flex: "0 0 auto", // ne zsugorodjon, fix méret
+            flex: "0 0 auto",
+            position: "relative", // 💡 Szükséges a ::after animációkhoz (purrfect)
+            overflow: "visible", // 💡 Animációknál kilógás engedélyezése
           }}
         >
           <img
