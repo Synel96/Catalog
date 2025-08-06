@@ -19,7 +19,7 @@ import {
 import { getOverlordById } from "../services/overlords/overlordsService";
 import OverlordPostFeed from "../components/overlord/OverlordPostFeed";
 import StreetPostFeed from "../components/street/StreetPostFeed";
-import OverlordStreetPostForm from "../components/overlord/OverlordStreetPostForm"; // 🆕 új komponens
+import OverlordStreetPostForm from "../components/overlord/OverlordStreetPostForm";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -79,7 +79,10 @@ const Overlord = () => {
   }, [overlord, currentOverlordId, fetchWhiskerStatus]);
 
   const isOwnOverlord =
-    currentUser && overlord && overlord.slave === currentUser.id;
+    currentUser &&
+    overlord &&
+    overlord.slave === currentUser.id &&
+    overlord.id === currentOverlordId;
 
   const handleWhisker = async () => {
     try {
