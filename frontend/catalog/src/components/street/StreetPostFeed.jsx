@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { fetchStreetPosts } from "../../services/posts/postService";
 import { useStreetStore } from "../../store/useStreetStore";
+import { useFeedSocket } from "../../hooks/useFeedSocket";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,6 +38,11 @@ const StreetPostFeed = () => {
 
     loadPosts();
   }, []);
+
+  // 🔄 WebSocket hook – frissítés új posztnál
+  useFeedSocket((updatedPosts) => {
+    setPosts(updatedPosts);
+  });
 
   const handleEdit = (post) => {
     console.log("Edit post:", post);
