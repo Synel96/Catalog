@@ -18,6 +18,8 @@ import {
 } from "../services/overlords/whiskersService";
 import { getOverlordById } from "../services/overlords/overlordsService";
 import OverlordPostFeed from "../components/overlord/OverlordPostFeed";
+import StreetPostFeed from "../components/street/StreetPostFeed";
+import OverlordStreetPostForm from "../components/overlord/OverlordStreetPostForm"; // 🆕 új komponens
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -145,9 +147,7 @@ const Overlord = () => {
           <ProfileHeader
             overlord={overlord}
             currentOverlordId={currentOverlordId}
-            showWhiskerButtons={
-              overlord.id !== currentOverlordId // csak akkor, ha nem az utcán lévő
-            }
+            showWhiskerButtons={overlord.id !== currentOverlordId}
             onWhisker={handleWhisker}
             onUnwhisker={handleUnwhisker}
             actions={
@@ -164,7 +164,17 @@ const Overlord = () => {
           />
         </Box>
 
-        <Divider sx={{ mb: 4 }} />
+        {isOwnOverlord && (
+          <>
+            <OverlordStreetPostForm overlord={overlord} />
+            <Divider sx={{ my: 4 }} />
+            <Typography level="h4" sx={{ mb: 2 }}>
+              Posts on the Street
+            </Typography>
+            <StreetPostFeed />
+            <Divider sx={{ my: 4 }} />
+          </>
+        )}
 
         <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
           <Typography level="h4">Posts</Typography>
