@@ -42,3 +42,33 @@ export const fetchPostsByOverlordId = async (overlordId) => {
     throw error;
   }
 };
+
+export const updatePost = async (postId, updatedData) => {
+  try {
+    const response = await axios.patch(
+      `${API_URL}/feed/posts/${postId}/`,
+      updatedData,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Post update failed:", error);
+    throw error;
+  }
+};
+
+export const deletePost = async (postId) => {
+  try {
+    await axios.delete(`${API_URL}/feed/posts/${postId}/`, {
+      withCredentials: true,
+    });
+  } catch (error) {
+    console.error("Post deletion failed:", error);
+    throw error;
+  }
+};

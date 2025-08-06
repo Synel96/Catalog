@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,10 +10,14 @@ import {
   Divider,
   Button,
   Stack,
+  Snackbar,
 } from "@mui/joy";
 import { useNavigate } from "react-router-dom";
 import { useStreetStore } from "../../store/useStreetStore";
 import { useFeedSocket } from "../../hooks/useFeedSocket";
+import EditPostModal from "../modals/EditPostModal";
+import DeletePostModal from "../modals/DeletePostModal";
+import { deletePost } from "../../services/posts/postService";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -24,20 +28,33 @@ const StreetPostFeed = () => {
   const selectedOverlord = useStreetStore((state) => state.selectedOverlord);
   const navigate = useNavigate();
 
+  const [editingPost, setEditingPost] = useState(null);
+  const [deletingPost, setDeletingPost] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
   useEffect(() => {
     fetchStreetPosts();
   }, []);
 
-  useFeedSocket(); // WebSocket automatikus frissítés
+  useFeedSocket();
 
   const handleEdit = (post) => {
-    console.log("Edit post:", post);
-    // Ide jöhet a szerkesztő modal
+    setEditingPost(post);
   };
 
-  const handleDelete = (postId) => {
-    console.log("Delete post ID:", postId);
-    // Törlés logika ide jöhet
+  const handleDelete = (post) => {
+    setDeletingPost(post);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deletePost(deletingPost.id);
+      setDeletingPost(null);
+      await fetchStreetPosts();
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
   if (loading) return <Typography>Loading posts...</Typography>;
@@ -144,7 +161,7 @@ const StreetPostFeed = () => {
                     size="sm"
                     variant="soft"
                     color="danger"
-                    onClick={() => handleDelete(post.id)}
+                    onClick={() => handleDelete(post)}
                   >
                     Delete
                   </Button>
@@ -154,6 +171,39 @@ const StreetPostFeed = () => {
           </Card>
         );
       })}
+
+      {/* Edit Modal */}
+      {editingPost && (
+        <EditPostModal
+          open={!!editingPost}
+          post={editingPost}
+          onClose={() => setEditingPost(null)}
+          onPostUpdated={() => {
+            fetchStreetPosts();
+            setEditingPost(null);
+          }}
+        />
+      )}
+
+      {/* Delete Modal */}
+      {deletingPost && (
+        <DeletePostModal
+          open={!!deletingPost}
+          onClose={() => setDeletingPost(null)}
+          onDelete={confirmDelete}
+        />
+      )}
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2500}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        color="success"
+      >
+        Post deleted successfully!
+      </Snackbar>
     </Box>
   );
 };

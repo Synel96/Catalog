@@ -39,10 +39,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post = serializer.save()
 
-        # ⬇️ Realtime WebSocket broadcast a "feed_updates" csatornára
+        
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            "feed_updates",  # A frontend is ehhez csatlakozik majd
+            "feed_updates",
             {
                 "type": "send_post_update",
                 "message": "New post created",
@@ -50,6 +50,16 @@ class PostViewSet(viewsets.ModelViewSet):
                 "post_id": post.id,
             },
         )
+
+    def perform_update(self, serializer):
+        if serializer.instance.overlord.slave != self.request.user:
+            raise ValidationError("You can only edit posts from your own overlords.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.overlord.slave != self.request.user:
+            raise ValidationError("You can only delete posts from your own overlords.")
+        instance.delete()
 
     @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
     def by_overlord(self, request, pk=None):
