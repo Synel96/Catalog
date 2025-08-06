@@ -18,6 +18,7 @@ import { useFeedSocket } from "../../hooks/useFeedSocket";
 import EditPostModal from "../modals/EditPostModal";
 import DeletePostModal from "../modals/DeletePostModal";
 import { deletePost } from "../../services/posts/postService";
+import ReactionBar from "../reactionbar/ReactionBar"; // 🔁 Új komponens import
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -146,6 +147,11 @@ const StreetPostFeed = () => {
                       .join(" • ")
                   : "No reactions yet"}
               </Typography>
+
+              {/* 🔁 Reakciósáv beillesztése */}
+              <Box mt={1}>
+                <ReactionBar postId={post.id} />
+              </Box>
 
               {isOwnPost && (
                 <Stack direction="row" spacing={1} mt={2}>
