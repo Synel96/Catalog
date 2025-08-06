@@ -30,7 +30,10 @@ class PostViewSet(viewsets.ModelViewSet):
             from_overlord__in=user_overlords
         ).values_list("to_overlord_id", flat=True)
         whiskered_overlords = Overlord.objects.filter(pk__in=whiskered_ids)
-        return Post.objects.filter(overlord__in=list(user_overlords) + list(whiskered_overlords))
+
+        return Post.objects.filter(
+            overlord__in=list(user_overlords) + list(whiskered_overlords)
+        ).order_by("-created_at")  # ⬅️ Legfrissebb poszt elöl
 
     def perform_create(self, serializer):
         overlord = serializer.validated_data["overlord"]
@@ -61,9 +64,10 @@ class PostViewSet(viewsets.ModelViewSet):
             raise ValidationError("You can only delete posts from your own overlords.")
         instance.delete()
 
+    
     @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
     def by_overlord(self, request, pk=None):
-        posts = Post.objects.filter(overlord__id=pk)
+        posts = Post.objects.filter(overlord__id=pk).order_by("-created_at")  # ⬅️ Add hozzá
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 

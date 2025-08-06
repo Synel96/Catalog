@@ -50,6 +50,9 @@ class Post(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
         return f"Post by {self.overlord.name} at {self.created_at}"
 
