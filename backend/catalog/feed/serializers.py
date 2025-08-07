@@ -12,11 +12,9 @@ class PostSerializer(serializers.ModelSerializer):
 
 
     def get_reaction_summary(self, obj):
-        return (
-            obj.reactions.values('type')
-            .annotate(count=Count('id'))
-            .order_by('-count')
-        )
+        summary = obj.reactions.values('type').annotate(count=Count('id'))
+        return {item['type']: item['count'] for item in summary}
+
 
     class Meta:
         model = Post

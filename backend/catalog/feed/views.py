@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
+from django.db.models import Count
 
 from core.models import Post, Reaction, Comment, Whisker, Notification, Overlord
 from .serializers import (
@@ -33,7 +33,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
         return Post.objects.filter(
             overlord__in=list(user_overlords) + list(whiskered_overlords)
-        ).order_by("-created_at")  # ⬅️ Legfrissebb poszt elöl
+        ).order_by("-created_at")
 
     def perform_create(self, serializer):
         overlord = serializer.validated_data["overlord"]
@@ -42,7 +42,6 @@ class PostViewSet(viewsets.ModelViewSet):
 
         post = serializer.save()
 
-        
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             "feed_updates",
@@ -64,10 +63,9 @@ class PostViewSet(viewsets.ModelViewSet):
             raise ValidationError("You can only delete posts from your own overlords.")
         instance.delete()
 
-    
     @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
     def by_overlord(self, request, pk=None):
-        posts = Post.objects.filter(overlord__id=pk).order_by("-created_at")  # ⬅️ Add hozzá
+        posts = Post.objects.filter(overlord__id=pk).order_by("-created_at")
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data)
 
@@ -98,6 +96,41 @@ class ReactionViewSet(viewsets.ModelViewSet):
         if instance.overlord.slave != self.request.user:
             raise ValidationError("You can only delete your own reactions.")
         instance.delete()
+
+    @action(detail=False, methods=["get"], url_path="by-post/(?P<post_id>[^/.]+)")
+    def reactions_by_post(self, request, post_id=None):
+        reactions = Reaction.objects.filter(post_id=post_id) \
+            .values('type') \
+            .annotate(count=Count('type'))
+        result = {item['type']: item['count'] for item in reactions}
+        return Response(result)
+
+    @action(detail=False, methods=["post"], url_path="toggle")
+    def toggle_reaction(self, request):
+        overlord_id = request.data.get("overlord_id")
+        post_id = request.data.get("post_id")
+        reaction_type = request.data.get("type")
+
+        if not overlord_id or not post_id or not reaction_type:
+            return Response({"error": "Missing parameters"}, status=400)
+
+        try:
+            overlord = Overlord.objects.get(id=overlord_id, slave=request.user)
+        except Overlord.DoesNotExist:
+            return Response({"error": "Invalid overlord"}, status=403)
+
+        try:
+            existing = Reaction.objects.get(post_id=post_id, overlord=overlord)
+            if existing.type == reaction_type:
+                existing.delete()
+                return Response({"status": "unreacted"})
+            else:
+                existing.type = reaction_type
+                existing.save()
+                return Response({"status": "updated"})
+        except Reaction.DoesNotExist:
+            Reaction.objects.create(post_id=post_id, overlord=overlord, type=reaction_type)
+            return Response({"status": "reacted"})
 
 
 class CommentViewSet(viewsets.ModelViewSet):
