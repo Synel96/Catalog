@@ -2,13 +2,15 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
+// The frame is 3:2 like the slides (1536×1024). The square logo image is
+// letterboxed on its own background colour instead of being cropped.
 const SLIDES = [
-  "/catalog.png",
-  "/slide1.png",
-  "/slide2.png",
-  "/slide3.png",
-  "/slide4.png",
-  "/slide5.png",
+  { src: "/catalog.png", fit: "contain" },
+  { src: "/slide1.png", fit: "cover" },
+  { src: "/slide2.png", fit: "cover" },
+  { src: "/slide3.png", fit: "cover" },
+  { src: "/slide4.png", fit: "cover" },
+  { src: "/slide5.png", fit: "cover" },
 ] as const;
 
 const AUTOPLAY_MS = 5000;
@@ -32,11 +34,13 @@ export function Welcome() {
     <div className="w-full p-4 text-center sm:p-8">
       <h2 className="mb-4 text-3xl font-bold">Have a mice day!</h2>
 
-      <div className="relative mx-auto max-w-[600px] rounded-xl shadow-md">
+      <div className="relative mx-auto aspect-[3/2] w-full max-w-[900px] overflow-hidden rounded-xl bg-[#2c2e30] shadow-md">
         <img
-          src={SLIDES[current]}
+          src={SLIDES[current].src}
           alt={`Slide ${current + 1} of ${length}`}
-          className="block aspect-square w-full rounded-xl object-cover"
+          className={`block size-full ${
+            SLIDES[current].fit === "contain" ? "object-contain" : "object-cover"
+          }`}
         />
         <Button
           variant="secondary"

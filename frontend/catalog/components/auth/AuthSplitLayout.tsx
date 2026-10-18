@@ -4,11 +4,15 @@ import { Welcome } from "./Welcome";
 // slider on the left (top on mobile), the form on the right.
 export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] flex-col md:flex-row">
+    <div className="flex min-h-[calc(100vh-4rem)] flex-col lg:flex-row">
       <section className="bg-background flex flex-1 items-center justify-center p-4">
         <Welcome />
       </section>
-      <section className="flex flex-1 items-center justify-center p-4">{children}</section>
+      {/* Fixed-width form column on large screens leaves the rest to the
+          widescreen slider. */}
+      <section className="flex flex-1 items-center justify-center p-4 lg:w-[480px] lg:flex-none">
+        {children}
+      </section>
     </div>
   );
 }
