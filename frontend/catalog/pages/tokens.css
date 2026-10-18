@@ -1,0 +1,49 @@
+/* Catalog palette, carried over from the old Joy theme (src/theme.js):
+   pink primary (#ffb3b3 / #ff9999), warm brown text (#5c2a2a) and a
+   blush page background (#fff7f7). */
+:root {
+  --background: #fff7f7;
+  --foreground: #2b1a1a;
+  --card: #fff;
+  --card-foreground: #2b1a1a;
+  --popover: #fff0f0;
+  --popover-foreground: #2b1a1a;
+  --primary: #f99;
+  --primary-foreground: #3d1616;
+  --secondary: #ffe6e6;
+  --secondary-foreground: #5c2a2a;
+  --muted: #ffe6e6;
+  --muted-foreground: #7a5c5c;
+  --accent: #fcc;
+  --accent-foreground: #5c2a2a;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #f5d0d0;
+  --input: #ebc4c4;
+  --ring: #ff8080;
+  --radius: 0.625rem;
+  --brand-surface: #ffe6e6;
+  --brand-on-surface: #2b1a1a;
+}
+
+.dark {
+  --background: #1d1416;
+  --foreground: #fbeeee;
+  --card: #2a1d20;
+  --card-foreground: #fbeeee;
+  --popover: #2a1d20;
+  --popover-foreground: #fbeeee;
+  --primary: #f99;
+  --primary-foreground: #3d1616;
+  --secondary: #3a272b;
+  --secondary-foreground: #fbeeee;
+  --muted: #3a272b;
+  --muted-foreground: #c9a9a9;
+  --accent: #4a3036;
+  --accent-foreground: #fbeeee;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
+  --ring: #ff8080;
+  --brand-surface: #2a1d20;
+  --brand-on-surface: #fbeeee;
+}

@@ -1,0 +1,11 @@
+# https://www.robotstxt.org/robotstxt.html
+# This file is intentionally minimal. Update for your needs.
+
+User-agent: *
+Allow: /
+
+# Disallow specific paths if needed:
+# Disallow: /admin/
+# Disallow: /private/
+
+Sitemap: https://example.com/sitemap.xml

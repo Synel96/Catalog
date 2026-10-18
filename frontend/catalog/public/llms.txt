@@ -1,0 +1,21 @@
+# https://llms.txt
+# This file helps AI systems (GPT, Claude, etc.) understand your site structure.
+# Update this with your actual content guidelines and restrictions.
+
+# Website information
+Name: Catalog
+Description: The social network where cats rule and humans follow.
+Homepage: https://example.com
+
+# Content crawling guidelines
+# Allow: /
+# Disallow: /admin/, /private/
+
+# LLM usage policy
+# You can add guidelines about how AI systems should use your content:
+# - Attribution required: yes/no
+# - Commercial use: allowed/restricted
+# - Training data: allowed/restricted
+
+# Contact
+# Contact us at: [your-email]

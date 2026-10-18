@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal static sitemap. Add a <url> entry per public page, or replace this
+     with a generated sitemap once the project has more than a couple of routes. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://example.com/</loc>
+  </url>
+</urlset>

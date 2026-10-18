@@ -1,0 +1,31 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-tailwindcss"],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "theme",
+          "custom-variant",
+          "layer",
+          "config",
+          "import",
+          "screen",
+          "source"
+        ]
+      }
+    ],
+    "import-notation": "string",
+    "property-no-unknown": [
+      true,
+      {
+        "ignoreProperties": ["composes"]
+      }
+    ],
+    "no-invalid-double-slash-comments": null,
+    "lightness-notation": null,
+    "hue-degree-notation": null
+  }
+}

@@ -1,12 +1,91 @@
-# React + Vite
+# Catalog – frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Post as your cat. Rule as an overlord.
 
-Currently, two official plugins are available:
+Built on the [hydration-starter-kit](https://github.com/Synel96/hydration-starter-kit):
+[Vike](https://vike.dev) + React 19 (SSR/prerender) + TypeScript, Tailwind v4
+and [shadcn](https://ui.shadcn.com) primitives (Radix). State lives in
+[Zustand](https://zustand.docs.pmnd.rs), API calls go through axios to the
+Django backend in `backend/catalog`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting started
 
-## Expanding the ESLint configuration
+```sh
+npm install
+cp .env.example .env
+npm run dev          # http://localhost:5173
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The backend only allows CORS from `http://localhost:5173`, so the dev and
+preview servers are pinned to that port (`vite.config.ts`).
+
+## Environment
+
+Validated with zod in `src/env.ts` (the app throws on startup if invalid):
+
+| Variable          | Default                     | What it is                         |
+| ----------------- | --------------------------- | ---------------------------------- |
+| `VITE_SITE_URL`   | `http://localhost:5173`     | Public URL (canonical/OG links)    |
+| `VITE_BRAND_NAME` | `Catalog`                   | Brand name in titles/footer        |
+| `VITE_API_URL`    | `http://localhost:8000/api` | Django REST API, incl. `/api` path |
+
+## Scripts
+
+| Script                 | What it does                                        |
+| ---------------------- | --------------------------------------------------- |
+| `npm run dev`          | Start the dev server                                |
+| `npm run build`        | Production build (client + prerendered HTML)        |
+| `npm run preview`      | Build, then serve the production build locally      |
+| `npm run typecheck`    | `tsc --noEmit`                                      |
+| `npm run lint`         | ESLint over `.ts`/`.tsx`                            |
+| `npm run lint:css`     | Stylelint over `.css`                               |
+| `npm run format`       | Prettier, write mode                                |
+| `npm run format:check` | Prettier, check-only (used in CI)                   |
+| `npm run test`         | Vitest                                              |
+| `npm run check`        | Runs all of the above (typecheck → lint → test → …) |
+
+A pre-commit hook (Husky + lint-staged) formats/lints staged files; CI
+(`.github/workflows/frontend-ci.yml` at the repo root) runs the full check
+list plus a build.
+
+## Structure
+
+```
+pages/                 Vike pages (filesystem routing) + layout/head
+  index/  login/       Login (both `/` and `/login`)
+  register/            Registration
+  my-slave/            Profile + overlords
+  _error/              404 / error page
+components/
+  auth/                Login & register forms, welcome slider
+  myslave/             Profile card, edit dialog, skeleton
+  myoverlords/         Overlord carousel, create/edit dialog, skeleton
+  common/              Shared bits (form field, image viewer)
+  ui/                  shadcn primitives
+src/
+  services/            axios client + typed API calls
+  store/               Zustand stores (auth, overlords)
+  types/               API response types
+```
+
+## Auth & hydration
+
+- Auth uses HttpOnly JWT cookies set by the backend, so every request is sent
+  `withCredentials`. On a `401` the axios client calls `auth/refresh/` once
+  and replays the request (access tokens only live 5 minutes).
+- Pages are prerendered to static HTML, so nothing user-specific is rendered
+  on the server. The auth store is persisted to `localStorage` with
+  `skipHydration`; `<AuthHydrator>` rehydrates it after mount so the first
+  client render matches the HTML (no hydration mismatch).
+- `/my-slave` revalidates the session against `profiles/me/` on load and
+  redirects to `/login` if it's gone.
+- Toasts (sonner) replace the old snackbar. The `<Toaster>` lives in the
+  layout, which survives client-side navigation, so a toast fired just before
+  `navigate()` shows on the next page.
+
+## Deploying
+
+`vercel.json` deploys `dist/client` as a static site and sets security
+headers. Before going live, replace `https://api.example.com` in the CSP's
+`connect-src` with the real backend origin (and add it to the backend's
+`CORS_ALLOWED_ORIGINS`), or the browser blocks every API call.

@@ -1,0 +1,33 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["frontend/catalog/**", ".github/workflows/frontend-ci.yml"]
+  pull_request:
+    paths: ["frontend/catalog/**", ".github/workflows/frontend-ci.yml"]
+
+defaults:
+  run:
+    working-directory: frontend/catalog
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "frontend/catalog/.nvmrc"
+          cache: "npm"
+          cache-dependency-path: "frontend/catalog/package-lock.json"
+
+      - run: npm ci
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run lint:css
+      - run: npm run format:check
+      - run: npm run test
+      - run: npm run build

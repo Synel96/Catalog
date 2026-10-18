@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.claude
+.next
+.nuxt
+out
+build
+.cache
+*.min.js
+*.min.css
