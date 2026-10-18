@@ -48,5 +48,7 @@ export function toApiError(error: unknown, fallback: string): ApiError {
 export function mediaUrl(path: string | null | undefined, placeholder: string): string {
   const value = path || placeholder;
   if (/^(https?:|data:|blob:)/.test(value)) return value;
+  // A relative API_URL (mock mode) means media is served by the site itself.
+  if (API_URL.startsWith("/")) return value;
   return new URL(value, API_URL).toString();
 }

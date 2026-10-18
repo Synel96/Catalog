@@ -2,7 +2,11 @@ import { env } from "@/src/env";
 
 export const BRAND_NAME = env.VITE_BRAND_NAME;
 export const SITE_URL = env.VITE_SITE_URL;
-export const API_URL = env.VITE_API_URL;
+export const API_MOCKS = env.VITE_API_MOCKS;
+// With mocks on, requests stay on the site's own origin (`/api/...`) so the
+// mock service worker can answer them and the CSP's connect-src 'self'
+// already allows them.
+export const API_URL = API_MOCKS ? "/api/" : env.VITE_API_URL;
 
 export const SITE_DESCRIPTION = "Catalog – The social network where cats rule and humans follow.";
 

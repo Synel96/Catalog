@@ -3,6 +3,7 @@ import { useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 import { AuthHydrator } from "../components/AuthHydrator";
 import { Footer } from "../components/Footer";
+import { MockModeBanner } from "../components/MockModeBanner";
 import { Navbar } from "../components/Navbar";
 import { PageLoading } from "../components/PageLoading";
 import { PushDrawerBody } from "../components/ui/push-drawer";
@@ -28,6 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       <AuthHydrator />
+      <MockModeBanner />
       <PageLoading />
       {/* Kept outside <PushDrawerBody> so the navbar stays put while the rest
           of the page slides aside. Anything `position: fixed` (e.g. a full-page
