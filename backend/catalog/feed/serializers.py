@@ -8,6 +8,7 @@ class PostSerializer(serializers.ModelSerializer):
     overlord_name = serializers.CharField(source='overlord.name', read_only=True)
     overlord_avatar = serializers.ImageField(source='overlord.avatar', read_only=True)
     reaction_summary = serializers.SerializerMethodField()
+    comment_count = serializers.IntegerField(source="comments.count", read_only=True)
     image = serializers.ImageField(required=False, allow_null=True)
 
 
@@ -18,7 +19,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'overlord', 'overlord_name', 'overlord_avatar', 'content', 'image', 'created_at','reaction_summary']
+        fields = ['id', 'overlord', 'overlord_name', 'overlord_avatar', 'content', 'image', 'created_at', 'reaction_summary', 'comment_count']
 
 
 class ReactionSerializer(serializers.ModelSerializer):

@@ -18,6 +18,22 @@ from .serializers import (
 from authapp.authentication import CookieJWTAuthentication
 
 
+def notify(actor, target, message, link=None):
+    """Notify `target` (an overlord) about something `actor` did.
+
+    Skipped when both overlords belong to the same slave: nobody needs to
+    be told that they reacted to their own cat's post.
+    """
+    if actor.slave_id == target.slave_id:
+        return
+    Notification.objects.create(overlord=target, message=message[:255], link=link)
+
+
+def overlord_link(overlord):
+    # Frontend profile route (frontend/catalog/components/street/links.ts).
+    return f"/overlord?id={overlord.id}"
+
+
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     authentication_classes = [CookieJWTAuthentication]
@@ -124,13 +140,30 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        # ?post=<id> lists everyone's comments under that post (oldest first,
+        # like a conversation); otherwise only the user's own comments.
+        post_id = self.request.query_params.get("post")
+        if self.action == "list" and post_id:
+            return (
+                Comment.objects.filter(post_id=post_id)
+                .select_related("overlord")
+                .order_by("created_at")
+            )
         return Comment.objects.filter(overlord__slave=self.request.user)
 
     def perform_create(self, serializer):
         overlord = serializer.validated_data["overlord"]
         if overlord.slave != self.request.user:
             raise ValidationError("You can only comment with your own overlords.")
-        serializer.save()
+        comment = serializer.save()
+
+        snippet = comment.content if len(comment.content) <= 60 else f"{comment.content[:57]}..."
+        notify(
+            overlord,
+            comment.post.overlord,
+            f"{overlord.name} commented on your post: \u201c{snippet}\u201d",
+            overlord_link(comment.post.overlord),
+        )
 
     def perform_update(self, serializer):
         if serializer.instance.overlord.slave != self.request.user:
@@ -149,7 +182,14 @@ class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(overlord__slave=self.request.user)
+        return Notification.objects.filter(overlord__slave=self.request.user).order_by(
+            "-created_at"
+        )
+
+    @action(detail=False, methods=["post"], url_path="mark-all-read")
+    def mark_all_read(self, request):
+        updated = self.get_queryset().filter(is_read=False).update(is_read=True)
+        return Response({"updated": updated})
 
     def perform_create(self, serializer):
         overlord = serializer.validated_data.get("overlord")
@@ -186,6 +226,12 @@ class WhiskerViewSet(viewsets.ModelViewSet):
         if Whisker.objects.filter(from_overlord=from_overlord, to_overlord=to_overlord).exists():
             raise ValidationError("This whiskering already exists.")
         serializer.save()
+        notify(
+            from_overlord,
+            to_overlord,
+            f"{from_overlord.name} started whiskering {to_overlord.name}.",
+            overlord_link(from_overlord),
+        )
 
     @action(detail=False, methods=["get"], url_path="status")
     def check_whisker_status(self, request):
@@ -245,5 +291,15 @@ class ToggleReactionAPIView(APIView):
                 existing.save()
                 return Response({"status": "updated"})
         except Reaction.DoesNotExist:
-            Reaction.objects.create(post_id=post_id, overlord=overlord, type=reaction_type)
+            reaction = Reaction.objects.create(
+                post_id=post_id, overlord=overlord, type=reaction_type
+            )
+            # Only a new reaction notifies; switching or taking one back doesn't.
+            label = dict(Reaction.REACTION_CHOICES).get(reaction_type, reaction_type)
+            notify(
+                overlord,
+                reaction.post.overlord,
+                f"{overlord.name} reacted {label} to your post.",
+                overlord_link(reaction.post.overlord),
+            )
             return Response({"status": "reacted"})
