@@ -65,7 +65,11 @@ export function ReactionBar({ postId, summary, overlordId }: ReactionBarProps) {
               type
             )}
           >
-            <img src={icon} alt="" className="h-[37px] w-14 object-contain sm:h-[63px] sm:w-24" />
+            <img
+              src={icon}
+              alt=""
+              className="h-[37px] w-14 object-contain sm:h-[63px] sm:w-24 dark:invert"
+            />
             {count > 0 && (
               <span className="bg-primary text-primary-foreground absolute top-1 right-1 min-w-[18px] rounded-full px-1.5 text-center text-[10px] leading-[1.4] font-bold">
                 {count}
