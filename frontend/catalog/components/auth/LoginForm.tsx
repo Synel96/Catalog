@@ -7,26 +7,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { loginUser } from "@/src/services/authService";
 import { getCurrentUser } from "@/src/services/userService";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import type { ApiError, LoginCredentials } from "@/src/types/api";
+import type { ApiError } from "@/src/types/api";
+import { formValues } from "./formValues";
 
 export function LoginForm() {
-  const [formData, setFormData] = useState<LoginCredentials>({ username: "", password: "" });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const login = useAuthStore((state) => state.login);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const credentials = formValues(e.currentTarget, ["username", "password"]);
     setError("");
     setIsSubmitting(true);
 
     try {
-      await loginUser(formData);
+      await loginUser(credentials);
       const user = await getCurrentUser();
       login(user);
       toast.success("Login successful!");
@@ -48,8 +44,6 @@ export function LoginForm() {
           <FormField
             label="Username"
             name="username"
-            value={formData.username}
-            onChange={handleChange}
             placeholder="Enter your username"
             autoComplete="username"
             required
@@ -58,8 +52,6 @@ export function LoginForm() {
             label="Password"
             type="password"
             name="password"
-            value={formData.password}
-            onChange={handleChange}
             placeholder="Enter your password"
             autoComplete="current-password"
             required

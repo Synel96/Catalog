@@ -5,27 +5,23 @@ import { FormField } from "@/components/common/FormField";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerUser } from "@/src/services/authService";
-import type { ApiError, RegisterPayload } from "@/src/types/api";
+import type { ApiError } from "@/src/types/api";
+import { formValues } from "./formValues";
 
 const REDIRECT_DELAY_MS = 2000;
 
 export function RegisterForm() {
-  const [formData, setFormData] = useState<RegisterPayload>({
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = formValues(e.currentTarget, [
+      "username",
+      "email",
+      "password",
+      "confirmPassword",
+    ]);
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
@@ -54,8 +50,6 @@ export function RegisterForm() {
           <FormField
             label="Slavename"
             name="username"
-            value={formData.username}
-            onChange={handleChange}
             placeholder="Enter your username"
             autoComplete="username"
             required
@@ -64,8 +58,6 @@ export function RegisterForm() {
             label="Email"
             type="email"
             name="email"
-            value={formData.email}
-            onChange={handleChange}
             placeholder="Enter your email"
             autoComplete="email"
             required
@@ -74,8 +66,6 @@ export function RegisterForm() {
             label="Password"
             type="password"
             name="password"
-            value={formData.password}
-            onChange={handleChange}
             placeholder="Enter your password"
             autoComplete="new-password"
             required
@@ -84,8 +74,6 @@ export function RegisterForm() {
             label="Confirm Password"
             type="password"
             name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
             placeholder="Confirm your password"
             autoComplete="new-password"
             required
