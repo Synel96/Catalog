@@ -1,9 +1,9 @@
-import type { Overlord, Post, ReactionType, User } from "@/src/types/api";
+import type { Comment, Notification, Overlord, Post, ReactionType, User } from "@/src/types/api";
 
 // In-memory stand-in for the Django database, kept in sessionStorage so
 // created/edited data survives reloads within a tab. Bump the key when the
 // shape changes so stale tabs start from the new seed.
-const STORAGE_KEY = "catalog-mock-db-v4";
+const STORAGE_KEY = "catalog-mock-db-v5";
 
 export const ME = 1;
 
@@ -15,7 +15,12 @@ type StoredOverlord = Omit<
   | "whiskered_by_names"
   | "whiskering_names"
 >;
-type StoredPost = Omit<Post, "overlord_name" | "overlord_avatar" | "reaction_summary">;
+type StoredPost = Omit<
+  Post,
+  "overlord_name" | "overlord_avatar" | "reaction_summary" | "comment_count"
+>;
+type StoredComment = Omit<Comment, "overlord_name">;
+type StoredNotification = Omit<Notification, "overlord_name">;
 type StoredReaction = { overlord: number; post: number; type: ReactionType };
 type StoredWhisker = { from: number; to: number };
 
@@ -28,6 +33,8 @@ export type MockDb = {
   posts: StoredPost[];
   reactions: StoredReaction[];
   whiskers: StoredWhisker[];
+  comments: StoredComment[];
+  notifications: StoredNotification[];
   nextId: number;
 };
 
@@ -76,6 +83,10 @@ const POSTS: [number, number, string, string | null, number][] = [
   [12, 4, "Nap report: excellent.", null, 33],
   [13, 3, "Lasagna status: missing. Suspect: Odie.", null, 40],
   [14, 7, "Knocked a plant over. It was looking at me.", "/slide4.png", 50],
+  [15, 6, "Hot take: dogs are just cats that failed the entrance exam.", null, 4],
+  [16, 10, "Petition to make 5 a.m. breakfast a human right. For cats.", null, 6],
+  [17, 2, "Sat in a box that was clearly too small. Worth it.", null, 8],
+  [18, 5, "Reminder: the red dot is NOT a conspiracy. (It is.)", null, 11],
 ];
 
 // [overlord, post, type]
@@ -121,6 +132,62 @@ const WHISKERS: [number, number][] = [
   [4, 2],
 ];
 
+// [id, overlord, post, content, hours ago]: little back-and-forth threads.
+const COMMENTS: [number, number, number, string, number][] = [
+  [1, 9, 1, "Mondays are a construct invented by alarm clocks.", 1.8],
+  [2, 3, 1, "Nermal, nobody asked. Go be cute somewhere else.", 1.7],
+  [3, 9, 1, "Too late, already cute here. 💅", 1.6],
+  [4, 3, 2, "A sunbeam? In THIS economy?", 4.5],
+  [5, 7, 2, "Share the coordinates or it didn't happen.", 4.2],
+  [6, 1, 2, "Coordinates are classified. Bring tuna and we'll talk.", 4],
+  [7, 6, 4, "Rats are just very small, very rude roommates.", 0.8],
+  [8, 5, 4, "Says the one who once got outsmarted by a vacuum cleaner.", 0.6],
+  [9, 6, 4, "We agreed never to speak of the vacuum. 😾", 0.5],
+  [10, 8, 15, "Excuse me, I lose to a mouse daily and even I find this rude.", 3.5],
+  [11, 6, 15, "Tom, the mouse is winning on points, not on merit.", 3.2],
+  [12, 11, 16, "Seconded. Also 4 a.m. second breakfast.", 5.5],
+  [13, 10, 16, "Pötyi, you scream at the fridge. You're not helping our case.", 5.2],
+  [14, 11, 16, "IT WORKED THOUGH.", 5],
+  [15, 3, 17, "If it fits, you sits. If it doesn't, you sits harder.", 7.5],
+  [16, 12, 17, "A box? How terribly common. I only sit in hatboxes.", 7],
+  [17, 2, 17, "Duchess, the hatbox is just a box with ambition.", 6.8],
+  [18, 4, 18, "I sleep through the red dot. That's how it loses.", 10],
+];
+
+// Notifications the seeded activity above would have created for the
+// user's overlords (Mirci 1, Cirmi 2), as the backend does.
+const NOTIFICATIONS: [number, number, string, number, boolean, number][] = [
+  // [id, overlord, message, link overlord, is_read, hours ago]
+  [1, 1, "Garfield commented on your post: \u201cA sunbeam? In THIS economy?\u201d", 1, false, 4.5],
+  [
+    2,
+    1,
+    "Luna commented on your post: \u201cShare the coordinates or it didn't happen.\u201d",
+    1,
+    false,
+    4.2,
+  ],
+  [3, 1, "Luna reacted Ekekekek to your post.", 1, false, 4.6],
+  [
+    4,
+    2,
+    "Garfield commented on your post: \u201cIf it fits, you sits. If it doesn't, you...\u201d",
+    2,
+    true,
+    7.5,
+  ],
+  [
+    5,
+    2,
+    "Duchess commented on your post: \u201cA box? How terribly common. I only sit in...\u201d",
+    2,
+    true,
+    7,
+  ],
+  [6, 1, "Crookshanks started whiskering Mirci.", 5, true, 20],
+  [7, 2, "Snowball started whiskering Cirmi.", 4, true, 30],
+];
+
 function seed(): MockDb {
   return {
     loggedIn: false,
@@ -154,6 +221,21 @@ function seed(): MockDb {
     })),
     reactions: REACTIONS.map(([overlord, post, type]) => ({ overlord, post, type })),
     whiskers: WHISKERS.map(([from, to]) => ({ from, to })),
+    comments: COMMENTS.map(([id, overlord, post, content, hours]) => ({
+      id,
+      overlord,
+      post,
+      content,
+      created_at: hoursAgo(hours),
+    })),
+    notifications: NOTIFICATIONS.map(([id, overlord, message, linkTo, isRead, hours]) => ({
+      id,
+      overlord,
+      message,
+      link: `/overlord?id=${linkTo}`,
+      is_read: isRead,
+      created_at: hoursAgo(hours),
+    })),
     nextId: 100,
   };
 }
@@ -211,9 +293,20 @@ export function toPost(p: StoredPost): Post {
     overlord_name: overlord?.name ?? "?",
     overlord_avatar: overlord?.avatar ?? null,
     reaction_summary: reactionSummary(p.id),
+    comment_count: db.comments.filter((c) => c.post === p.id).length,
   };
 }
 
 export function currentUser(): User {
   return { ...db.user, overlords: db.overlords.filter((o) => o.slave === ME).map(toOverlord) };
+}
+
+export const overlordName = (id: number) => db.overlords.find((o) => o.id === id)?.name ?? "?";
+
+export function toComment(c: StoredComment): Comment {
+  return { ...c, overlord_name: overlordName(c.overlord) };
+}
+
+export function toNotification(n: StoredNotification): Notification {
+  return { ...n, overlord_name: overlordName(n.overlord) };
 }

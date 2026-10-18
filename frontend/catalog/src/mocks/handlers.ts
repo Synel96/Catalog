@@ -1,7 +1,19 @@
 import { delay, http, HttpResponse, ws } from "msw";
 import { feedSocketUrl } from "@/components/site";
 import type { ReactionType } from "@/src/types/api";
-import { currentUser, db, ME, nextId, persist, reactionSummary, toOverlord, toPost } from "./db";
+import { addComment, counterComment, notify, reactToNewPost } from "./chatter";
+import {
+  currentUser,
+  db,
+  ME,
+  nextId,
+  persist,
+  reactionSummary,
+  toComment,
+  toNotification,
+  toOverlord,
+  toPost,
+} from "./db";
 
 // Mirrors the Django endpoints the app calls (see src/services). Relative
 // paths match against the page's own origin, where API_URL points in mock mode.
@@ -15,6 +27,17 @@ const unauthorized = () =>
   HttpResponse.json({ detail: "Authentication credentials were not provided." }, { status: 401 });
 const notFound = () => HttpResponse.json({ detail: "Not found." }, { status: 404 });
 const badRequest = (detail: string) => HttpResponse.json([detail], { status: 400 });
+
+// Tells feed sockets to refetch, like the backend does after a new post.
+const announce = (overlordId: number, postId: number) =>
+  feed.broadcast(
+    JSON.stringify({
+      type: "post_update",
+      message: "Feed updated",
+      overlord: overlordId,
+      post_id: postId,
+    })
+  );
 
 const isMine = (overlordId: number) =>
   db.overlords.some((o) => o.id === overlordId && o.slave === ME);
@@ -192,14 +215,8 @@ const postHandlers = [
     await applyForm(post, form, [], "image");
     db.posts.push(post);
     persist();
-    feed.broadcast(
-      JSON.stringify({
-        type: "post_update",
-        message: "New post created",
-        overlord: overlordId,
-        post_id: post.id,
-      })
-    );
+    announce(overlordId, post.id);
+    reactToNewPost(post.id, overlordId, announce);
     return HttpResponse.json(toPost(post), { status: 201 });
   }),
 
@@ -222,6 +239,7 @@ const postHandlers = [
       return badRequest("You can only delete posts from your own overlords.");
     db.posts = db.posts.filter((p) => p !== post);
     db.reactions = db.reactions.filter((r) => r.post !== post.id);
+    db.comments = db.comments.filter((c) => c.post !== post.id);
     persist();
     return new HttpResponse(null, { status: 204 });
   }),
@@ -243,6 +261,14 @@ const reactionHandlers = [
     if (!existing) {
       db.reactions.push({ post: post_id, overlord: overlord_id, type });
       status = "reacted";
+      const post = db.posts.find((p) => p.id === post_id);
+      const label = { purrfect: "Purrfect", hisss: "Hisss", ekekekek: "Ekekekek", nap: "Overnap" }[
+        type
+      ];
+      if (post) {
+        const name = db.overlords.find((o) => o.id === overlord_id)?.name;
+        notify(overlord_id, post.overlord, `${name} reacted ${label} to your post.`, post.overlord);
+      }
     } else if (existing.type === type) {
       db.reactions = db.reactions.filter((r) => r !== existing);
       status = "unreacted";
@@ -274,6 +300,12 @@ const whiskerHandlers = [
       return badRequest("This whiskering already exists.");
     }
     db.whiskers.push({ from, to });
+    notify(
+      from,
+      to,
+      `${db.overlords.find((o) => o.id === from)?.name} started whiskering ${db.overlords.find((o) => o.id === to)?.name}.`,
+      from
+    );
     persist();
     return HttpResponse.json({ from_overlord: from, to_overlord: to }, { status: 201 });
   }),
@@ -301,6 +333,93 @@ const whiskerHandlers = [
   }),
 ];
 
+const commentHandlers = [
+  // ?post= lists everyone's comments under a post; otherwise only the user's.
+  http.get(`${API}/feed/comments/`, ({ request }) => {
+    if (!db.loggedIn) return unauthorized();
+    const postId = Number(new URL(request.url).searchParams.get("post"));
+    const comments = postId
+      ? db.comments.filter((c) => c.post === postId)
+      : db.comments.filter((c) => isMine(c.overlord));
+    return HttpResponse.json(
+      [...comments].sort((a, b) => a.created_at.localeCompare(b.created_at)).map(toComment)
+    );
+  }),
+
+  http.post(`${API}/feed/comments/`, async ({ request }) => {
+    if (!db.loggedIn) return unauthorized();
+    const { post, overlord, content } = (await request.json()) as {
+      post: number;
+      overlord: number;
+      content: string;
+    };
+    if (!isMine(overlord)) return badRequest("You can only comment with your own overlords.");
+    if (!content?.trim()) {
+      return HttpResponse.json({ content: ["This field may not be blank."] }, { status: 400 });
+    }
+    const comment = addComment(overlord, post, content);
+    persist();
+    counterComment(post, overlord, announce);
+    return HttpResponse.json(toComment(comment), { status: 201 });
+  }),
+
+  http.patch(`${API}/feed/comments/:id/`, async ({ request, params }) => {
+    if (!db.loggedIn) return unauthorized();
+    const comment = db.comments.find((c) => c.id === Number(params.id) && isMine(c.overlord));
+    if (!comment) return notFound();
+    const { content } = (await request.json()) as { content?: string };
+    if (content) comment.content = content;
+    persist();
+    return HttpResponse.json(toComment(comment));
+  }),
+
+  http.delete(`${API}/feed/comments/:id/`, ({ params }) => {
+    if (!db.loggedIn) return unauthorized();
+    const comment = db.comments.find((c) => c.id === Number(params.id) && isMine(c.overlord));
+    if (!comment) return notFound();
+    db.comments = db.comments.filter((c) => c !== comment);
+    persist();
+    return new HttpResponse(null, { status: 204 });
+  }),
+];
+
+const notificationHandlers = [
+  http.get(`${API}/feed/notifications/`, () => {
+    if (!db.loggedIn) return unauthorized();
+    return HttpResponse.json(
+      db.notifications
+        .filter((n) => isMine(n.overlord))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .map(toNotification)
+    );
+  }),
+
+  http.post(`${API}/feed/notifications/mark-all-read/`, () => {
+    if (!db.loggedIn) return unauthorized();
+    let updated = 0;
+    for (const n of db.notifications) {
+      if (isMine(n.overlord) && !n.is_read) {
+        n.is_read = true;
+        updated++;
+      }
+    }
+    persist();
+    return HttpResponse.json({ updated });
+  }),
+
+  http.patch(`${API}/feed/notifications/:id/`, async ({ request, params }) => {
+    if (!db.loggedIn) return unauthorized();
+    const notification = db.notifications.find(
+      (n) => n.id === Number(params.id) && isMine(n.overlord)
+    );
+    if (!notification) return notFound();
+    const { is_read } = (await request.json()) as { is_read?: boolean };
+    if (typeof is_read === "boolean") notification.is_read = is_read;
+    persist();
+    return HttpResponse.json(toNotification(notification));
+  }),
+];
+
 export const handlers = [
   http.all(`${API}/*`, async () => {
     await delay(LATENCY_MS);
@@ -310,6 +429,8 @@ export const handlers = [
   ...postHandlers,
   ...reactionHandlers,
   ...whiskerHandlers,
+  ...commentHandlers,
+  ...notificationHandlers,
   // Accept connections; broadcasts above reach every connected client.
   feed.addEventListener("connection", () => {}),
 ];
