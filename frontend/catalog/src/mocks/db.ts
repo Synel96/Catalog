@@ -3,7 +3,7 @@ import type { Overlord, Post, ReactionType, User } from "@/src/types/api";
 // In-memory stand-in for the Django database, kept in sessionStorage so
 // created/edited data survives reloads within a tab. Bump the key when the
 // shape changes so stale tabs start from the new seed.
-const STORAGE_KEY = "catalog-mock-db-v3";
+const STORAGE_KEY = "catalog-mock-db-v4";
 
 export const ME = 1;
 
@@ -33,6 +33,94 @@ export type MockDb = {
 
 const hoursAgo = (h: number) => new Date(Date.now() - h * 3_600_000).toISOString();
 
+// Other slaves and their overlords, so the Street, search and whiskers have
+// someone besides the logged-in user to interact with.
+const SLAVES: Record<number, string> = {
+  2: "jon",
+  3: "marge",
+  4: "hermione",
+  5: "sabrina",
+  6: "tom_odie",
+  7: "zsofi",
+};
+
+// [id, name, breed, bio, slave]; ids 1-2 belong to the logged-in user.
+const OVERLORDS: [number, string, string, string, number][] = [
+  [1, "Mirci", "Tabby", "Rules the sofa with an iron paw.", ME],
+  [2, "Cirmi", "British Shorthair", "Knocks things off tables for science.", ME],
+  [3, "Garfield", "Orange Tabby", "Hates Mondays. Loves lasagna.", 2],
+  [4, "Snowball", "Persian", "Professional napper.", 3],
+  [5, "Crookshanks", "Half-Kneazle", "Excellent judge of character. Suspicious of rats.", 4],
+  [6, "Salem", "American Shorthair", "Former warlock. Current menace.", 5],
+  [7, "Luna", "Bombay", "Moonlight enthusiast, 3 a.m. zoomies specialist.", 5],
+  [8, "Tom", "Russian Blue", "Still chasing that mouse. Any day now.", 6],
+  [9, "Nermal", "Exotic Shorthair", "World's cutest kitten, allegedly.", 2],
+  [10, "Bundás", "Maine Coon", "Fluffier than your sofa cushion.", 7],
+  [11, "Pötyi", "Calico", "Small. Loud. In charge.", 7],
+  [12, "Duchess", "Turkish Angora", "Only drinks from crystal bowls.", 3],
+];
+
+// [id, overlord, content, image, hours ago]
+const POSTS: [number, number, string, string | null, number][] = [
+  [1, 3, "Monday again. I refuse.", null, 2],
+  [2, 1, "Caught a sunbeam today. 10/10 would nap again.", "/slide5.png", 5],
+  [3, 2, "The vase had it coming.", null, 26],
+  [4, 5, "Found a rat in the dormitory. Nobody believes me.", null, 1],
+  [5, 6, "Tried to take over the world again. Got distracted by a string.", null, 3],
+  [6, 7, "It is 3 a.m. Time to run laps through the hallway.", null, 7],
+  [7, 8, "Mouse: 1, me: 0. Rematch tomorrow.", null, 9],
+  [8, 9, "Cute and I know it. 💅", null, 12],
+  [9, 10, "My slave bought a new sofa. I have claimed it.", "/slide3.png", 15],
+  [10, 11, "Screamed at the fridge for 20 minutes. It worked.", null, 20],
+  [11, 12, "This water is not served in crystal. I am appalled.", null, 30],
+  [12, 4, "Nap report: excellent.", null, 33],
+  [13, 3, "Lasagna status: missing. Suspect: Odie.", null, 40],
+  [14, 7, "Knocked a plant over. It was looking at me.", "/slide4.png", 50],
+];
+
+// [overlord, post, type]
+const REACTIONS: [number, number, ReactionType][] = [
+  [2, 2, "purrfect"],
+  [3, 2, "purrfect"],
+  [7, 2, "ekekekek"],
+  [1, 1, "ekekekek"],
+  [9, 1, "hisss"],
+  [12, 1, "nap"],
+  [6, 4, "ekekekek"],
+  [7, 5, "purrfect"],
+  [10, 5, "hisss"],
+  [4, 6, "nap"],
+  [11, 6, "ekekekek"],
+  [3, 7, "nap"],
+  [5, 9, "purrfect"],
+  [11, 9, "purrfect"],
+  [8, 10, "hisss"],
+  [10, 10, "purrfect"],
+  [6, 11, "hisss"],
+  [3, 13, "ekekekek"],
+  [6, 14, "purrfect"],
+];
+
+// [from, to]: Mirci and Cirmi whisker a few others so the Street feed has
+// posts from beyond the user's own overlords; the rest add follower counts.
+const WHISKERS: [number, number][] = [
+  [1, 3],
+  [1, 5],
+  [1, 7],
+  [2, 8],
+  [2, 10],
+  [3, 1],
+  [5, 1],
+  [6, 7],
+  [7, 6],
+  [8, 3],
+  [9, 3],
+  [10, 11],
+  [11, 10],
+  [12, 4],
+  [4, 2],
+];
+
 function seed(): MockDb {
   return {
     loggedIn: false,
@@ -48,73 +136,24 @@ function seed(): MockDb {
       avatar: null,
       date_joined: "2025-07-01T10:00:00Z",
     },
-    slaves: { 2: "jon", 3: "marge" },
-    overlords: [
-      {
-        id: 1,
-        name: "Mirci",
-        avatar: null,
-        bio: "Rules the sofa with an iron paw.",
-        breed: "Tabby",
-        slave: ME,
-      },
-      {
-        id: 2,
-        name: "Cirmi",
-        avatar: null,
-        bio: "Knocks things off tables for science.",
-        breed: "British Shorthair",
-        slave: ME,
-      },
-      {
-        id: 3,
-        name: "Garfield",
-        avatar: null,
-        bio: "Hates Mondays. Loves lasagna.",
-        breed: "Orange Tabby",
-        slave: 2,
-      },
-      {
-        id: 4,
-        name: "Snowball",
-        avatar: null,
-        bio: "Professional napper.",
-        breed: "Persian",
-        slave: 3,
-      },
-    ],
-    posts: [
-      {
-        id: 1,
-        overlord: 3,
-        content: "Monday again. I refuse.",
-        image: null,
-        created_at: hoursAgo(2),
-      },
-      {
-        id: 2,
-        overlord: 1,
-        content: "Caught a sunbeam today. 10/10 would nap again.",
-        image: "/slide5.png",
-        created_at: hoursAgo(5),
-      },
-      {
-        id: 3,
-        overlord: 2,
-        content: "The vase had it coming.",
-        image: null,
-        created_at: hoursAgo(26),
-      },
-    ],
-    reactions: [
-      { overlord: 2, post: 2, type: "purrfect" },
-      { overlord: 3, post: 2, type: "purrfect" },
-      { overlord: 1, post: 1, type: "ekekekek" },
-    ],
-    whiskers: [
-      { from: 1, to: 3 },
-      { from: 3, to: 1 },
-    ],
+    slaves: SLAVES,
+    overlords: OVERLORDS.map(([id, name, breed, bio, slave]) => ({
+      id,
+      name,
+      breed,
+      bio,
+      slave,
+      avatar: null,
+    })),
+    posts: POSTS.map(([id, overlord, content, image, hours]) => ({
+      id,
+      overlord,
+      content,
+      image,
+      created_at: hoursAgo(hours),
+    })),
+    reactions: REACTIONS.map(([overlord, post, type]) => ({ overlord, post, type })),
+    whiskers: WHISKERS.map(([from, to]) => ({ from, to })),
     nextId: 100,
   };
 }
