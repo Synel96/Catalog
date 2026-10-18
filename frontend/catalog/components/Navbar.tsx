@@ -1,4 +1,4 @@
-import { BellIcon, LogOutIcon, MenuIcon, XIcon } from "lucide-react";
+import { LogOutIcon, MenuIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { navigate } from "vike/client/router";
 import { usePageContext } from "vike-react/usePageContext";
@@ -9,6 +9,8 @@ import { logoutUser } from "@/src/services/authService";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStreetStore } from "@/src/store/useStreetStore";
 import { StreetBar } from "@/components/street/StreetBar";
+import { NotificationBell } from "@/components/NotificationBell";
+import { useNotificationsStore } from "@/src/store/useNotificationsStore";
 import {
   PushDrawer,
   PushDrawerClose,
@@ -45,6 +47,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
   // page links move into the menu (on every screen size).
   const onStreet = useStreetStore((state) => state.selectedOverlord !== null) && isAuthenticated;
   const goHome = useStreetStore((state) => state.goHome);
+  const clearNotifications = useNotificationsStore((state) => state.clear);
   const links = useNavLinks();
 
   const isActive = (href: string) =>
@@ -63,6 +66,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
     }
     logout();
     goHome();
+    clearNotifications();
     setOpen(false);
     await navigate("/login");
   };
@@ -96,14 +100,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
               <span className={onStreet ? "hidden" : "mr-2 hidden text-sm font-medium lg:inline"}>
                 Welcome, {user?.username}!
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Notifications"
-                className={`${onStreet ? "hidden sm:inline-flex" : ""} ${iconButtonClass}`}
-              >
-                <BellIcon className="size-5" />
-              </Button>
+              <NotificationBell className={onStreet ? "hidden sm:block" : undefined} />
               <Button
                 variant="ghost"
                 size="icon"

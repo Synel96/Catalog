@@ -38,7 +38,7 @@ export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted
         <PostCard
           key={post.id}
           post={post}
-          reactingOverlordId={selectedOverlord?.id ?? null}
+          actingOverlord={selectedOverlord}
           canManage={isOwnOverlord(post.overlord)}
           onEdit={setEditing}
           onDelete={setDeleting}

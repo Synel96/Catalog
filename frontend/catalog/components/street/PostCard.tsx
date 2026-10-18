@@ -1,4 +1,5 @@
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { MessageCircleIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,18 +7,29 @@ import { mediaUrl } from "@/src/services/api";
 import type { Post } from "@/src/types/api";
 import { formatPostDate, OVERLORD_PLACEHOLDER } from "./media";
 import { overlordHref } from "./links";
+import { CommentSection } from "./CommentSection";
 import { ReactionBar } from "./ReactionBar";
 
 type PostCardProps = {
   post: Post;
-  reactingOverlordId: number | null;
+  // The user's street overlord, who reacts and comments.
+  actingOverlord: { id: number; name: string } | null;
   canManage: boolean;
   onEdit: (post: Post) => void;
   onDelete: (post: Post) => void;
 };
 
-export function PostCard({ post, reactingOverlordId, canManage, onEdit, onDelete }: PostCardProps) {
+export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: PostCardProps) {
   const profileHref = overlordHref(post.overlord);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentCount, setCommentCount] = useState(post.comment_count ?? 0);
+  const [syncedCount, setSyncedCount] = useState(post.comment_count);
+
+  // Adopt a refetched count (see ReactionBar for the pattern).
+  if (post.comment_count !== syncedCount) {
+    setSyncedCount(post.comment_count);
+    setCommentCount(post.comment_count ?? 0);
+  }
 
   return (
     <Card className="gap-3 overflow-hidden pb-2">
@@ -74,12 +86,32 @@ export function PostCard({ post, reactingOverlordId, canManage, onEdit, onDelete
         />
       )}
 
-      <CardContent className="border-t pt-1">
+      <CardContent className="grid gap-2 border-t pt-1">
         <ReactionBar
           postId={post.id}
           summary={post.reaction_summary}
-          overlordId={reactingOverlordId}
+          overlordId={actingOverlord?.id ?? null}
         />
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-expanded={commentsOpen}
+            onClick={() => setCommentsOpen((open) => !open)}
+          >
+            <MessageCircleIcon />
+            {commentCount === 1 ? "1 comment" : `${commentCount} comments`}
+          </Button>
+        </div>
+        {commentsOpen && (
+          <CommentSection
+            postId={post.id}
+            overlordId={actingOverlord?.id ?? null}
+            overlordName={actingOverlord?.name ?? null}
+            serverCount={post.comment_count ?? 0}
+            onCountChange={(delta) => setCommentCount((count) => count + delta)}
+          />
+        )}
       </CardContent>
     </Card>
   );
