@@ -1,6 +1,7 @@
 from rest_framework import viewsets, permissions, filters, status
-from rest_framework.decorators import action
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -97,40 +98,24 @@ class ReactionViewSet(viewsets.ModelViewSet):
             raise ValidationError("You can only delete your own reactions.")
         instance.delete()
 
-    @action(detail=False, methods=["get"], url_path="by-post/(?P<post_id>[^/.]+)")
-    def reactions_by_post(self, request, post_id=None):
+   
+
+
+class ReactionCountByPostView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        post_id = request.query_params.get("post_id")
+        if not post_id:
+            return Response({"error": "Missing post_id"}, status=400)
+
         reactions = Reaction.objects.filter(post_id=post_id) \
             .values('type') \
             .annotate(count=Count('type'))
+
         result = {item['type']: item['count'] for item in reactions}
         return Response(result)
-
-    @action(detail=False, methods=["post"], url_path="toggle")
-    def toggle_reaction(self, request):
-        overlord_id = request.data.get("overlord_id")
-        post_id = request.data.get("post_id")
-        reaction_type = request.data.get("type")
-
-        if not overlord_id or not post_id or not reaction_type:
-            return Response({"error": "Missing parameters"}, status=400)
-
-        try:
-            overlord = Overlord.objects.get(id=overlord_id, slave=request.user)
-        except Overlord.DoesNotExist:
-            return Response({"error": "Invalid overlord"}, status=403)
-
-        try:
-            existing = Reaction.objects.get(post_id=post_id, overlord=overlord)
-            if existing.type == reaction_type:
-                existing.delete()
-                return Response({"status": "unreacted"})
-            else:
-                existing.type = reaction_type
-                existing.save()
-                return Response({"status": "updated"})
-        except Reaction.DoesNotExist:
-            Reaction.objects.create(post_id=post_id, overlord=overlord, type=reaction_type)
-            return Response({"status": "reacted"})
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -230,3 +215,35 @@ class WhiskerViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Whisker.DoesNotExist:
             return Response({"detail": "Whisker not found."}, status=404)
+
+
+
+class ToggleReactionAPIView(APIView):
+    authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        overlord_id = request.data.get("overlord_id")
+        post_id = request.data.get("post_id")
+        reaction_type = request.data.get("type")
+
+        if not overlord_id or not post_id or not reaction_type:
+            return Response({"error": "Missing parameters"}, status=400)
+
+        try:
+            overlord = Overlord.objects.get(id=overlord_id, slave=request.user)
+        except Overlord.DoesNotExist:
+            return Response({"error": "Invalid overlord"}, status=403)
+
+        try:
+            existing = Reaction.objects.get(post_id=post_id, overlord=overlord)
+            if existing.type == reaction_type:
+                existing.delete()
+                return Response({"status": "unreacted"})
+            else:
+                existing.type = reaction_type
+                existing.save()
+                return Response({"status": "updated"})
+        except Reaction.DoesNotExist:
+            Reaction.objects.create(post_id=post_id, overlord=overlord, type=reaction_type)
+            return Response({"status": "reacted"})

@@ -150,7 +150,10 @@ const StreetPostFeed = () => {
 
               {/* 🔁 Reakciósáv beillesztése */}
               <Box mt={1}>
-                <ReactionBar postId={post.id} />
+                <ReactionBar
+                  postId={post.id}
+                  overlordId={selectedOverlord?.id}
+                />
               </Box>
 
               {isOwnPost && (

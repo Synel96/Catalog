@@ -5,7 +5,9 @@ from .views import (
     ReactionViewSet,
     CommentViewSet,
     WhiskerViewSet,
-    NotificationViewSet
+    NotificationViewSet,
+    ReactionCountByPostView,
+    ToggleReactionAPIView
 )
 
 router = DefaultRouter()
@@ -17,4 +19,8 @@ router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
     path('', include(router.urls)),
+    path("feed/reactions/toggle/", ToggleReactionAPIView.as_view(), name="toggle-reaction"),
+    path("reactions/by-post/", ReactionCountByPostView.as_view(), name="reaction-by-post"),
+
+
 ]
