@@ -103,9 +103,14 @@ VITE_API_MOCKS=true npm run dev
   the CSP needs no changes. A banner shows that the data is fake.
 - With the flag off, the mock code isn't included in the bundle at all.
 
-**On Vercel:** add `VITE_API_MOCKS=true` as an environment variable for the
-**Preview** environment only (Settings → Environment Variables), then
-redeploy. Production keeps talking to the real backend.
+**On Vercel:** add `VITE_API_MOCKS=true` under Settings → Environment
+Variables. Tick **Production** too while there's no deployed backend
+(deploys from `main` are production deploys); once there is one, keep it on
+**Preview** only.
+
+The value is inlined at build time, so changing it does nothing until the
+next deploy: push a commit or use Deployments → ⋯ → Redeploy (without the
+build cache). The "Demo mode" banner at the top confirms it took effect.
 
 ## Deploying
 
