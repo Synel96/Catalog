@@ -1,6 +1,6 @@
+from django.db.models import Count
 from rest_framework import viewsets, permissions, filters, status
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -11,50 +11,77 @@ from authapp.authentication import CookieJWTAuthentication
 User = get_user_model()
 
 
+from django.db.models import Count
+from rest_framework import viewsets, filters
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from authapp.authentication import CookieJWTAuthentication
+from core.models import Overlord
+from .serializers import OverlordSerializer
+
+
+from django.db.models import Count
+from rest_framework import viewsets, filters
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from authapp.authentication import CookieJWTAuthentication
+from core.models import Overlord
+from .serializers import OverlordSerializer
+
+
 class OverlordViewSet(viewsets.ModelViewSet):
     serializer_class = OverlordSerializer
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'breed', 'slave__username']
+    search_fields = ["name", "breed", "slave__username"]
 
     def get_queryset(self):
-       
-        return Overlord.objects.filter(slave=self.request.user)
+        base_qs = Overlord.objects.all().annotate(
+            whiskered_by_count=Count("whiskered_by", distinct=True),
+            whiskering_count=Count("whiskering", distinct=True),
+        )
+
+        # list-nél, ha nincs search param, csak a saját overlordokat mutatjuk
+        if self.action == "list" and "search" not in self.request.query_params:
+            return base_qs.filter(slave=self.request.user)
+
+        # retrieve, vagy keresés esetén minden overlord elérhető
+        return base_qs
 
     def perform_create(self, serializer):
-       
         if Overlord.objects.filter(slave=self.request.user).count() >= 10:
             raise ValidationError("You can't create more than 10 overlords.")
         serializer.save(slave=self.request.user)
 
     def perform_update(self, serializer):
-        
         if serializer.instance.slave != self.request.user:
             raise ValidationError("You can only edit your own overlords.")
         serializer.save()
 
     def perform_destroy(self, instance):
-        
         if instance.slave != self.request.user:
             raise ValidationError("You can only delete your own overlords.")
         instance.delete()
-
-
+        
 class MeView(APIView):
     authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        serializer = UserSerializer(request.user, context={'request': request})
+        serializer = UserSerializer(request.user, context={"request": request})
         return Response(serializer.data)
 
     def patch(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True, context={'request': request})
+        serializer = UserSerializer(
+            request.user, data=request.data, partial=True, context={"request": request}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
 
     def delete(self, request):
         request.user.delete()
-        return Response({"detail": "Your account has been deleted."}, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": "Your account has been deleted."}, status=status.HTTP_204_NO_CONTENT
+        )

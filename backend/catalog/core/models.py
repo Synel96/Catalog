@@ -10,6 +10,9 @@ def user_avatar_upload_path(instance, filename):
 def overlord_avatar_upload_path(self, filename):
     return f'overlords/{self.slave.username}/{self.name}/{filename}'
 
+def post_image_upload_path(instance, filename):
+    return f'posts/{instance.overlord.slave.username}/{instance.overlord.name}/{filename}'
+
 
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
@@ -19,6 +22,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
 
 
 class Overlord(models.Model):
@@ -33,13 +37,21 @@ class Overlord(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.slave.username})"
+    
 
 
 class Post(models.Model):
     overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
-    image = models.ImageField(upload_to='posts/', blank=True, null=True)
+    image = models.ImageField(
+        upload_to=post_image_upload_path,
+        blank=True,
+        null=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"Post by {self.overlord.name} at {self.created_at}"
