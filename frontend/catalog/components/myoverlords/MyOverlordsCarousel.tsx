@@ -1,11 +1,12 @@
 import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { navigate } from "vike/client/router";
 import { ImageViewerDialog } from "@/components/common/ImageViewerDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { mediaUrl } from "@/src/services/api";
+import { useStreetStore } from "@/src/store/useStreetStore";
 import type { Overlord } from "@/src/types/api";
 
 const OVERLORD_PLACEHOLDER = "/media/placeholders/overlord_placeholder.png";
@@ -20,6 +21,7 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
   const length = overlords.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageOpen, setImageOpen] = useState(false);
+  const goToStreet = useStreetStore((state) => state.goToStreet);
 
   const createButton = (
     <Button size="lg" onClick={onCreate} className="w-full">
@@ -97,7 +99,10 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
           <Button
             size="lg"
             className="w-full"
-            onClick={() => toast(`Go to the Street with ${name}`)}
+            onClick={() => {
+              goToStreet(current);
+              void navigate("/street");
+            }}
           >
             <span className="truncate">Go to the Street with {name}</span>
           </Button>

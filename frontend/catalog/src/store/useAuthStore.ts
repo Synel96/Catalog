@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: ({ user, isAuthenticated }) => ({ user, isAuthenticated }),
       // The server render (and the prerendered HTML) never sees localStorage,
       // so rehydrating at store creation would make the first client render
-      // differ from the HTML. <AuthHydrator> rehydrates after mount instead.
+      // differ from the HTML. <StoreHydrator> rehydrates after mount instead.
       skipHydration: true,
     }
   )

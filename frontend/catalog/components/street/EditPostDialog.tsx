@@ -1,0 +1,91 @@
+import { ImageIcon, SaveIcon } from "lucide-react";
+import { useId, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { updatePost } from "@/src/services/postService";
+import type { ApiError, Post } from "@/src/types/api";
+
+type EditPostDialogProps = {
+  post: Post | null;
+  onOpenChange: (open: boolean) => void;
+  onUpdated: (post: Post) => void;
+};
+
+export function EditPostDialog({ post, onOpenChange, onUpdated }: EditPostDialogProps) {
+  return (
+    <Dialog open={post !== null} onOpenChange={onOpenChange}>
+      <DialogContent aria-describedby={undefined}>
+        <DialogHeader>
+          <DialogTitle>Edit Post</DialogTitle>
+        </DialogHeader>
+        {post && <EditPostForm post={post} onUpdated={onUpdated} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post) => void }) {
+  const [content, setContent] = useState(post.content);
+  const [image, setImage] = useState<File | null>(null);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputId = useId();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    const formData = new FormData();
+    formData.append("content", content);
+    if (image) formData.append("image", image);
+
+    try {
+      onUpdated(await updatePost(post.id, formData));
+    } catch (err) {
+      setError((err as ApiError).detail);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="grid gap-4">
+      <Textarea
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Update your meow..."
+        aria-label="Post content"
+        rows={3}
+        autoFocus
+      />
+
+      <div className="flex items-center gap-3">
+        <input
+          id={fileInputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+        />
+        <Button variant="secondary" size="icon" asChild>
+          <label htmlFor={fileInputId} aria-label="Replace image" className="cursor-pointer">
+            <ImageIcon />
+          </label>
+        </Button>
+        {image && <span className="text-muted-foreground truncate text-sm">{image.name}</span>}
+      </div>
+
+      {error && (
+        <p role="alert" className="text-destructive text-sm">
+          {error}
+        </p>
+      )}
+
+      <Button type="submit" size="lg" disabled={(!content.trim() && !image) || isSubmitting}>
+        <SaveIcon /> {isSubmitting ? "Saving…" : "Save Changes"}
+      </Button>
+    </form>
+  );
+}

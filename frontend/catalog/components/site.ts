@@ -8,6 +8,16 @@ export const API_MOCKS = env.VITE_API_MOCKS;
 // already allows them.
 export const API_URL = API_MOCKS ? "/api/" : env.VITE_API_URL;
 
+// Django Channels feed socket (backend/catalog/feed/routing.py). It lives on
+// the API's origin, outside the /api prefix. Browser-only: in mock mode it
+// resolves against the page's own origin.
+export function feedSocketUrl(): string {
+  const base = API_MOCKS ? window.location.origin : env.VITE_API_URL;
+  const url = new URL("/ws/feed/", base);
+  url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+  return url.toString();
+}
+
 export const SITE_DESCRIPTION = "Catalog – The social network where cats rule and humans follow.";
 
 // Placeholder Open Graph image — replace public/og-image.png with real artwork.

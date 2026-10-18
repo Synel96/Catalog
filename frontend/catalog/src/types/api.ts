@@ -7,7 +7,31 @@ export type Overlord = {
   bio: string;
   breed: string;
   slave: number;
+  slave_name?: string;
+  whiskered_by_count?: number;
+  whiskering_count?: number;
+  whiskered_by_names?: string[];
+  whiskering_names?: string[];
 };
+
+// Keys of core.models.Reaction.REACTION_CHOICES.
+export type ReactionType = "purrfect" | "hisss" | "ekekekek" | "nap";
+
+export type ReactionSummary = Partial<Record<ReactionType, number>>;
+
+// backend/catalog/feed/serializers.py PostSerializer
+export type Post = {
+  id: number;
+  overlord: number;
+  overlord_name: string;
+  overlord_avatar: string | null;
+  content: string;
+  image: string | null;
+  created_at: string;
+  reaction_summary: ReactionSummary;
+};
+
+export type ToggleReactionResult = { status: "reacted" | "updated" | "unreacted" };
 
 export type User = {
   id: number;

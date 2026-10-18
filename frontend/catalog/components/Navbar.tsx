@@ -7,6 +7,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useMounted } from "@/src/hooks/use-mounted";
 import { logoutUser } from "@/src/services/authService";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useStreetStore } from "@/src/store/useStreetStore";
+import { StreetBar } from "@/components/street/StreetBar";
 import {
   PushDrawer,
   PushDrawerClose,
@@ -39,6 +41,10 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const logout = useAuthStore((state) => state.logout);
+  // Out on the Street the centre of the bar is the street controls, and the
+  // page links move into the menu (on every screen size).
+  const onStreet = useStreetStore((state) => state.selectedOverlord !== null) && isAuthenticated;
+  const goHome = useStreetStore((state) => state.goHome);
   const links = useNavLinks();
 
   const isActive = (href: string) =>
@@ -56,6 +62,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
       console.error("Logout error:", error);
     }
     logout();
+    goHome();
     setOpen(false);
     await navigate("/login");
   };
@@ -67,29 +74,33 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
           <img
             src="/brand.png"
             alt={`${BRAND_NAME} logo`}
-            className="h-10 w-[150px] rounded-md bg-[#ffe6e6] object-contain shadow-sm transition-transform duration-200 hover:scale-105 hover:shadow-md sm:h-[60px] sm:w-[200px]"
+            className="h-10 w-[110px] rounded-md bg-[#ffe6e6] object-contain shadow-sm transition-transform duration-200 hover:scale-105 hover:shadow-md sm:h-[60px] sm:w-[200px]"
           />
         </a>
 
-        <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
-          {links.map((item) => (
-            <a key={item.href} href={item.href} className={navLinkClass(item.href)}>
-              {item.label}
-            </a>
-          ))}
-        </nav>
+        {onStreet ? (
+          <StreetBar />
+        ) : (
+          <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
+            {links.map((item) => (
+              <a key={item.href} href={item.href} className={navLinkClass(item.href)}>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        )}
 
         <div className="flex items-center gap-1">
           {isAuthenticated && (
             <>
-              <span className="mr-2 hidden text-sm font-medium lg:inline">
+              <span className={onStreet ? "hidden" : "mr-2 hidden text-sm font-medium lg:inline"}>
                 Welcome, {user?.username}!
               </span>
               <Button
                 variant="ghost"
                 size="icon"
                 aria-label="Notifications"
-                className={iconButtonClass}
+                className={`${onStreet ? "hidden sm:inline-flex" : ""} ${iconButtonClass}`}
               >
                 <BellIcon className="size-5" />
               </Button>
@@ -98,14 +109,14 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
                 size="icon"
                 aria-label="Logout"
                 onClick={handleLogout}
-                className={`hidden md:inline-flex ${iconButtonClass}`}
+                className={`hidden ${onStreet ? "" : "md:inline-flex"} ${iconButtonClass}`}
               >
                 <LogOutIcon className="size-5" />
               </Button>
             </>
           )}
           <ThemeToggle />
-          <div className="md:hidden">
+          <div className={onStreet ? undefined : "md:hidden"}>
             {mounted ? (
               <PushDrawer open={open} onOpenChange={setOpen}>
                 <PushDrawerTrigger asChild>

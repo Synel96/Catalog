@@ -1,7 +1,7 @@
 import "./Layout.css";
 import { useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
-import { AuthHydrator } from "../components/AuthHydrator";
+import { StoreHydrator } from "../components/StoreHydrator";
 import { Footer } from "../components/Footer";
 import { MockModeBanner } from "../components/MockModeBanner";
 import { Navbar } from "../components/Navbar";
@@ -28,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <a href="#page-content" className="skip-link">
         Skip to content
       </a>
-      <AuthHydrator />
+      <StoreHydrator />
       <MockModeBanner />
       <PageLoading />
       {/* Kept outside <PushDrawerBody> so the navbar stays put while the rest

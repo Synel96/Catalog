@@ -49,3 +49,24 @@ export async function deleteOverlord(id: number): Promise<void> {
     throw toApiError(error, "Failed to delete overlord.");
   }
 }
+
+// Any overlord, not just the user's own (the backend allows retrieve for all).
+export async function getOverlord(id: number): Promise<Overlord> {
+  try {
+    const response = await api.get<Overlord>(`profiles/overlords/${id}/`);
+    return response.data;
+  } catch (error) {
+    throw toApiError(error, "Failed to fetch overlord.");
+  }
+}
+
+// With `search`, the list endpoint searches all overlords by name, breed and
+// slave username instead of returning only the user's own.
+export async function searchOverlords(term: string, signal?: AbortSignal): Promise<Overlord[]> {
+  try {
+    const response = await api.get("profiles/overlords/", { params: { search: term }, signal });
+    return extractList(response.data);
+  } catch (error) {
+    throw toApiError(error, "Search failed.");
+  }
+}

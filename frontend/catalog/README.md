@@ -55,11 +55,15 @@ pages/                 Vike pages (filesystem routing) + layout/head
   index/  login/       Login (both `/` and `/login`)
   register/            Registration
   my-slave/            Profile + overlords
+  street/              Feed of own + whiskered overlords' posts
+  overlord/            Overlord profile (/overlord?id=<id>)
   _error/              404 / error page
 components/
   auth/                Login & register forms, welcome slider
   myslave/             Profile card, edit dialog, skeleton
   myoverlords/         Overlord carousel, create/edit dialog, skeleton
+  street/              Posts, reactions, composer, search, street navbar
+  overlord/            Profile header, whisker toggle
   common/              Shared bits (form field, image viewer)
   ui/                  shadcn primitives
 src/
@@ -75,7 +79,7 @@ src/
   and replays the request (access tokens only live 5 minutes).
 - Pages are prerendered to static HTML, so nothing user-specific is rendered
   on the server. The auth store is persisted to `localStorage` with
-  `skipHydration`; `<AuthHydrator>` rehydrates it after mount so the first
+  `skipHydration`; `<StoreHydrator>` rehydrates it (and the Street store) after mount so the first
   client render matches the HTML (no hydration mismatch).
 - `/my-slave` revalidates the session against `profiles/me/` on load and
   redirects to `/login` if it's gone.
@@ -112,9 +116,25 @@ The value is inlined at build time, so changing it does nothing until the
 next deploy: push a commit or use Deployments → ⋯ → Redeploy (without the
 build cache). The "Demo mode" banner at the top confirms it took effect.
 
+## Street
+
+"Go to the Street with …" on My Slave picks the overlord the user acts as:
+posts, reactions and whiskers are done in its name, and the navbar switches
+to search + "Go Home". The choice is persisted like the auth store.
+
+- The feed (`feed/posts/`) shows the user's overlords and the ones they
+  whisker, and reloads when the backend's Channels socket (`/ws/feed/` on
+  the API's origin, see `feedSocketUrl()` in `components/site.ts`) reports
+  a new post.
+- Overlord profiles live at `/overlord?id=<id>` rather than
+  `/overlords/<id>`: a query parameter keeps the page prerenderable for a
+  static host, since the id is only read in the browser.
+- Mock mode covers all of it, including the websocket.
+
 ## Deploying
 
 `vercel.json` deploys `dist/client` as a static site and sets security
 headers. Before going live, replace `https://api.example.com` in the CSP's
-`connect-src` with the real backend origin (and add it to the backend's
-`CORS_ALLOWED_ORIGINS`), or the browser blocks every API call.
+`connect-src` with the real backend origin, plus its `wss://` origin for the
+feed socket (and add the site to the backend's `CORS_ALLOWED_ORIGINS`), or
+the browser blocks every API call.
