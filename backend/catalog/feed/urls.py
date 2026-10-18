@@ -17,10 +17,11 @@ router.register(r'comments', CommentViewSet, basename='comment')
 router.register(r'whiskers', WhiskerViewSet, basename='whisker')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
+# The custom reaction routes must come before the router: its
+# `reactions/<pk>/` detail route would otherwise swallow "toggle" and
+# "by-post" as primary keys (405 on POST, 404 on GET).
 urlpatterns = [
-    path('', include(router.urls)),
-    path("feed/reactions/toggle/", ToggleReactionAPIView.as_view(), name="toggle-reaction"),
+    path("reactions/toggle/", ToggleReactionAPIView.as_view(), name="toggle-reaction"),
     path("reactions/by-post/", ReactionCountByPostView.as_view(), name="reaction-by-post"),
-
-
+    path('', include(router.urls)),
 ]
