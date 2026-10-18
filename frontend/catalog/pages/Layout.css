@@ -8,6 +8,10 @@
 @source "../components";
 @source "../src";
 
+/* `dark:` follows the theme toggle (the .dark class set by src/theme.ts),
+   not the OS setting, which is Tailwind v4's default. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Maps the design tokens (tokens.css) onto Tailwind's theme so utilities
    like bg-primary, text-muted-foreground and ring-foreground/10 exist. */
 @theme inline {
