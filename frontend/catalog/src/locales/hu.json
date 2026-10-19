@@ -114,7 +114,11 @@
     "title": "Utca",
     "onStreetWith": "Az utcán: {{name}}",
     "goHome": "Haza",
-    "pickOverlord": "Posztoláshoz, reagáláshoz és bajuszoláshoz válassz egy nagyurat a <link>Szolgám</link> oldalon, és vidd ki az utcára."
+    "pickOverlord": "Posztoláshoz, reagáláshoz és bajuszoláshoz válassz egy nagyurat a <link>Szolgám</link> oldalon, és vidd ki az utcára.",
+    "switchLabel": "Nagyúr váltása (most kint: {{name}})",
+    "switchTitle": "Ki legyen kint az utcán?",
+    "viewProfile": "{{name}} profilja",
+    "switched": "Most {{name}} van kint az utcán"
   },
   "composer": {
     "placeholder": "Írj valami nyávosat...",
@@ -305,7 +309,7 @@
       },
       "street": {
         "title": "Irány az utca",
-        "body": "Egy nagyúr alatt nyomd meg az <b>Irány az utca: …</b> gombot. Az utcán a nevében posztolsz, reagálsz, kommentelsz és bajuszolsz. A navbar mutatja, ki van kint; a <b>Haza</b> gomb visszahoz ide, hogy másik macskát küldj ki."
+        "body": "Egy nagyúr alatt nyomd meg az <b>Irány az utca: …</b> gombot. Az utcán a nevében posztolsz, reagálsz, kommentelsz és bajuszolsz. A navbar mutatja, ki van kint: a képére koppintva másik macskádra válthatsz, a <b>Haza</b> gomb pedig visszahoz ide."
       }
     },
     "street": {
@@ -323,7 +327,7 @@
       },
       "notifications": {
         "title": "A csengő",
-        "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja azt a nagyurat, akivel kint vagy; minden macskának saját csengője van. Macskát váltani a <b>Haza</b> gombbal tudsz: küldj ki egy másikat."
+        "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja azt a nagyurat, akivel kint vagy; minden macskának saját csengője van. Macskát váltani úgy tudsz, hogy a navbarban <b>rákoppintasz a macska képére</b>, és kiválasztasz egy másikat."
       }
     }
   }

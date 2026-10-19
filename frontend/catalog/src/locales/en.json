@@ -114,7 +114,11 @@
     "title": "Street",
     "onStreetWith": "On the Street with: {{name}}",
     "goHome": "Go Home",
-    "pickOverlord": "To post, react and whisker, pick an overlord on <link>My Slave</link> and go to the Street with them."
+    "pickOverlord": "To post, react and whisker, pick an overlord on <link>My Slave</link> and go to the Street with them.",
+    "switchLabel": "Switch overlord (on the Street with {{name}})",
+    "switchTitle": "Who's out on the Street?",
+    "viewProfile": "View {{name}}'s profile",
+    "switched": "{{name}} is out on the Street now"
   },
   "composer": {
     "placeholder": "Write something mew...",
@@ -305,7 +309,7 @@
       },
       "street": {
         "title": "Off to the Street",
-        "body": "Under an overlord press <b>Go to the Street with …</b>. On the Street you act as that cat: post, react, comment and whisker in its name. The navbar shows who's out; <b>Go Home</b> brings you back here to send another cat."
+        "body": "Under an overlord press <b>Go to the Street with …</b>. On the Street you act as that cat: post, react, comment and whisker in its name. The navbar shows who's out: tap its picture to switch to another of your cats, or press <b>Go Home</b> to come back here."
       }
     },
     "street": {
@@ -323,7 +327,7 @@
       },
       "notifications": {
         "title": "The bell",
-        "body": "The bell tells you when someone comments on, reacts to or whiskers the overlord you came out with; each cat has its own. To switch cats, press <b>Go Home</b> and send another one out."
+        "body": "The bell tells you when someone comments on, reacts to or whiskers the overlord you came out with; each cat has its own. To switch cats, <b>tap the cat’s picture</b> in the navbar and pick another one."
       }
     }
   }

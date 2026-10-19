@@ -116,3 +116,25 @@ test("shows upload progress and shrinks a big photo before posting it", async ({
   expect([width, height]).toEqual([1600, 1200]);
   expect(length).toBeLessThan(buffer.length);
 });
+
+test("switches to another overlord from the navbar", async ({ page }) => {
+  await page.getByRole("button", { name: /^Switch overlord \(on the Street with Mirci\)/ }).click();
+  await expect(page.getByRole("menuitemradio", { name: "Mirci" })).toHaveAttribute(
+    "aria-checked",
+    "true"
+  );
+  await page.getByRole("menuitemradio", { name: "Cirmi" }).click();
+
+  await expect(page).toHaveURL(/\/street$/);
+  await expect(page.getByText("Cirmi is out on the Street now")).toBeVisible();
+  await expect(page.getByLabel("Post as Cirmi")).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Notifications/ })).toHaveAccessibleName(
+    "Notifications (1 unread)"
+  );
+
+  // The menu still leads to the profile of whoever is out now.
+  await page.getByRole("button", { name: /^Switch overlord \(on the Street with Cirmi\)/ }).click();
+  await page.getByRole("menuitem", { name: "View Cirmi's profile" }).click();
+  await expect(page).toHaveURL(/\/overlord\?id=2$/);
+  await expect(page.getByRole("heading", { name: "Cirmi" })).toBeVisible();
+});
