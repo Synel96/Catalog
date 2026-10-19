@@ -140,7 +140,11 @@
     "updated": "Post updated!",
     "deleted": "Post deleted successfully!",
     "empty": "No posts yet. 😿",
-    "loading": "Loading posts"
+    "loading": "Loading posts",
+    "newPosts_one": "{{count}} new post",
+    "newPosts_other": "{{count}} new posts",
+    "loadMore": "Load more",
+    "end": "That's all, folks. Even the cats have run out of things to say. 🐾"
   },
   "reactions": {
     "label": "Reactions",

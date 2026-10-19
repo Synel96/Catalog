@@ -140,7 +140,11 @@
     "updated": "Poszt frissítve!",
     "deleted": "Poszt törölve!",
     "empty": "Még nincs poszt. 😿",
-    "loading": "Posztok betöltése"
+    "loading": "Posztok betöltése",
+    "newPosts_one": "{{count}} új poszt",
+    "newPosts_other": "{{count}} új poszt",
+    "loadMore": "Továbbiak",
+    "end": "Ennyi volt. Már a macskáknak sincs több mondanivalójuk. 🐾"
   },
   "reactions": {
     "label": "Reakciók",

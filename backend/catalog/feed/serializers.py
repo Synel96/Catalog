@@ -1,5 +1,6 @@
+from collections import Counter
+
 from rest_framework import serializers
-from django.db.models import Count
 from core.models import Post, Reaction, Comment, Whisker, Notification
 
 
@@ -15,19 +16,26 @@ class PostSerializer(serializers.ModelSerializer):
     overlord_avatar = serializers.ImageField(source='overlord.avatar', read_only=True)
     reaction_summary = serializers.SerializerMethodField()
     my_reaction = serializers.SerializerMethodField()
-    comment_count = serializers.IntegerField(source="comments.count", read_only=True)
+    comment_count = serializers.SerializerMethodField()
     image = serializers.ImageField(required=False, allow_null=True)
 
 
+    # The feed views prefetch reactions and annotate `comment_count` (see
+    # feed.views.with_feed_data); a single post (create, update) queries.
     def get_reaction_summary(self, obj):
-        summary = obj.reactions.values('type').annotate(count=Count('id'))
-        return {item['type']: item['count'] for item in summary}
+        return dict(Counter(reaction.type for reaction in obj.reactions.all()))
 
     def get_my_reaction(self, obj):
         overlord_id = acting_overlord_id(self)
         if overlord_id is None:
             return None
-        return obj.reactions.filter(overlord_id=overlord_id).values_list('type', flat=True).first()
+        return next(
+            (r.type for r in obj.reactions.all() if r.overlord_id == overlord_id), None
+        )
+
+    def get_comment_count(self, obj):
+        count = getattr(obj, "comment_count", None)
+        return obj.comments.count() if count is None else count
 
 
     class Meta:

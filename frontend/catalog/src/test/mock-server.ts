@@ -21,7 +21,6 @@ export function useMockBackend({ loggedIn = true, streetOverlordId }: Options = 
     useAuthStore.setState({ user, isAuthenticated: loggedIn });
     useStreetStore.setState({
       selectedOverlord: user?.overlords.find((o) => o.id === streetOverlordId) ?? null,
-      posts: [],
     });
   });
 }

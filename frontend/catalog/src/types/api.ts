@@ -34,6 +34,14 @@ export type Post = {
   comment_count: number;
 };
 
+// feed/pagination.py FeedCursorPagination: `next` / `previous` are URLs
+// carrying a `cursor` query parameter.
+export type CursorPage<T> = {
+  next: string | null;
+  previous: string | null;
+  results: T[];
+};
+
 // feed/serializers.py CommentSerializer
 export type Comment = {
   id: number;

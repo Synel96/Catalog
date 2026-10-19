@@ -3,6 +3,9 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+from urllib.parse import parse_qs, urlparse
 from core.models import Overlord, Post, Reaction, Comment, CommentHeart, Whisker, Notification
 
 User = get_user_model()
@@ -114,7 +117,7 @@ class CommentAndNotificationTests(APITestCase):
         Comment.objects.create(overlord=self.garfield, post=self.post, content='hi')
         login(self.client, self.me)
         response = self.client.get(reverse('post-list'))
-        self.assertEqual(response.data[0]['comment_count'], 1)
+        self.assertEqual(response.data['results'][0]['comment_count'], 1)
 
     def test_comment_notifies_post_owner(self):
         response = self.client.post(
@@ -237,5 +240,76 @@ class HeartsAndOwnReactionTests(APITestCase):
         Reaction.objects.create(overlord=self.garfield, post=self.post, type='hisss')
         Whisker.objects.create(from_overlord=self.garfield, to_overlord=self.mirci)
         url = reverse('post-list')
-        self.assertEqual(self.client.get(url, {'overlord': self.garfield.id}).data[0]['my_reaction'], 'hisss')
-        self.assertIsNone(self.client.get(url).data[0]['my_reaction'])
+        mine = self.client.get(url, {'overlord': self.garfield.id}).data['results'][0]
+        self.assertEqual(mine['my_reaction'], 'hisss')
+        self.assertIsNone(self.client.get(url).data['results'][0]['my_reaction'])
+
+
+class FeedPaginationTests(APITestCase):
+    """The feeds come in cursor pages with a fixed number of queries."""
+
+    def setUp(self):
+        self.me = User.objects.create_user(username='me', email='me@example.com', password='pw')
+        self.other = User.objects.create_user(
+            username='other', email='other@example.com', password='pw'
+        )
+        self.mirci = Overlord.objects.create(name='Mirci', slave=self.me)
+        self.garfield = Overlord.objects.create(name='Garfield', slave=self.other)
+        self.snowball = Overlord.objects.create(name='Snowball', slave=self.other)
+        Whisker.objects.create(from_overlord=self.mirci, to_overlord=self.garfield)
+        login(self.client, self.me)
+
+    def add_posts(self, overlord, count):
+        for i in range(count):
+            post = Post.objects.create(overlord=overlord, content=f'{overlord.name} {i}')
+            Reaction.objects.create(overlord=self.garfield, post=post, type='purrfect')
+            Comment.objects.create(overlord=self.mirci, post=post, content='meow')
+
+    def page(self, url, params=None):
+        return self.client.get(url, params or {}).data
+
+    @staticmethod
+    def cursor(next_url):
+        return parse_qs(urlparse(next_url).query)['cursor'][0]
+
+    def test_pages_of_twenty_without_gaps_or_repeats(self):
+        self.add_posts(self.mirci, 15)
+        self.add_posts(self.garfield, 15)
+        self.add_posts(self.snowball, 5)  # not whiskered: not on the Street
+        url = reverse('post-list')
+
+        first = self.page(url)
+        self.assertEqual(len(first['results']), 20)
+        # A post arriving between pages doesn't shift the next one.
+        Post.objects.create(overlord=self.mirci, content='brand new')
+        second = self.page(url, {'cursor': self.cursor(first['next'])})
+        self.assertIsNone(second['next'])
+
+        ids = [p['id'] for p in first['results'] + second['results']]
+        self.assertEqual(len(ids), 30)
+        self.assertEqual(len(set(ids)), 30)
+        self.assertNotIn('brand new', [p['content'] for p in second['results']])
+
+    def test_feed_query_count_does_not_grow_with_posts(self):
+        url = reverse('post-list')
+        self.add_posts(self.mirci, 3)
+        with CaptureQueriesContext(connection) as few:
+            self.page(url, {'overlord': self.mirci.id})
+        self.add_posts(self.garfield, 15)
+        with CaptureQueriesContext(connection) as many:
+            data = self.page(url, {'overlord': self.mirci.id})
+        self.assertEqual(len(data['results']), 18)
+        self.assertEqual(len(many.captured_queries), len(few.captured_queries))
+        self.assertLessEqual(len(many.captured_queries), 8)
+        post = data['results'][0]
+        self.assertEqual(
+            (post['reaction_summary'], post['comment_count'], post['my_reaction']),
+            ({'purrfect': 1}, 1, None),
+        )
+
+    def test_profile_feed_is_paginated_too(self):
+        self.add_posts(self.snowball, 25)
+        url = reverse('post-by-overlord', args=[self.snowball.id])
+        first = self.page(url)
+        second = self.page(url, {'cursor': self.cursor(first['next'])})
+        self.assertEqual((len(first['results']), len(second['results'])), (20, 5))

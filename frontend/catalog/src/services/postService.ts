@@ -1,19 +1,32 @@
 import i18n from "@/src/i18n";
 import { api, toApiError } from "./api";
-import type { Post } from "@/src/types/api";
+import type { CursorPage, Post } from "@/src/types/api";
+
+// One page of a feed; `next` is the cursor of the following page.
+export type PostPage = { posts: Post[]; next: string | null };
+
+function toPostPage(page: CursorPage<Post>): PostPage {
+  const next = page.next ? new URL(page.next, "http://x").searchParams.get("cursor") : null;
+  return { posts: page.results, next };
+}
 
 // `actingOverlordId`: the overlord out on the Street, whose own reaction
-// comes back as `my_reaction`.
-const actingParams = (actingOverlordId?: number | null) =>
-  actingOverlordId ? { overlord: actingOverlordId } : undefined;
+// comes back as `my_reaction`. `cursor`: a page's `next`, null for the first.
+const feedParams = (actingOverlordId: number | null, cursor: string | null) => ({
+  ...(actingOverlordId ? { overlord: actingOverlordId } : {}),
+  ...(cursor ? { cursor } : {}),
+});
 
 // Street feed: posts of the user's own overlords and the ones they whisker.
-export async function getStreetPosts(actingOverlordId?: number | null): Promise<Post[]> {
+export async function getStreetPosts(
+  actingOverlordId: number | null,
+  cursor: string | null = null
+): Promise<PostPage> {
   try {
-    const response = await api.get<Post[]>("feed/posts/", {
-      params: actingParams(actingOverlordId),
+    const response = await api.get<CursorPage<Post>>("feed/posts/", {
+      params: feedParams(actingOverlordId, cursor),
     });
-    return response.data;
+    return toPostPage(response.data);
   } catch (error) {
     throw toApiError(error, i18n.t("errors.fetchStreetPosts"));
   }
@@ -21,13 +34,14 @@ export async function getStreetPosts(actingOverlordId?: number | null): Promise<
 
 export async function getPostsByOverlord(
   overlordId: number,
-  actingOverlordId?: number | null
-): Promise<Post[]> {
+  actingOverlordId: number | null,
+  cursor: string | null = null
+): Promise<PostPage> {
   try {
-    const response = await api.get<Post[]>(`feed/posts/by-overlord/${overlordId}/`, {
-      params: actingParams(actingOverlordId),
+    const response = await api.get<CursorPage<Post>>(`feed/posts/by-overlord/${overlordId}/`, {
+      params: feedParams(actingOverlordId, cursor),
     });
-    return response.data;
+    return toPostPage(response.data);
   } catch (error) {
     throw toApiError(error, i18n.t("errors.fetchPosts"));
   }

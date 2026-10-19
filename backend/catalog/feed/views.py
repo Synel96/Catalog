@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from core.models import Post, Reaction, Comment, CommentHeart, Whisker, Notification, Overlord
 from .serializers import (
@@ -16,6 +16,7 @@ from .serializers import (
     NotificationSerializer,
 )
 from authapp.authentication import CookieJWTAuthentication
+from .pagination import FeedCursorPagination
 
 
 def notify(actor, target, message, link=None):
@@ -47,23 +48,34 @@ class ActingOverlordMixin:
         return context
 
 
+def with_feed_data(posts):
+    """Loads what PostSerializer shows in a fixed number of queries, however
+    many posts there are: the author in a join, the comment count as an
+    annotation, all reactions in one prefetch (summary and `my_reaction`
+    are counted from it in Python)."""
+    return (
+        posts.select_related("overlord")
+        .annotate(comment_count=Count("comments", distinct=True))
+        .prefetch_related("reactions")
+    )
+
+
 class PostViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
     serializer_class = PostSerializer
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter]
     search_fields = ["overlord__name", "content"]
+    pagination_class = FeedCursorPagination
 
     def get_queryset(self):
-        user_overlords = self.request.user.overlords.all()
-        whiskered_ids = Whisker.objects.filter(
-            from_overlord__in=user_overlords
-        ).values_list("to_overlord_id", flat=True)
-        whiskered_overlords = Overlord.objects.filter(pk__in=whiskered_ids)
-
-        return Post.objects.filter(
-            overlord__in=list(user_overlords) + list(whiskered_overlords)
-        ).order_by("-created_at")
+        # The user's own overlords' posts and those of the overlords they
+        # whisker, as subqueries (no join, so no duplicate rows).
+        user = self.request.user
+        own = Overlord.objects.filter(slave=user).values("id")
+        whiskered = Whisker.objects.filter(from_overlord__slave=user).values("to_overlord_id")
+        posts = Post.objects.filter(Q(overlord_id__in=own) | Q(overlord_id__in=whiskered))
+        return with_feed_data(posts)
 
     def perform_create(self, serializer):
         overlord = serializer.validated_data["overlord"]
@@ -95,9 +107,10 @@ class PostViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="by-overlord/(?P<pk>[^/.]+)")
     def by_overlord(self, request, pk=None):
-        posts = Post.objects.filter(overlord__id=pk).order_by("-created_at")
-        serializer = self.get_serializer(posts, many=True)
-        return Response(serializer.data)
+        posts = with_feed_data(Post.objects.filter(overlord__id=pk))
+        page = self.paginate_queryset(posts)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
 
 class ReactionViewSet(viewsets.ModelViewSet):

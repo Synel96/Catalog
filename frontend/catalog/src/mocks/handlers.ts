@@ -195,8 +195,38 @@ const profileHandlers = [
   }),
 ];
 
-const byNewest = (a: { created_at: string }, b: { created_at: string }) =>
-  b.created_at.localeCompare(a.created_at);
+// feed/pagination.py FeedCursorPagination, newest first by (created_at,
+// id). Pages are smaller than the backend's 20, so the demo's seed spans a
+// few and the infinite scrolling shows.
+const PAGE_SIZE = 8;
+
+type Postlike = { id: number; created_at: string };
+
+const newerFirst = (a: Postlike, b: Postlike) =>
+  b.created_at.localeCompare(a.created_at) || b.id - a.id;
+
+function cursorPage<T extends Postlike, R>(request: Request, items: T[], toItem: (item: T) => R) {
+  const url = new URL(request.url);
+  const cursor = url.searchParams.get("cursor");
+  const sorted = [...items].sort(newerFirst);
+  // The cursor is the last item of the previous page; continue after it.
+  let start = 0;
+  if (cursor) {
+    const [createdAt, id] = atob(cursor).split("|");
+    const last = { created_at: createdAt ?? "", id: Number(id) };
+    start = sorted.findIndex((item) => newerFirst(last, item) < 0);
+    if (start < 0) start = sorted.length;
+  }
+  const page = sorted.slice(start, start + PAGE_SIZE);
+  const last = page.at(-1);
+  const hasMore = start + PAGE_SIZE < sorted.length;
+  if (hasMore && last) url.searchParams.set("cursor", btoa(`${last.created_at}|${last.id}`));
+  return HttpResponse.json({
+    next: hasMore ? url.toString() : null,
+    previous: null,
+    results: page.map(toItem),
+  });
+}
 
 const postHandlers = [
   // feed/views.py PostViewSet.get_queryset: own overlords + whiskered ones.
@@ -206,22 +236,20 @@ const postHandlers = [
     const whiskered = db.whiskers.filter((w) => own.includes(w.from)).map((w) => w.to);
     const visible = new Set([...own, ...whiskered]);
     const acting = actingParam(request);
-    return HttpResponse.json(
-      db.posts
-        .filter((p) => visible.has(p.overlord))
-        .sort(byNewest)
-        .map((p) => toPost(p, acting))
+    return cursorPage(
+      request,
+      db.posts.filter((p) => visible.has(p.overlord)),
+      (p) => toPost(p, acting)
     );
   }),
 
   http.get(`${API}/feed/posts/by-overlord/:id/`, ({ request, params }) => {
     if (!db.loggedIn) return unauthorized();
     const acting = actingParam(request);
-    return HttpResponse.json(
-      db.posts
-        .filter((p) => p.overlord === Number(params.id))
-        .sort(byNewest)
-        .map((p) => toPost(p, acting))
+    return cursorPage(
+      request,
+      db.posts.filter((p) => p.overlord === Number(params.id)),
+      (p) => toPost(p, acting)
     );
   }),
 

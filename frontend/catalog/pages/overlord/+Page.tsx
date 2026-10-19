@@ -13,8 +13,9 @@ import { useMounted } from "@/src/hooks/use-mounted";
 import { getOverlord } from "@/src/services/overlordsService";
 import { getPostsByOverlord } from "@/src/services/postService";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { usePostFeed } from "@/src/hooks/use-post-feed";
 import { useStreetStore } from "@/src/store/useStreetStore";
-import type { ApiError, Overlord, Post } from "@/src/types/api";
+import type { ApiError, Overlord } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
 
 // /overlord?id=<id> (see components/street/links.ts for why not /overlords/@id).
@@ -36,16 +37,12 @@ function OverlordProfile({ id }: { id: number }) {
   const streetOverlord = useStreetStore((state) => state.selectedOverlord);
   const [overlord, setOverlord] = useState<Overlord | null>(null);
   const [error, setError] = useState("");
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [postsLoading, setPostsLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
 
-  // Bumping a version re-runs the matching fetch below (after a whisker,
-  // an edit, a new post or a feed socket event).
+  // Bumping the version re-runs the profile fetch below (after a whisker
+  // or an edit).
   const [overlordVersion, setOverlordVersion] = useState(0);
-  const [postsVersion, setPostsVersion] = useState(0);
   const reloadOverlord = () => setOverlordVersion((v) => v + 1);
-  const reloadPosts = useCallback(() => setPostsVersion((v) => v + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,24 +58,19 @@ function OverlordProfile({ id }: { id: number }) {
     };
   }, [id, overlordVersion, t]);
 
+  // The acting overlord's own reactions come along (`my_reaction`).
   const actingId = streetOverlord?.id ?? null;
-  useEffect(() => {
-    let cancelled = false;
-    getPostsByOverlord(id, actingId)
-      .then((data) => !cancelled && setPosts(data))
-      .catch((err) => console.error("Failed to load posts:", err))
-      .finally(() => !cancelled && setPostsLoading(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [id, postsVersion, actingId]);
+  const feed = usePostFeed(
+    useCallback((cursor: string | null) => getPostsByOverlord(id, actingId, cursor), [id, actingId])
+  );
+  const { refresh } = feed;
 
   useFeedSocket(
     useCallback(
       (event) => {
-        if (event.overlord === id) reloadPosts();
+        if (event.overlord === id) void refresh();
       },
-      [id, reloadPosts]
+      [id, refresh]
     )
   );
 
@@ -120,16 +112,22 @@ function OverlordProfile({ id }: { id: number }) {
 
       {isStreetOverlord && (
         <section className="mb-8">
-          <PostComposer overlord={overlord} onPosted={reloadPosts} />
+          <PostComposer overlord={overlord} onPosted={() => void refresh({ show: true })} />
         </section>
       )}
 
       <h2 className="mb-4 text-xl font-bold">{t("overlordPage.posts")}</h2>
       <PostFeed
-        posts={posts}
-        isLoading={postsLoading}
-        onPostUpdated={(post) => setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)))}
-        onPostDeleted={(postId) => setPosts((prev) => prev.filter((p) => p.id !== postId))}
+        posts={feed.posts}
+        isLoading={feed.isLoading}
+        error={feed.error}
+        onPostUpdated={feed.replacePost}
+        onPostDeleted={feed.removePost}
+        hasMore={feed.hasMore}
+        isLoadingMore={feed.isLoadingMore}
+        onLoadMore={feed.loadMore}
+        incomingCount={feed.incomingCount}
+        onShowIncoming={feed.showIncoming}
       />
 
       {isOwn && (

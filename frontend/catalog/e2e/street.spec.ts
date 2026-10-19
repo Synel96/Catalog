@@ -147,3 +147,20 @@ test("switches to another overlord from the navbar", async ({ page }) => {
   await expect(page).toHaveURL(/\/overlord\?id=2$/);
   await expect(page.getByRole("heading", { name: "Cirmi" })).toBeVisible();
 });
+
+test("loads older posts while scrolling, down to the end", async ({ page }) => {
+  const cards = page.locator("[data-slot=card]").filter({ has: page.getByRole("group") });
+  await expect(cards).toHaveCount(8);
+
+  const end = page.getByText("That's all, folks.", { exact: false });
+  await expect(async () => {
+    await page.mouse.wheel(0, 4000);
+    await expect(end).toBeVisible({ timeout: 1000 });
+  }).toPass({ timeout: 20_000 });
+
+  const count = await cards.count();
+  expect(count).toBeGreaterThan(8);
+  // Every post once, newest first.
+  const ids = await cards.evaluateAll((els) => els.map((el) => el.textContent));
+  expect(new Set(ids).size).toBe(count);
+});

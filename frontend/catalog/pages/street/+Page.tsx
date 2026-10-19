@@ -1,9 +1,11 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { PostComposer } from "@/components/street/PostComposer";
 import { PostFeed } from "@/components/street/PostFeed";
 import { StreetTutorial } from "@/components/tutorial/tutorials";
 import { useMounted } from "@/src/hooks/use-mounted";
 import { useFeedSocket } from "@/src/hooks/use-feed-socket";
+import { usePostFeed } from "@/src/hooks/use-post-feed";
+import { getStreetPosts } from "@/src/services/postService";
 import { useStreetStore } from "@/src/store/useStreetStore";
 import { Trans, useTranslation } from "react-i18next";
 import { useLocalePath } from "@/src/i18n/hooks";
@@ -13,21 +15,17 @@ export default function Page() {
   const localePath = useLocalePath();
   const mounted = useMounted();
   const overlord = useStreetStore((state) => state.selectedOverlord);
-  const posts = useStreetStore((state) => state.posts);
-  const isLoading = useStreetStore((state) => state.isLoading);
-  const error = useStreetStore((state) => state.error);
-  const fetchPosts = useStreetStore((state) => state.fetchPosts);
-  const replacePost = useStreetStore((state) => state.replacePost);
-  const removePost = useStreetStore((state) => state.removePost);
 
-  // Refetched when another overlord goes out: `my_reaction` is theirs.
-  const overlordId = overlord?.id;
-  useEffect(() => {
-    void fetchPosts();
-  }, [fetchPosts, overlordId]);
+  // Starts over when another overlord goes out: `my_reaction` is theirs.
+  const overlordId = overlord?.id ?? null;
+  const feed = usePostFeed(
+    useCallback((cursor: string | null) => getStreetPosts(overlordId, cursor), [overlordId])
+  );
+  const { refresh } = feed;
 
-  // Someone posted: reload the feed.
-  useFeedSocket(useCallback(() => void fetchPosts(), [fetchPosts]));
+  // Someone posted or the chatter changed a post: counts update in place,
+  // new posts wait behind the "new posts" button.
+  useFeedSocket(useCallback(() => void refresh(), [refresh]));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -40,7 +38,7 @@ export default function Page() {
           after mount; the prerendered HTML shows neither branch. */}
       {mounted &&
         (overlord ? (
-          <PostComposer overlord={overlord} onPosted={() => void fetchPosts()} />
+          <PostComposer overlord={overlord} onPosted={() => void refresh({ show: true })} />
         ) : (
           <p className="bg-secondary text-secondary-foreground rounded-lg p-4">
             <Trans
@@ -59,11 +57,16 @@ export default function Page() {
 
       <div className="mt-8">
         <PostFeed
-          posts={posts}
-          isLoading={isLoading || !mounted}
-          error={error}
-          onPostUpdated={replacePost}
-          onPostDeleted={removePost}
+          posts={feed.posts}
+          isLoading={feed.isLoading || !mounted}
+          error={feed.error}
+          onPostUpdated={feed.replacePost}
+          onPostDeleted={feed.removePost}
+          hasMore={feed.hasMore}
+          isLoadingMore={feed.isLoadingMore}
+          onLoadMore={feed.loadMore}
+          incomingCount={feed.incomingCount}
+          onShowIncoming={feed.showIncoming}
         />
       </div>
     </div>
