@@ -79,7 +79,7 @@ function PushDrawerContent({
           "fixed inset-y-0 right-0 z-50 flex h-full w-[min(20rem,100vw)] max-w-[100vw] flex-col gap-4 overflow-x-hidden overflow-y-auto border-l bg-clip-padding text-sm",
           // Shadow only while open: the closed panel sits just off-screen,
           // and its shadow would otherwise bleed into the viewport's edge.
-          open ? "shadow-[-32px_0_64px_-24px_rgba(0,0,0,0.75)]" : "pointer-events-none",
+          open ? "shadow-[-24px_0_48px_-24px_rgba(0,0,0,0.35)]" : "pointer-events-none",
           className
         )}
         style={{
@@ -94,7 +94,7 @@ function PushDrawerContent({
             catch the least light. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black/45 to-transparent"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black/12 to-transparent dark:from-black/25"
         />
         {children}
         <DialogPrimitive.Close asChild>
