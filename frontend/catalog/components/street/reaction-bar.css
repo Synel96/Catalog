@@ -54,8 +54,11 @@
   animation: reaction-float-up 0.9s ease-in-out 1;
 }
 
+/* Shakes and glows red, the glow fading out after the shake. */
 .reaction-btn.hisss.burst {
-  animation: reaction-shake 0.2s 3;
+  animation:
+    reaction-shake 0.2s 3,
+    reaction-hiss-glow 0.9s ease-out 1;
 }
 
 .reaction-btn.hisss.burst::after {
@@ -71,6 +74,19 @@
 
 .reaction-btn.nap.burst {
   animation: reaction-relax 0.9s 1;
+}
+
+@keyframes reaction-hiss-glow {
+  0%,
+  60% {
+    background-color: #ff4d4d;
+    box-shadow: 0 0 12px 4px rgb(255 0 0 / 60%);
+  }
+
+  100% {
+    background-color: transparent;
+    box-shadow: 0 0 0 0 rgb(255 0 0 / 0%);
+  }
 }
 
 @keyframes reaction-float-up {
