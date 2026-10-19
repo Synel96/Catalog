@@ -36,7 +36,7 @@ export async function promptInstall(): Promise<boolean> {
   return outcome === "accepted";
 }
 
-// Called once on the client (pages/+client.ts), early enough to catch
+// Called once on the client (pages/+Layout.tsx), early enough to catch
 // `beforeinstallprompt`, which may fire before React has hydrated.
 export function setUpPwa() {
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -49,9 +49,11 @@ export function setUpPwa() {
 
   // Production builds only: in dev it would cache Vite's modules.
   // After the page has loaded, so it doesn't compete with the first render.
-  if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  // Some browsers have the property but no worker (e.g. private windows).
+  const serviceWorker = navigator.serviceWorker as ServiceWorkerContainer | undefined;
+  if (import.meta.env.PROD && serviceWorker) {
     const register = () =>
-      navigator.serviceWorker.register("/sw.js").catch((error: unknown) => {
+      serviceWorker.register("/sw.js").catch((error: unknown) => {
         console.error("Service worker registration failed:", error);
       });
     if (document.readyState === "complete") void register();

@@ -13,6 +13,12 @@ import { useTranslation } from "react-i18next";
 import { useConfig } from "vike-react/useConfig";
 import { useLang } from "../src/i18n/hooks";
 import { pageMeta } from "../src/seo";
+import { setUpPwa } from "../src/pwa";
+
+// Install prompt + service worker, set up as soon as this module loads in
+// the browser (before hydration). Not a +client.ts: that makes Vike start
+// the app with an inline script, which the CSP (vercel.json) blocks.
+if (typeof window !== "undefined") setUpPwa();
 
 // The provider must sit above everything that translates, so it applies
 // the URL's language before they render.
