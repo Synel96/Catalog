@@ -11,6 +11,10 @@ export const API_URL = API_MOCKS ? "/api/" : env.VITE_API_URL;
 // Django Channels feed socket (backend/catalog/feed/routing.py). It lives on
 // the API's origin, outside the /api prefix. Browser-only: in mock mode it
 // resolves against the page's own origin.
+// Mock mode has no socket: the mock backend announces feed updates with a
+// window event of this name instead (see src/hooks/use-feed-socket.ts).
+export const MOCK_FEED_EVENT = "catalog:mock-feed";
+
 export function feedSocketUrl(): string {
   const base = API_MOCKS ? window.location.origin : env.VITE_API_URL;
   const url = new URL("/ws/feed/", base);

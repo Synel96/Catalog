@@ -9,4 +9,3 @@ build
 .cache
 *.min.js
 *.min.css
-public/mockServiceWorker.js

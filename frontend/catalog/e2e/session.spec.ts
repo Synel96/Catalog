@@ -57,3 +57,28 @@ test("Go to the Street still works when client-side navigation fails", async ({ 
   await expect(page).toHaveURL(/\/street$/);
   await expect(page.getByLabel("Post as Mirci")).toBeVisible();
 });
+
+test("the mock backend works without service worker support", async ({ browser }) => {
+  // Like a private window that disables service workers: the in-page mock
+  // (src/mocks/adapter.ts) must not need one.
+  const context = await browser.newContext({ serviceWorkers: "block" });
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, "serviceWorker", { value: undefined });
+  });
+  const page = await context.newPage();
+
+  await page.goto("/login");
+  await page.getByLabel("Username").fill("t");
+  await page.getByLabel("Password").fill("x");
+  await page.getByRole("button", { name: "Login" }).click();
+  await expect(page).toHaveURL(/\/my-slave$/);
+
+  await page.getByRole("link", { name: "Go to the Street with Mirci" }).click();
+  await expect(page).toHaveURL(/\/street$/);
+  await expect(page.getByText("Monday again. I refuse.")).toBeVisible();
+
+  // A full page load straight onto the Street works too.
+  await page.reload();
+  await expect(page.getByText("Monday again. I refuse.")).toBeVisible();
+  await context.close();
+});

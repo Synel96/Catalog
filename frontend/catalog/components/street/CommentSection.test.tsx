@@ -59,7 +59,9 @@ describe("CommentSection", () => {
     await userEvent.clear(box);
     await userEvent.type(box, "Coordinates: the sofa.");
     await userEvent.click(within(mirci).getByRole("button", { name: "Save comment" }));
-    expect(await screen.findByText("Coordinates: the sofa.")).toBeInTheDocument();
+    // `selector: "p"`: while the edit box is still mounted it carries the
+    // same text (React mirrors a textarea's value into its content).
+    expect(await screen.findByText("Coordinates: the sofa.", { selector: "p" })).toBeVisible();
 
     await userEvent.click(screen.getByRole("button", { name: "Delete comment" }));
     await vi.waitFor(() => expect(screen.queryByText("Coordinates: the sofa.")).toBeNull());

@@ -1,6 +1,7 @@
-import { delay, http, HttpResponse, ws } from "msw";
-import { feedSocketUrl } from "@/components/site";
+import { delay, http, HttpResponse } from "msw";
+import { MOCK_FEED_EVENT } from "@/components/site";
 import type { ReactionType } from "@/src/types/api";
+import { readForm } from "./forms";
 import { addComment, counterComment, notify, reactToNewPost } from "./chatter";
 import {
   currentUser,
@@ -21,24 +22,26 @@ const API = "/api";
 // Feels like a network in the demo; tests (Vitest's "test" mode) skip it.
 const LATENCY_MS = import.meta.env.MODE === "test" ? 0 : 300;
 
-// backend/catalog/feed/consumers.py: every client hears about every new post.
-const feed = ws.link(feedSocketUrl());
-
 const unauthorized = () =>
   HttpResponse.json({ detail: "Authentication credentials were not provided." }, { status: 401 });
 const notFound = () => HttpResponse.json({ detail: "Not found." }, { status: 404 });
 const badRequest = (detail: string) => HttpResponse.json([detail], { status: 400 });
 
-// Tells feed sockets to refetch, like the backend does after a new post.
-const announce = (overlordId: number, postId: number) =>
-  feed.broadcast(
-    JSON.stringify({
-      type: "post_update",
-      message: "Feed updated",
-      overlord: overlordId,
-      post_id: postId,
+// Tells open feeds to refetch, like the backend's Channels socket does after
+// a new post (backend/catalog/feed/consumers.py). See use-feed-socket.ts.
+const announce = (overlordId: number, postId: number) => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent(MOCK_FEED_EVENT, {
+      detail: {
+        type: "post_update",
+        message: "Feed updated",
+        overlord: overlordId,
+        post_id: postId,
+      },
     })
   );
+};
 
 const isMine = (overlordId: number) =>
   db.overlords.some((o) => o.id === overlordId && o.slave === ME);
@@ -122,7 +125,7 @@ const profileHandlers = [
     if (!db.loggedIn) return unauthorized();
     await applyForm(
       db.user,
-      await request.formData(),
+      await readForm(request),
       ["username", "email", "first_name", "last_name", "bio"],
       "avatar"
     );
@@ -153,7 +156,7 @@ const profileHandlers = [
   http.post(`${API}/profiles/overlords/`, async ({ request }) => {
     if (!db.loggedIn) return unauthorized();
     const overlord = { id: nextId(), name: "", avatar: null, bio: "", breed: "", slave: ME };
-    await applyForm(overlord, await request.formData(), ["name", "bio", "breed"], "avatar");
+    await applyForm(overlord, await readForm(request), ["name", "bio", "breed"], "avatar");
     if (!overlord.name) {
       return HttpResponse.json({ name: ["This field is required."] }, { status: 400 });
     }
@@ -166,7 +169,7 @@ const profileHandlers = [
     if (!db.loggedIn) return unauthorized();
     const overlord = db.overlords.find((o) => o.id === Number(params.id) && o.slave === ME);
     if (!overlord) return notFound();
-    await applyForm(overlord, await request.formData(), ["name", "bio", "breed"], "avatar");
+    await applyForm(overlord, await readForm(request), ["name", "bio", "breed"], "avatar");
     persist();
     return HttpResponse.json(toOverlord(overlord));
   }),
@@ -209,7 +212,7 @@ const postHandlers = [
 
   http.post(`${API}/feed/posts/`, async ({ request }) => {
     if (!db.loggedIn) return unauthorized();
-    const form = await request.formData();
+    const form = await readForm(request);
     const overlordId = Number(form.get("overlord"));
     if (!isMine(overlordId)) return badRequest("You can only post as your own overlords.");
     const post = {
@@ -233,7 +236,7 @@ const postHandlers = [
     if (!post) return notFound();
     if (!isMine(post.overlord))
       return badRequest("You can only edit posts from your own overlords.");
-    await applyForm(post, await request.formData(), ["content"], "image");
+    await applyForm(post, await readForm(request), ["content"], "image");
     persist();
     return HttpResponse.json(toPost(post));
   }),
@@ -438,6 +441,4 @@ export const handlers = [
   ...whiskerHandlers,
   ...commentHandlers,
   ...notificationHandlers,
-  // Accept connections; broadcasts above reach every connected client.
-  feed.addEventListener("connection", () => {}),
 ];

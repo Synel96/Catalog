@@ -10,6 +10,13 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+// Mock mode: the mock backend answers right in the page (src/mocks/adapter.ts).
+// The literal env check lets builds without mocks drop the import entirely.
+if (import.meta.env.VITE_API_MOCKS === "true") {
+  api.defaults.adapter = async (config) =>
+    (await import("@/src/mocks/adapter")).mockAdapter(config);
+}
+
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 
 const NO_REFRESH_PATHS = ["auth/login/", "auth/register/", "auth/refresh/", "auth/logout/"];

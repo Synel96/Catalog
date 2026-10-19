@@ -1,13 +1,11 @@
-import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
-import { db, resetMockDb } from "@/src/mocks/db";
-import { handlers } from "@/src/mocks/handlers";
+import { beforeEach } from "vitest";
+import { currentUser, db, resetMockDb } from "@/src/mocks/db";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStreetStore } from "@/src/store/useStreetStore";
-import { currentUser } from "@/src/mocks/db";
 
-// The same handlers the demo uses, served in Node for component tests.
-export const server = setupServer(...handlers);
+// Component tests run in mock mode (vitest.config.ts), so the API client
+// already talks to the in-page mock backend (src/mocks/adapter.ts). This
+// resets its data and the stores before each test.
 
 type Options = {
   // Log in as the mock user and put an overlord out on the Street.
@@ -16,10 +14,6 @@ type Options = {
 };
 
 export function useMockBackend({ loggedIn = true, streetOverlordId }: Options = {}) {
-  beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
-
   beforeEach(() => {
     resetMockDb();
     db.loggedIn = loggedIn;
