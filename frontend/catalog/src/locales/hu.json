@@ -277,5 +277,54 @@
     "uploading": "Feltöltés…",
     "percent": "Feltöltés… {{percent}}%",
     "finishing": "Mindjárt kész, a macska még megszagolja…"
+  },
+  "tutorial": {
+    "help": "Hogyan működik?",
+    "next": "Tovább",
+    "back": "Vissza",
+    "done": "Értem!",
+    "progress": "{{step}} / {{total}}",
+    "welcome": {
+      "demo": {
+        "title": "Üdv a Catalog tesztjén! 🐾",
+        "body": "Ez egy <b>demó változat</b>: nincs mögötte valódi szerver. Semmi, amit itt csinálsz, nem mentődik és nem megy el sehova. Minden csak ebben a böngészőfülben él, és bezáráskor elfelejtődik."
+      },
+      "login": {
+        "title": "Bármivel beléphetsz",
+        "body": "Bármilyen felhasználónév és jelszó jó, és a regisztráció is mindent elfogad. <b>Kérjük, ne add meg a valódi e-mail-címed vagy jelszavad</b>: találj ki egyet, például „Bolyhos Lord / tonhal123”. A macskák úgysem ellenőrzik. Soha nem szokták."
+      }
+    },
+    "mySlave": {
+      "slave": {
+        "title": "Te vagy a Szolga",
+        "body": "A fiókod a <b>Szolga</b>: az ember, aki konzervet nyit és almot cserél. Ezen az oldalon látod a szolgaprofilodat: a nevedet, bemutatkozásodat és profilképedet a <b>Profil szerkesztése</b> gombbal állíthatod be."
+      },
+      "overlords": {
+        "title": "A macskáid a Nagyurak",
+        "body": "A <b>Nagyurak</b> a macskák, akiket szolgálsz, és ők irányítanak. Az <b>Új nagyúr</b> gombbal adhatsz hozzá egyet névvel, fajtával, bemutatkozással és profilképpel, a körhintában lapozva pedig szerkesztheted őket."
+      },
+      "street": {
+        "title": "Irány az utca",
+        "body": "Egy nagyúr alatt nyomd meg az <b>Irány az utca: …</b> gombot. Az utcán a nevében posztolsz, reagálsz, kommentelsz és bajuszolsz. A navbar mutatja, ki van kint; a <b>Haza</b> gomb visszahoz ide, hogy másik macskát küldj ki."
+      }
+    },
+    "street": {
+      "feed": {
+        "title": "Ez az utca",
+        "body": "A feedben a nagyuraid és az általuk <b>bajuszolt</b> (követett) macskák posztjai jelennek meg. Az új posztok maguktól beúsznak."
+      },
+      "post": {
+        "title": "Posztolj, reagálj, kommentelj",
+        "body": "Írj posztot, akár fotóval, annak a nagyúrnak a nevében, akivel kijöttél. Reagálj <b>Purrfect</b>, <b>Hisss</b>, <b>Ekekekek</b> vagy <b>Overnap</b> reakcióval, és nyisd le a kommenteket bármelyik poszt alatt."
+      },
+      "whisker": {
+        "title": "Keress más macskákat",
+        "body": "A navbarban kereshetsz nagyurakra, és megnyithatod a profiljukat. <b>Bajuszold</b> meg őket, és a posztjaik megjelennek az utcádon."
+      },
+      "notifications": {
+        "title": "A csengő",
+        "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja a nagyuraidat. Macskát váltani a <b>Haza</b> gombbal tudsz: küldj ki egy másikat."
+      }
+    }
   }
 }

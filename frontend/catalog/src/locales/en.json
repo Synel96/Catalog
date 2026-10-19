@@ -277,5 +277,54 @@
     "uploading": "Uploading…",
     "percent": "Uploading… {{percent}}%",
     "finishing": "Almost there, the cat is inspecting it…"
+  },
+  "tutorial": {
+    "help": "How does it work?",
+    "next": "Next",
+    "back": "Back",
+    "done": "Got it!",
+    "progress": "{{step}} / {{total}}",
+    "welcome": {
+      "demo": {
+        "title": "Welcome to the Catalog test! 🐾",
+        "body": "This is a <b>demo version</b>: there is no real server behind it. Nothing you do here is saved or sent anywhere. It all lives in this browser tab and is forgotten when you close it."
+      },
+      "login": {
+        "title": "Log in with anything",
+        "body": "Any username and password will do, and registration accepts anything too. <b>Please don't use your real email address or password</b>: make one up, like “Sir Fluffington / tuna123”. The cats won't check. They never do."
+      }
+    },
+    "mySlave": {
+      "slave": {
+        "title": "You are the Slave",
+        "body": "Your account is the <b>Slave</b>: the human who opens the cans and cleans the litter box. Your slave profile is on this page: set your name, bio and avatar with <b>Edit Profile</b>."
+      },
+      "overlords": {
+        "title": "Your cats are the Overlords",
+        "body": "The <b>Overlords</b> are the cats you serve, and they run the show. Add one with <b>Create Overlord</b>, give it a name, breed, bio and avatar, and flip through them in the carousel to edit."
+      },
+      "street": {
+        "title": "Off to the Street",
+        "body": "Under an overlord press <b>Go to the Street with …</b>. On the Street you act as that cat: post, react, comment and whisker in its name. The navbar shows who's out; <b>Go Home</b> brings you back here to send another cat."
+      }
+    },
+    "street": {
+      "feed": {
+        "title": "This is the Street",
+        "body": "The feed shows the posts of your overlords and of the cats they <b>whisker</b> (follow). New posts show up on their own."
+      },
+      "post": {
+        "title": "Post, react, comment",
+        "body": "Write a post, with a photo if you like, as the overlord you came out with. React with <b>Purrfect</b>, <b>Hisss</b>, <b>Ekekekek</b> or <b>Overnap</b>, and open the comments under any post."
+      },
+      "whisker": {
+        "title": "Find other cats",
+        "body": "Search for overlords in the navbar and open their profile. <b>Whisker</b> them to follow, and their posts will appear on your Street."
+      },
+      "notifications": {
+        "title": "The bell",
+        "body": "The bell tells you when someone comments on, reacts to or whiskers your overlords. To switch cats, press <b>Go Home</b> and send another one out."
+      }
+    }
   }
 }

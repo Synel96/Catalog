@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { PostComposer } from "@/components/street/PostComposer";
 import { PostFeed } from "@/components/street/PostFeed";
+import { StreetTutorial } from "@/components/tutorial/tutorials";
 import { useMounted } from "@/src/hooks/use-mounted";
 import { useFeedSocket } from "@/src/hooks/use-feed-socket";
 import { useStreetStore } from "@/src/store/useStreetStore";
@@ -28,7 +29,10 @@ export default function Page() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-3xl font-bold">{t("street.title")}</h1>
+      <div className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold">{t("street.title")}</h1>
+        <StreetTutorial />
+      </div>
 
       {/* The selected overlord comes from localStorage, so it's only known
           after mount; the prerendered HTML shows neither branch. */}
