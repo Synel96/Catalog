@@ -107,7 +107,12 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
         </p>
       )}
 
-      <Button type="submit" size="lg" disabled={(!content.trim() && !image) || isSubmitting}>
+      {/* Text, a picture, or both (the picture may be the one already there). */}
+      <Button
+        type="submit"
+        size="lg"
+        disabled={(!content.trim() && !image && !post.image) || isSubmitting}
+      >
         <SaveIcon /> {isSubmitting ? t("common.saving") : t("common.saveChanges")}
       </Button>
     </form>

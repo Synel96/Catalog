@@ -25,6 +25,22 @@ describe("PostComposer", () => {
     expect(screen.getByRole("button", { name: /Post/ })).toBeDisabled();
   });
 
+  it("posts a picture without text", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:dot");
+    URL.revokeObjectURL = vi.fn();
+    const onPosted = vi.fn();
+    render(<PostComposer overlord={mirci} onPosted={onPosted} />);
+    await userEvent.upload(
+      screen.getByLabelText("Attach image"),
+      new File(["meow"], "dot.png", { type: "image/png" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: /Post/ }));
+
+    await vi.waitFor(() => expect(onPosted).toHaveBeenCalledOnce());
+    expect(db.posts.at(-1)).toMatchObject({ overlord: 1, content: "" });
+    expect(db.posts.at(-1)?.image).toMatch(/^data:image\/png/);
+  });
+
   it("posts as the overlord and clears itself", async () => {
     const onPosted = vi.fn();
     render(<PostComposer overlord={mirci} onPosted={onPosted} />);

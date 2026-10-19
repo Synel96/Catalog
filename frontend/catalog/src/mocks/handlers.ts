@@ -43,6 +43,10 @@ const announce = (overlordId: number, postId: number) => {
   );
 };
 
+// feed/serializers.py require_text_or_picture
+const needsTextOrPicture = () =>
+  HttpResponse.json({ content: ["Write something or add a picture."] }, { status: 400 });
+
 // `?overlord=<id>` naming one of the user's overlords: the one out on the
 // Street (feed/views.py ActingOverlordMixin). Others are ignored.
 function actingParam(request: Request): number | null {
@@ -266,6 +270,7 @@ const postHandlers = [
       created_at: new Date().toISOString(),
     };
     await applyForm(post, form, [], "image");
+    if (!post.content.trim() && !post.image) return needsTextOrPicture();
     db.posts.push(post);
     persist();
     announce(overlordId, post.id);
@@ -279,7 +284,10 @@ const postHandlers = [
     if (!post) return notFound();
     if (!isMine(post.overlord))
       return badRequest("You can only edit posts from your own overlords.");
-    await applyForm(post, await readForm(request), ["content"], "image");
+    const edited = { ...post };
+    await applyForm(edited, await readForm(request), ["content"], "image");
+    if (!edited.content.trim() && !edited.image) return needsTextOrPicture();
+    Object.assign(post, edited);
     persist();
     return HttpResponse.json(toPost(post));
   }),
@@ -428,9 +436,7 @@ const commentHandlers = [
       });
     }
     if (!isMine(overlord)) return badRequest("You can only comment with your own overlords.");
-    if (!content.trim() && !image) {
-      return HttpResponse.json({ content: ["Write something or add a picture."] }, { status: 400 });
-    }
+    if (!content.trim() && !image) return needsTextOrPicture();
     const comment = addComment(overlord, post, content, image);
     persist();
     counterComment(post, overlord, announce, comment.id);

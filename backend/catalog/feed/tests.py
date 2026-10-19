@@ -374,3 +374,42 @@ class CommentImageTests(APITestCase):
         self.assertTrue(response.data['image'])
         # Text can't be emptied on a picture-less comment, but can on this one.
         self.assertEqual(self.client.patch(url, {'content': ''}, format='json').status_code, 200)
+
+
+class PostTextOrPictureTests(APITestCase):
+    """Posts, like comments, need text, a picture or both."""
+
+    def setUp(self):
+        import tempfile
+        from django.test import override_settings
+
+        media = override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+        media.enable()
+        self.addCleanup(media.disable)
+
+        self.me = User.objects.create_user(username='me', email='me@example.com', password='pw')
+        self.mirci = Overlord.objects.create(name='Mirci', slave=self.me)
+        login(self.client, self.me)
+
+    def post(self, **fields):
+        data = {'overlord': self.mirci.id, **fields}
+        return self.client.post(reverse('post-list'), data, format='multipart')
+
+    def test_picture_only_post(self):
+        response = self.post(image=tiny_png())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['content'], '')
+        self.assertIn('/posts/me/Mirci/', response.data['image'])
+
+    def test_empty_post_is_refused(self):
+        self.assertEqual(self.post(content='  ').status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.post().status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Post.objects.exists())
+
+    def test_text_can_be_cleared_while_the_picture_stays(self):
+        post_id = self.post(content='Sunbeam.', image=tiny_png()).data['id']
+        url = reverse('post-detail', args=[post_id])
+        self.assertEqual(self.client.patch(url, {'content': ''}, format='json').status_code, 200)
+        text_only = self.post(content='Just words.').data['id']
+        url = reverse('post-detail', args=[text_only])
+        self.assertEqual(self.client.patch(url, {'content': ''}, format='json').status_code, 400)

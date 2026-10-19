@@ -45,7 +45,8 @@ class Overlord(models.Model):
 
 class Post(models.Model):
     overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='posts')
-    content = models.TextField()
+    # A post has text, a picture, or both.
+    content = models.TextField(blank=True)
     image = models.ImageField(
         upload_to=post_image_upload_path,
         blank=True,
