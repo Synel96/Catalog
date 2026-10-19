@@ -39,7 +39,8 @@ describe("PostComposer", () => {
     await userEvent.click(screen.getByRole("button", { name: /Post/ }));
 
     await vi.waitFor(() => expect(onPosted).toHaveBeenCalledOnce());
-    expect(box).toHaveValue("");
+    // The cleared state renders right after the callback.
+    await vi.waitFor(() => expect(box).toHaveValue(""));
     expect(db.posts.at(-1)).toMatchObject({ overlord: 1, content: "The red dot is back." });
     expect(db.posts.at(-1)?.image).toMatch(/^data:image\/png/);
     // The upload reported its progress all the way.
