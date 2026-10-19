@@ -23,17 +23,18 @@ export const SITE_DESCRIPTION = "Catalog – The social network where cats rule 
 // Placeholder Open Graph image — replace public/og-image.png with real artwork.
 export const OG_IMAGE_PATH = "/og-image.png";
 
-export type NavLink = { href: string; label: string };
+// `labelKey` is a translation key (src/locales/*.json).
+export type NavLink = { href: string; labelKey: string };
 
 export const PUBLIC_NAV_LINKS: readonly NavLink[] = [
-  { href: "/mews", label: "Mews" },
-  { href: "/login", label: "Login" },
-  { href: "/register", label: "Register" },
+  { href: "/mews", labelKey: "nav.mews" },
+  { href: "/login", labelKey: "nav.login" },
+  { href: "/register", labelKey: "nav.register" },
 ];
 
 export const AUTH_NAV_LINKS: readonly NavLink[] = [
-  { href: "/mews", label: "Mews" },
-  { href: "/webshop", label: "Webshop" },
-  { href: "/my-slave", label: "My Slave" },
-  { href: "/street", label: "Street" },
+  { href: "/mews", labelKey: "nav.mews" },
+  { href: "/webshop", labelKey: "nav.webshop" },
+  { href: "/my-slave", labelKey: "nav.mySlave" },
+  { href: "/street", labelKey: "nav.street" },
 ];

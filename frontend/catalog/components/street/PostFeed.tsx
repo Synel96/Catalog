@@ -8,6 +8,7 @@ import type { Post } from "@/src/types/api";
 import { DeletePostDialog } from "./DeletePostDialog";
 import { EditPostDialog } from "./EditPostDialog";
 import { PostCard } from "./PostCard";
+import { useTranslation } from "react-i18next";
 
 type PostFeedProps = {
   posts: Post[];
@@ -18,6 +19,7 @@ type PostFeedProps = {
 };
 
 export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted }: PostFeedProps) {
+  const { t } = useTranslation();
   const selectedOverlord = useStreetStore((state) => state.selectedOverlord);
   const user = useAuthStore((state) => state.user);
   const [editing, setEditing] = useState<Post | null>(null);
@@ -30,7 +32,7 @@ export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted
 
   if (isLoading && posts.length === 0) return <PostFeedSkeleton />;
   if (error) return <p className="text-destructive">{error}</p>;
-  if (posts.length === 0) return <p className="text-muted-foreground">No posts yet. 😿</p>;
+  if (posts.length === 0) return <p className="text-muted-foreground">{t("posts.empty")}</p>;
 
   return (
     <div className="grid gap-6">
@@ -51,7 +53,7 @@ export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted
         onUpdated={(post) => {
           onPostUpdated(post);
           setEditing(null);
-          toast.success("Post updated!");
+          toast.success(t("posts.updated"));
         }}
       />
       <DeletePostDialog
@@ -60,7 +62,7 @@ export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted
         onDeleted={(postId) => {
           onPostDeleted(postId);
           setDeleting(null);
-          toast.success("Post deleted successfully!");
+          toast.success(t("posts.deleted"));
         }}
       />
     </div>
@@ -68,8 +70,9 @@ export function PostFeed({ posts, isLoading, error, onPostUpdated, onPostDeleted
 }
 
 function PostFeedSkeleton() {
+  const { t } = useTranslation();
   return (
-    <div className="grid gap-6" aria-busy="true" aria-label="Loading posts">
+    <div className="grid gap-6" aria-busy="true" aria-label={t("posts.loading")}>
       {Array.from({ length: 2 }, (_, i) => (
         <Card key={i}>
           <CardContent className="grid gap-4">

@@ -9,8 +9,12 @@ import { getCurrentUser } from "@/src/services/userService";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import type { ApiError } from "@/src/types/api";
 import { formValues } from "./formValues";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 export function LoginForm() {
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const login = useAuthStore((state) => state.login);
@@ -25,10 +29,10 @@ export function LoginForm() {
       await loginUser(credentials);
       const user = await getCurrentUser();
       login(user);
-      toast.success("Login successful!");
-      await navigate("/my-slave");
+      toast.success(t("auth.loginSuccess"));
+      await navigate(localePath("/my-slave"));
     } catch (err) {
-      setError((err as ApiError).detail || "Login failed.");
+      setError((err as ApiError).detail || t("auth.loginFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -37,22 +41,22 @@ export function LoginForm() {
   return (
     <Card className="w-full gap-6 p-4 shadow-lg sm:w-[360px]">
       <CardHeader>
-        <CardTitle className="text-center text-2xl">Login</CardTitle>
+        <CardTitle className="text-center text-2xl">{t("auth.login")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <FormField
-            label="Username"
+            label={t("auth.username")}
             name="username"
-            placeholder="Enter your username"
+            placeholder={t("auth.usernamePlaceholder")}
             autoComplete="username"
             required
           />
           <FormField
-            label="Password"
+            label={t("auth.password")}
             type="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder={t("auth.passwordPlaceholder")}
             autoComplete="current-password"
             required
           />
@@ -64,14 +68,17 @@ export function LoginForm() {
           )}
 
           <Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Logging in…" : "Login"}
+            {isSubmitting ? t("auth.loggingIn") : t("auth.login")}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm">
-          Don’t have an account?{" "}
-          <a href="/register" className="font-medium underline-offset-4 hover:underline">
-            Register
+          {t("auth.noAccount")}{" "}
+          <a
+            href={localePath("/register")}
+            className="font-medium underline-offset-4 hover:underline"
+          >
+            {t("auth.register")}
           </a>
         </p>
       </CardContent>

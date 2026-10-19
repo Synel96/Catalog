@@ -6,6 +6,9 @@ import { formatPostDate } from "@/components/street/media";
 import { cn } from "@/lib/utils";
 import { useNotificationsStore } from "@/src/store/useNotificationsStore";
 import type { Notification } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
+import { useLang } from "@/src/i18n/hooks";
 
 const POLL_MS = 30_000;
 
@@ -14,6 +17,9 @@ type NotificationBellProps = { className?: string };
 // Polls the user's notifications (every 30 s and when the tab regains
 // focus) and lists them in a dropdown. Only rendered while logged in.
 export function NotificationBell({ className }: NotificationBellProps) {
+  const { t } = useTranslation();
+  const lang = useLang();
+  const localePath = useLocalePath();
   const notifications = useNotificationsStore((state) => state.notifications);
   const loaded = useNotificationsStore((state) => state.loaded);
   const fetchNotifications = useNotificationsStore((state) => state.fetch);
@@ -53,7 +59,8 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const select = (notification: Notification) => {
     if (!notification.is_read) void markRead(notification.id);
     setOpen(false);
-    if (notification.link) void navigate(notification.link);
+    // Backend links are plain app paths; keep the current language.
+    if (notification.link) void navigate(localePath(notification.link));
   };
 
   return (
@@ -61,7 +68,9 @@ export function NotificationBell({ className }: NotificationBellProps) {
       <Button
         variant="ghost"
         size="icon"
-        aria-label={unread ? `Notifications (${unread} unread)` : "Notifications"}
+        aria-label={
+          unread ? t("notifications.labelUnread", { count: unread }) : t("notifications.label")
+        }
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((o) => !o)}
@@ -81,19 +90,19 @@ export function NotificationBell({ className }: NotificationBellProps) {
           className="bg-popover text-popover-foreground ring-foreground/10 fixed inset-x-2 top-16 z-50 overflow-hidden rounded-xl shadow-lg ring-1 sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96"
         >
           <div className="flex items-center justify-between border-b px-4 py-2">
-            <h2 className="font-display font-bold">Notifications</h2>
+            <h2 className="font-display font-bold">{t("notifications.label")}</h2>
             {unread > 0 && (
               <Button variant="ghost" size="sm" onClick={() => void markAllRead()}>
-                <CheckCheckIcon /> Mark all read
+                <CheckCheckIcon /> {t("notifications.markAllRead")}
               </Button>
             )}
           </div>
           <ul className="max-h-96 overflow-y-auto">
-            {!loaded && <li className="text-muted-foreground p-4 text-sm">Loading…</li>}
+            {!loaded && (
+              <li className="text-muted-foreground p-4 text-sm">{t("common.loading")}</li>
+            )}
             {loaded && notifications.length === 0 && (
-              <li className="text-muted-foreground p-4 text-sm">
-                No notifications yet. Your overlords are being ignored. For now.
-              </li>
+              <li className="text-muted-foreground p-4 text-sm">{t("notifications.empty")}</li>
             )}
             {notifications.map((notification) => (
               <li key={notification.id}>
@@ -115,8 +124,11 @@ export function NotificationBell({ className }: NotificationBellProps) {
                   <span className="min-w-0">
                     <span className="block">{notification.message}</span>
                     <span className="text-muted-foreground block text-xs">
-                      For {notification.overlord_name} · {formatPostDate(notification.created_at)}
-                      {!notification.is_read && <span className="sr-only"> (unread)</span>}
+                      {t("notifications.for", { name: notification.overlord_name })} ·{" "}
+                      {formatPostDate(notification.created_at, lang)}
+                      {!notification.is_read && (
+                        <span className="sr-only"> {t("notifications.unread")}</span>
+                      )}
                     </span>
                   </span>
                 </button>

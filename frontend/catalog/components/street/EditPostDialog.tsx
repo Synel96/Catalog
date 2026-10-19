@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea";
 import { updatePost } from "@/src/services/postService";
 import type { ApiError, Post } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 type EditPostDialogProps = {
   post: Post | null;
@@ -13,11 +14,12 @@ type EditPostDialogProps = {
 };
 
 export function EditPostDialog({ post, onOpenChange, onUpdated }: EditPostDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={post !== null} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>Edit Post</DialogTitle>
+          <DialogTitle>{t("posts.edit")}</DialogTitle>
         </DialogHeader>
         {post && <EditPostForm post={post} onUpdated={onUpdated} />}
       </DialogContent>
@@ -26,6 +28,7 @@ export function EditPostDialog({ post, onOpenChange, onUpdated }: EditPostDialog
 }
 
 function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post) => void }) {
+  const { t } = useTranslation();
   const [content, setContent] = useState(post.content);
   const [image, setImage] = useState<File | null>(null);
   const [error, setError] = useState("");
@@ -55,8 +58,8 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
       <Textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Update your meow..."
-        aria-label="Post content"
+        placeholder={t("posts.editPlaceholder")}
+        aria-label={t("posts.content")}
         rows={3}
         autoFocus
       />
@@ -70,7 +73,11 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
           onChange={(e) => setImage(e.target.files?.[0] ?? null)}
         />
         <Button variant="secondary" size="icon" asChild>
-          <label htmlFor={fileInputId} aria-label="Replace image" className="cursor-pointer">
+          <label
+            htmlFor={fileInputId}
+            aria-label={t("posts.replaceImage")}
+            className="cursor-pointer"
+          >
             <ImageIcon />
           </label>
         </Button>
@@ -84,7 +91,7 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
       )}
 
       <Button type="submit" size="lg" disabled={(!content.trim() && !image) || isSubmitting}>
-        <SaveIcon /> {isSubmitting ? "Saving…" : "Save Changes"}
+        <SaveIcon /> {isSubmitting ? t("common.saving") : t("common.saveChanges")}
       </Button>
     </form>
   );

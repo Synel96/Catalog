@@ -9,6 +9,9 @@ import { formatPostDate, OVERLORD_PLACEHOLDER } from "./media";
 import { overlordHref } from "./links";
 import { CommentSection } from "./CommentSection";
 import { ReactionBar } from "./ReactionBar";
+import { useTranslation } from "react-i18next";
+import { useLang } from "@/src/i18n/hooks";
+import { langPath } from "@/src/i18n/config";
 
 type PostCardProps = {
   post: Post;
@@ -20,7 +23,9 @@ type PostCardProps = {
 };
 
 export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: PostCardProps) {
-  const profileHref = overlordHref(post.overlord);
+  const { t } = useTranslation();
+  const lang = useLang();
+  const profileHref = langPath(overlordHref(post.overlord), lang);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentCount, setCommentCount] = useState(post.comment_count ?? 0);
   const [syncedCount, setSyncedCount] = useState(post.comment_count);
@@ -45,7 +50,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
             {post.overlord_name}
           </a>
           <p className="text-muted-foreground text-xs">
-            <time dateTime={post.created_at}>{formatPostDate(post.created_at)}</time>
+            <time dateTime={post.created_at}>{formatPostDate(post.created_at, lang)}</time>
           </p>
         </div>
         {canManage && (
@@ -53,7 +58,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label="Edit post"
+              aria-label={t("posts.editLabel")}
               onClick={() => onEdit(post)}
             >
               <PencilIcon />
@@ -61,7 +66,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label="Delete post"
+              aria-label={t("posts.deleteLabel")}
               onClick={() => onDelete(post)}
               className="text-destructive hover:text-destructive"
             >
@@ -100,7 +105,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
             onClick={() => setCommentsOpen((open) => !open)}
           >
             <MessageCircleIcon />
-            {commentCount === 1 ? "1 comment" : `${commentCount} comments`}
+            {t("comments.count", { count: commentCount })}
           </Button>
         </div>
         {commentsOpen && (

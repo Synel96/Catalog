@@ -10,6 +10,8 @@ import { searchOverlords } from "@/src/services/overlordsService";
 import type { ApiError, Overlord } from "@/src/types/api";
 import { overlordHref } from "./links";
 import { OVERLORD_PLACEHOLDER } from "./media";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 const DEBOUNCE_MS = 400;
 
@@ -22,6 +24,8 @@ type SearchState =
 // Navbar search over all overlords (name, breed, slave). Picking a result
 // opens its profile. Collapses to an icon on small screens.
 export function OverlordSearch() {
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
   const [term, setTerm] = useState("");
   const [state, setState] = useState<SearchState>({ status: "idle" });
   const [open, setOpen] = useState(false);
@@ -74,7 +78,7 @@ export function OverlordSearch() {
   const select = (overlord: Overlord) => {
     reset();
     setMobileOpen(false);
-    void navigate(overlordHref(overlord.id));
+    void navigate(localePath(overlordHref(overlord.id)));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -101,7 +105,7 @@ export function OverlordSearch() {
       <Button
         variant="ghost"
         size="icon"
-        aria-label="Open search"
+        aria-label={t("search.open")}
         onClick={() => {
           setMobileOpen(true);
           setTimeout(() => inputRef.current?.focus(), 0);
@@ -129,8 +133,8 @@ export function OverlordSearch() {
           }}
           onKeyDown={handleKeyDown}
           onFocus={() => setOpen(true)}
-          placeholder="Search Overlords..."
-          aria-label="Search overlords"
+          placeholder={t("search.placeholder")}
+          aria-label={t("search.label")}
           role="combobox"
           aria-expanded={showList}
           aria-controls={listId}
@@ -141,7 +145,7 @@ export function OverlordSearch() {
           <Button
             variant="ghost"
             size="icon-xs"
-            aria-label={term ? "Clear search" : "Close search"}
+            aria-label={term ? t("search.clear") : t("search.close")}
             onClick={() => {
               if (term) reset();
               else setMobileOpen(false);
@@ -158,12 +162,12 @@ export function OverlordSearch() {
             role="listbox"
             className="bg-popover text-popover-foreground ring-foreground/10 absolute inset-x-0 top-full z-50 mt-1 max-h-80 min-w-64 overflow-y-auto rounded-lg p-1 shadow-md ring-1"
           >
-            {state.status === "loading" && <li className="p-3 text-sm">Searching…</li>}
+            {state.status === "loading" && <li className="p-3 text-sm">{t("search.searching")}</li>}
             {state.status === "error" && (
               <li className="text-destructive p-3 text-sm">{state.message}</li>
             )}
             {state.status === "done" && results.length === 0 && (
-              <li className="text-muted-foreground p-3 text-sm">No results</li>
+              <li className="text-muted-foreground p-3 text-sm">{t("search.noResults")}</li>
             )}
             {results.map((overlord, index) => (
               <li
@@ -187,7 +191,7 @@ export function OverlordSearch() {
                   <span className="block truncate font-semibold">{overlord.name}</span>
                   {overlord.slave_name && (
                     <span className="text-muted-foreground block truncate text-xs">
-                      Slave: {overlord.slave_name}
+                      {t("search.slave", { name: overlord.slave_name })}
                     </span>
                   )}
                 </span>

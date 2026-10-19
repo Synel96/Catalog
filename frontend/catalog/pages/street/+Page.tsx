@@ -4,8 +4,12 @@ import { PostFeed } from "@/components/street/PostFeed";
 import { useMounted } from "@/src/hooks/use-mounted";
 import { useFeedSocket } from "@/src/hooks/use-feed-socket";
 import { useStreetStore } from "@/src/store/useStreetStore";
+import { Trans, useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 export default function Page() {
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
   const mounted = useMounted();
   const overlord = useStreetStore((state) => state.selectedOverlord);
   const posts = useStreetStore((state) => state.posts);
@@ -24,7 +28,7 @@ export default function Page() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-3xl font-bold">Street</h1>
+      <h1 className="mb-6 text-3xl font-bold">{t("street.title")}</h1>
 
       {/* The selected overlord comes from localStorage, so it's only known
           after mount; the prerendered HTML shows neither branch. */}
@@ -33,11 +37,17 @@ export default function Page() {
           <PostComposer overlord={overlord} onPosted={() => void fetchPosts()} />
         ) : (
           <p className="bg-secondary text-secondary-foreground rounded-lg p-4">
-            To post, react and whisker, pick an overlord on{" "}
-            <a href="/my-slave" className="font-semibold underline underline-offset-4">
-              My Slave
-            </a>{" "}
-            and go to the Street with them.
+            <Trans
+              i18nKey="street.pickOverlord"
+              components={{
+                link: (
+                  <a
+                    href={localePath("/my-slave")}
+                    className="font-semibold underline underline-offset-4"
+                  />
+                ),
+              }}
+            />
           </p>
         ))}
 

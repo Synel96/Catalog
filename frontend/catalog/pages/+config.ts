@@ -9,7 +9,8 @@ const config: Config = {
   // replacement, so they can't import BRAND_NAME from components/site.ts.
   // Leaving `title` unset lets pages/+Head.tsx's buildMeta() fall back to
   // BRAND_NAME instead (see src/seo.ts).
-  description: "Catalog – The social network where cats rule and humans follow.",
+  // Titles and descriptions are per language and per route: see pageMeta()
+  // in src/seo.ts, applied in pages/+Layout.tsx.
 
   // Every page is prerendered to static HTML at build time. User-specific
   // data (profile, overlords) is fetched in the browser with the auth

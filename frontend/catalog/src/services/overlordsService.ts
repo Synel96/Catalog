@@ -1,3 +1,4 @@
+import i18n from "@/src/i18n";
 import { api, toApiError } from "./api";
 import type { Overlord } from "@/src/types/api";
 
@@ -20,7 +21,7 @@ export async function getMyOverlords(): Promise<Overlord[]> {
     const response = await api.get("profiles/overlords/");
     return extractList(response.data);
   } catch (error) {
-    throw toApiError(error, "Failed to fetch overlords.");
+    throw toApiError(error, i18n.t("errors.fetchOverlords"));
   }
 }
 
@@ -29,7 +30,7 @@ export async function createOverlord(formData: FormData): Promise<Overlord> {
     const response = await api.post<Overlord>("profiles/overlords/", formData);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to create overlord.");
+    throw toApiError(error, i18n.t("errors.createOverlord"));
   }
 }
 
@@ -38,7 +39,7 @@ export async function updateOverlord(id: number, formData: FormData): Promise<Ov
     const response = await api.patch<Overlord>(`profiles/overlords/${id}/`, formData);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to update overlord.");
+    throw toApiError(error, i18n.t("errors.updateOverlord"));
   }
 }
 
@@ -46,7 +47,7 @@ export async function deleteOverlord(id: number): Promise<void> {
   try {
     await api.delete(`profiles/overlords/${id}/`);
   } catch (error) {
-    throw toApiError(error, "Failed to delete overlord.");
+    throw toApiError(error, i18n.t("errors.deleteOverlord"));
   }
 }
 
@@ -56,7 +57,7 @@ export async function getOverlord(id: number): Promise<Overlord> {
     const response = await api.get<Overlord>(`profiles/overlords/${id}/`);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to fetch overlord.");
+    throw toApiError(error, i18n.t("errors.fetchOverlord"));
   }
 }
 
@@ -67,6 +68,6 @@ export async function searchOverlords(term: string, signal?: AbortSignal): Promi
     const response = await api.get("profiles/overlords/", { params: { search: term }, signal });
     return extractList(response.data);
   } catch (error) {
-    throw toApiError(error, "Search failed.");
+    throw toApiError(error, i18n.t("errors.searchFailed"));
   }
 }

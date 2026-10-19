@@ -14,6 +14,9 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import type { ApiError, Comment } from "@/src/types/api";
 import { overlordHref } from "./links";
 import { formatPostDate } from "./media";
+import { useTranslation } from "react-i18next";
+import { useLang } from "@/src/i18n/hooks";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 type CommentSectionProps = {
   postId: number;
@@ -34,6 +37,7 @@ export function CommentSection({
   serverCount,
   onCountChange,
 }: CommentSectionProps) {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [error, setError] = useState("");
@@ -86,13 +90,13 @@ export function CommentSection({
     <div className="grid gap-3 border-t pt-3">
       {error && <p className="text-destructive text-sm">{error}</p>}
       {!comments && !error && (
-        <div className="grid gap-2" aria-busy="true" aria-label="Loading comments">
+        <div className="grid gap-2" aria-busy="true" aria-label={t("comments.loading")}>
           <Skeleton className="h-4 w-1/2" />
           <Skeleton className="h-4 w-2/3" />
         </div>
       )}
       {comments?.length === 0 && (
-        <p className="text-muted-foreground text-sm">No comments yet. Be the first to meow.</p>
+        <p className="text-muted-foreground text-sm">{t("comments.empty")}</p>
       )}
       {comments && comments.length > 0 && (
         <ul className="grid gap-3">
@@ -113,8 +117,8 @@ export function CommentSection({
           <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={`Comment as ${overlordName}...`}
-            aria-label={`Comment as ${overlordName}`}
+            placeholder={t("comments.placeholder", { name: overlordName })}
+            aria-label={t("comments.as", { name: overlordName })}
             rows={1}
             className="min-h-9"
             disabled={isSending}
@@ -122,16 +126,14 @@ export function CommentSection({
           <Button
             type="submit"
             size="icon"
-            aria-label="Send comment"
+            aria-label={t("comments.send")}
             disabled={!draft.trim() || isSending}
           >
             <SendIcon />
           </Button>
         </form>
       ) : (
-        <p className="text-muted-foreground text-sm">
-          Go to the Street with an overlord to comment.
-        </p>
+        <p className="text-muted-foreground text-sm">{t("comments.needOverlord")}</p>
       )}
     </div>
   );
@@ -145,6 +147,9 @@ type CommentItemProps = {
 };
 
 function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemProps) {
+  const { t } = useTranslation();
+  const lang = useLang();
+  const localePath = useLocalePath();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(comment.content);
   const [isSaving, setIsSaving] = useState(false);
@@ -166,20 +171,20 @@ function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemPro
     <li className="bg-secondary text-secondary-foreground rounded-lg px-3 py-2">
       <div className="flex items-center gap-2">
         <a
-          href={overlordHref(comment.overlord)}
+          href={localePath(overlordHref(comment.overlord))}
           className="text-sm font-semibold underline-offset-4 hover:underline"
         >
           {comment.overlord_name}
         </a>
         <time dateTime={comment.created_at} className="text-muted-foreground text-xs">
-          {formatPostDate(comment.created_at)}
+          {formatPostDate(comment.created_at, lang)}
         </time>
         {canManage && !editing && (
           <div className="ml-auto flex">
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label="Edit comment"
+              aria-label={t("comments.edit")}
               onClick={() => {
                 setText(comment.content);
                 setEditing(true);
@@ -190,7 +195,7 @@ function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemPro
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label="Delete comment"
+              aria-label={t("comments.delete")}
               onClick={onDelete}
               className="text-destructive hover:text-destructive"
             >
@@ -205,18 +210,18 @@ function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemPro
           <Textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            aria-label="Edit comment"
+            aria-label={t("comments.edit")}
             rows={1}
             className="bg-background min-h-9"
             autoFocus
           />
-          <Button size="icon-sm" aria-label="Save comment" onClick={save} disabled={isSaving}>
+          <Button size="icon-sm" aria-label={t("comments.save")} onClick={save} disabled={isSaving}>
             <CheckIcon />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Cancel editing"
+            aria-label={t("comments.cancelEdit")}
             onClick={() => setEditing(false)}
           >
             <XIcon />

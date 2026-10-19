@@ -49,6 +49,29 @@ A pre-commit hook (Husky + lint-staged) formats/lints staged files; CI
 (`.github/workflows/frontend-ci.yml` at the repo root) runs the full check
 list plus a build.
 
+## Languages
+
+English by default, Hungarian selectable (EN | HU in the navbar and the
+mobile menu). Adapted from the hydration-starter-kit's `i18n` branch:
+
+- The URL decides the language: English at the plain paths (`/street`),
+  Hungarian under `/hu/` (`/hu/street`; `/en/…` also works).
+  `pages/+onBeforeRoute.ts` strips the prefix and sets `pageContext.lang`,
+  `pages/+lang.ts` sets `<html lang>`, and `<I18nProvider>` applies it to
+  i18next before anything renders, so prerendered HTML and hydration match.
+- Every page is prerendered once per language (each page's
+  `+onBeforePrerenderStart.ts` calls `prerenderUrls()`); a new page needs
+  the same one-line hook.
+- Internal links and `navigate()` calls go through `useLocalePath()` so the
+  language sticks; that includes notification links coming from the backend.
+- Strings live in `src/locales/{en,hu}.json` (bundled, no fetch).
+  `src/i18n/locales.test.ts` fails if the two files' keys drift apart or the
+  code uses a key that isn't defined. Titles/descriptions per route are in
+  `meta.*` (`pageMeta()` in `src/seo.ts`), with canonical + `hreflang`
+  alternates in `pages/+Head.tsx`.
+- User content (posts, comments) and the backend's own messages, including
+  notification texts, aren't translated.
+
 ## Tests
 
 - **Unit** (`*.test.ts`, Node): API error handling, media URLs, the feed

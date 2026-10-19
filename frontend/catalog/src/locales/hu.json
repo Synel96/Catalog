@@ -1,0 +1,276 @@
+{
+  "a11y": {
+    "skipToContent": "Ugrás a tartalomhoz"
+  },
+  "common": {
+    "back": "Vissza",
+    "cancel": "Mégse",
+    "close": "Bezárás",
+    "create": "Létrehozás",
+    "delete": "Törlés",
+    "deleting": "Törlés…",
+    "edit": "Szerkesztés",
+    "loading": "Betöltés…",
+    "saveChanges": "Mentés",
+    "saving": "Mentés…"
+  },
+  "language": {
+    "label": "Nyelv",
+    "en": "English",
+    "hu": "Magyar"
+  },
+  "theme": {
+    "toggle": "Téma váltása"
+  },
+  "demo": {
+    "banner": "Demó mód: a backendet csak a böngésződ játssza el. Bármilyen felhasználónévvel és jelszóval beléphetsz."
+  },
+  "nav": {
+    "home": "{{brand}} főoldal",
+    "logo": "{{brand}} logó",
+    "main": "Fő navigáció",
+    "mews": "Nyávhírek",
+    "login": "Belépés",
+    "register": "Regisztráció",
+    "webshop": "Webshop",
+    "mySlave": "Szolgám",
+    "street": "Utca",
+    "welcome": "Szia, {{name}}!",
+    "logout": "Kijelentkezés",
+    "openMenu": "Menü megnyitása",
+    "closeMenu": "Menü bezárása",
+    "navigationMenu": "Navigációs menü"
+  },
+  "footer": {
+    "links": "Lábléc linkek",
+    "copyright": "{{year}} {{brand}}. Minden jog fenntartva (a macskáknál)."
+  },
+  "welcome": {
+    "title": "Egérkellemes napot!",
+    "slide": "{{current}}. dia / {{total}}",
+    "previous": "Előző dia",
+    "next": "Következő dia"
+  },
+  "auth": {
+    "login": "Belépés",
+    "loggingIn": "Belépés…",
+    "loginSuccess": "Sikeres belépés! A nagyurak már várnak.",
+    "loginFailed": "Sikertelen bejelentkezés.",
+    "register": "Regisztráció",
+    "registering": "Regisztráció…",
+    "registerSuccess": "Sikeres regisztráció! Nézd meg az e-mailjeidet a fiókod aktiválásához.",
+    "registerFailed": "Sikertelen regisztráció.",
+    "username": "Felhasználónév",
+    "usernamePlaceholder": "Add meg a felhasználóneved",
+    "password": "Jelszó",
+    "passwordPlaceholder": "Add meg a jelszavad",
+    "confirmPassword": "Jelszó megerősítése",
+    "confirmPasswordPlaceholder": "Írd be újra a jelszavad",
+    "email": "E-mail",
+    "emailPlaceholder": "Add meg az e-mail-címed",
+    "slavename": "Szolganév",
+    "passwordMismatch": "A két jelszó nem egyezik.",
+    "noAccount": "Még nincs fiókod?",
+    "haveAccount": "Már van fiókod?"
+  },
+  "profile": {
+    "slave": "Szolga",
+    "edit": "Profil szerkesztése",
+    "updated": "Profil frissítve!",
+    "updateFailed": "Nem sikerült menteni a profilt.",
+    "firstName": "Keresztnév",
+    "lastName": "Vezetéknév",
+    "bio": "Bemutatkozás",
+    "avatar": "Profilkép",
+    "joined": "Csatlakozott",
+    "viewAvatar": "Profilkép megtekintése",
+    "fullAvatar": "Profilkép teljes méretben",
+    "loading": "Profil betöltése"
+  },
+  "overlords": {
+    "title": "Nagyuraim",
+    "create": "Új nagyúr",
+    "createNew": "Új nagyúr létrehozása",
+    "edit": "Nagyúr szerkesztése",
+    "editNamed": "{{name}} szerkesztése",
+    "unnamed": "Névtelen nagyúr",
+    "viewAvatar": "{{name}} profilképének megtekintése",
+    "avatarAlt": "{{name}} profilképe",
+    "breed": "Fajta: {{breed}}",
+    "breedLabel": "Fajta",
+    "noBreed": "Nincs megadva",
+    "noBio": "Nincs bemutatkozás",
+    "name": "Név",
+    "prev": "Előző",
+    "next": "Következő",
+    "previous": "Előző nagyúr",
+    "nextLabel": "Következő nagyúr",
+    "goToStreet": "Irány az utca: {{name}}",
+    "createFailed": "Nem sikerült létrehozni a nagyurat.",
+    "updateFailed": "Nem sikerült menteni a nagyurat.",
+    "loading": "Nagyurak betöltése"
+  },
+  "street": {
+    "title": "Utca",
+    "onStreetWith": "Az utcán: {{name}}",
+    "goHome": "Haza",
+    "pickOverlord": "Posztoláshoz, reagáláshoz és bajuszoláshoz válassz egy nagyurat a <link>Szolgám</link> oldalon, és vidd ki az utcára."
+  },
+  "composer": {
+    "placeholder": "Írj valami nyávosat...",
+    "postAs": "Posztolás mint {{name}}",
+    "attachImage": "Kép csatolása",
+    "removeImage": "Kép eltávolítása",
+    "post": "Posztolás",
+    "posting": "Posztolás…"
+  },
+  "posts": {
+    "edit": "Poszt szerkesztése",
+    "editLabel": "Poszt szerkesztése",
+    "editPlaceholder": "Frissítsd a nyávogásod...",
+    "content": "Poszt szövege",
+    "replaceImage": "Kép cseréje",
+    "delete": "Poszt törlése",
+    "deleteLabel": "Poszt törlése",
+    "deleteConfirm": "Biztosan törlöd ezt a posztot? Ezt nem lehet visszacsinálni (még egy macska sem tudná).",
+    "updated": "Poszt frissítve!",
+    "deleted": "Poszt törölve!",
+    "empty": "Még nincs poszt. 😿",
+    "loading": "Posztok betöltése"
+  },
+  "reactions": {
+    "label": "Reakciók",
+    "needOverlord": "Reagáláshoz vigyél ki egy nagyurat az utcára"
+  },
+  "comments": {
+    "count_one": "{{count}} komment",
+    "count_other": "{{count}} komment",
+    "loading": "Kommentek betöltése",
+    "empty": "Még nincs komment. Nyávogj elsőként!",
+    "placeholder": "Kommentelés mint {{name}}...",
+    "as": "Kommentelés mint {{name}}",
+    "send": "Komment küldése",
+    "needOverlord": "Kommenteléshez vigyél ki egy nagyurat az utcára.",
+    "edit": "Komment szerkesztése",
+    "delete": "Komment törlése",
+    "save": "Komment mentése",
+    "cancelEdit": "Szerkesztés megszakítása"
+  },
+  "search": {
+    "open": "Keresés megnyitása",
+    "placeholder": "Nagyurak keresése...",
+    "label": "Nagyurak keresése",
+    "clear": "Keresés törlése",
+    "close": "Keresés bezárása",
+    "searching": "Keresés…",
+    "noResults": "Nincs találat",
+    "slave": "Szolga: {{name}}"
+  },
+  "notifications": {
+    "label": "Értesítések",
+    "labelUnread": "Értesítések ({{count}} olvasatlan)",
+    "markAllRead": "Mind olvasott",
+    "empty": "Még nincs értesítés. A nagyuraidat egyelőre ignorálják. Egyelőre.",
+    "for": "Neki: {{name}}",
+    "unread": "(olvasatlan)"
+  },
+  "whisker": {
+    "whisker": "Bajuszolom",
+    "unwhisker": "Nem bajuszolom",
+    "whiskered": "Sikeresen megbajuszoltad ezt a nagyurat!",
+    "unwhiskered": "Visszavontad a bajuszolást.",
+    "whiskeredBy": "Bajuszolói",
+    "whiskering": "Bajuszol"
+  },
+  "overlordPage": {
+    "title": "Nagyúr",
+    "posts": "Posztok",
+    "missingId": "Hiányzik a nagyúr azonosítója.",
+    "notFound": "Nincs ilyen nagyúr",
+    "loading": "Nagyúr betöltése",
+    "whiskerHint": "Vidd ki az egyik nagyuradat az utcára, hogy megbajuszolhasd: {{name}}."
+  },
+  "error": {
+    "title": "Belső hiba",
+    "notFoundTitle": "Az oldal nem található",
+    "notFound": "Ez az oldal nem található. Lehet, hogy egy nagyúr leverte az asztalról.",
+    "generic": "Valami elromlott.",
+    "backHome": "Vissza a Catalogra"
+  },
+  "mews": {
+    "title": "Nyávhírek",
+    "tagline": "Minden hír, ami dorombolásra érdemes.",
+    "empty": "Nincs hír, jó hír. Nézz vissza később! 😺",
+    "items": {
+      "testing": {
+        "title": "Rendkívüli nyávhír: elindult a Catalog tesztelése! 🐾",
+        "lede": "Szakértők szerint ez a legnagyobb esemény a kartondoboz feltalálása óta: a Catalog hivatalosan is tesztüzembe lépett.",
+        "p1": "Ez egy mockup változat. Minden szolga, nagyúr, poszt és Purrfect, amit itt látsz, kitalált: nincs mögötte valódi szerver, csak egy nagyon meggyőző utánzat, ami a böngésződben fut.",
+        "p2": "Semmi, amit itt csinálsz, nem kerül szerverre, és nem megy el sehova. A posztjaid, reakcióid és bajuszolásaid ki sem teszik a lábukat a böngésződből. Csak ebben a fülben élnek, és amint bezárod, elfelejtődnek, gyorsabban, mint ahogy egy macska elfelejti, hogy valaha is „nem”-et mondtak neki.",
+        "p3": "Szóval nyugodtan: posztolj, hisssegj, bajuszold meg a szomszéd nagyurát. Nincsenek következmények. Ami, ahogy minden macska tudja, pont így van rendjén.",
+        "p4": "Hibát találtál? Verd le az asztalról, és szólj nekünk.",
+        "quote": "Végre egy közösségi oldal, ami semmit nem vár el tőlem. Purrfect.",
+        "quoteBy": "Mirci, főszerkesztő, a hűtő tetejéről"
+      }
+    }
+  },
+  "meta": {
+    "default": {
+      "description": "Catalog – a közösségi oldal, ahol a macskák uralkodnak, az emberek pedig követik őket."
+    },
+    "login": {
+      "title": "Belépés",
+      "description": "Catalog – a közösségi oldal, ahol a macskák uralkodnak, az emberek pedig követik őket."
+    },
+    "register": {
+      "title": "Regisztráció",
+      "description": "Csatlakozz a Catalogra, és légy a nagyuraid hűséges szolgája."
+    },
+    "mySlave": {
+      "title": "Szolgám",
+      "description": "A szolgaprofilod és a nagyurak, akiket szolgálsz."
+    },
+    "street": {
+      "title": "Utca",
+      "description": "A nagyuraid és az általuk bajuszolt nagyurak posztjai."
+    },
+    "overlord": {
+      "title": "Nagyúr",
+      "description": "Egy nagyúr profilja és posztjai."
+    },
+    "mews": {
+      "title": "Nyávhírek",
+      "description": "Hírek a Catalogról, a közösségi oldalról, ahol a macskák uralkodnak."
+    }
+  },
+  "errors": {
+    "fetchOverlords": "Nem sikerült betölteni a nagyurakat.",
+    "createOverlord": "Nem sikerült létrehozni a nagyurat.",
+    "updateOverlord": "Nem sikerült menteni a nagyurat.",
+    "deleteOverlord": "Nem sikerült törölni a nagyurat.",
+    "fetchOverlord": "Nem sikerült betölteni a nagyurat.",
+    "searchFailed": "A keresés nem sikerült.",
+    "whiskerOverlord": "Nem sikerült megbajuszolni a nagyurat.",
+    "unwhiskerOverlord": "Nem sikerült visszavonni a bajuszolást.",
+    "fetchWhiskerStatus": "Nem sikerült lekérni a bajuszolás állapotát.",
+    "fetchUserData": "Nem sikerült betölteni a felhasználói adatokat.",
+    "updateUserData": "Nem sikerült menteni a felhasználói adatokat.",
+    "react": "Nem sikerült reagálni.",
+    "fetchReactions": "Nem sikerült betölteni a reakciókat.",
+    "registrationFailed": "Sikertelen regisztráció.",
+    "loginFailed": "Sikertelen bejelentkezés.",
+    "logoutFailed": "Sikertelen kijelentkezés.",
+    "loadComments": "Nem sikerült betölteni a kommenteket.",
+    "postComment": "Nem sikerült elküldeni a kommentet.",
+    "updateComment": "Nem sikerült menteni a kommentet.",
+    "deleteComment": "Nem sikerült törölni a kommentet.",
+    "loadNotifications": "Nem sikerült betölteni az értesítéseket.",
+    "updateNotification": "Nem sikerült frissíteni az értesítést.",
+    "updateNotifications": "Nem sikerült frissíteni az értesítéseket.",
+    "fetchStreetPosts": "Nem sikerült betölteni az utca posztjait.",
+    "fetchPosts": "Nem sikerült betölteni a posztokat.",
+    "createPost": "Nem sikerült közzétenni a posztot.",
+    "updatePost": "Nem sikerült menteni a posztot.",
+    "deletePost": "Nem sikerült törölni a posztot."
+  }
+}

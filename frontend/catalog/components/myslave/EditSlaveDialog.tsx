@@ -3,6 +3,7 @@ import { FormField } from "@/components/common/FormField";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ApiError, User } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 type EditSlaveDialogProps = {
   open: boolean;
@@ -12,11 +13,12 @@ type EditSlaveDialogProps = {
 };
 
 export function EditSlaveDialog({ open, onOpenChange, slave, onSave }: EditSlaveDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby={undefined} className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle>{t("profile.edit")}</DialogTitle>
         </DialogHeader>
         {/* Radix unmounts the content while closed, so the form re-reads
             `slave` every time the dialog opens. */}
@@ -29,6 +31,7 @@ export function EditSlaveDialog({ open, onOpenChange, slave, onSave }: EditSlave
 type SlaveFields = Pick<User, "username" | "email" | "first_name" | "last_name" | "bio">;
 
 function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "onSave">) {
+  const { t } = useTranslation();
   const [fields, setFields] = useState<SlaveFields>({
     username: slave.username ?? "",
     email: slave.email ?? "",
@@ -59,7 +62,7 @@ function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "
     try {
       await onSave(payload);
     } catch (err) {
-      setError((err as ApiError).detail || "Failed to update profile.");
+      setError((err as ApiError).detail || t("profile.updateFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -67,29 +70,34 @@ function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <FormField label="Username" name="username" value={fields.username} onChange={handleChange} />
       <FormField
-        label="Email"
+        label={t("auth.username")}
+        name="username"
+        value={fields.username}
+        onChange={handleChange}
+      />
+      <FormField
+        label={t("auth.email")}
         type="email"
         name="email"
         value={fields.email}
         onChange={handleChange}
       />
       <FormField
-        label="First Name"
+        label={t("profile.firstName")}
         name="first_name"
         value={fields.first_name}
         onChange={handleChange}
       />
       <FormField
-        label="Last Name"
+        label={t("profile.lastName")}
         name="last_name"
         value={fields.last_name}
         onChange={handleChange}
       />
-      <FormField label="Bio" name="bio" value={fields.bio} onChange={handleChange} />
+      <FormField label={t("profile.bio")} name="bio" value={fields.bio} onChange={handleChange} />
       <FormField
-        label="Avatar"
+        label={t("profile.avatar")}
         type="file"
         name="avatar"
         accept="image/*"
@@ -103,7 +111,7 @@ function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "
       )}
 
       <Button type="submit" size="lg" disabled={isSubmitting}>
-        {isSubmitting ? "Saving…" : "Save Changes"}
+        {isSubmitting ? t("common.saving") : t("common.saveChanges")}
       </Button>
     </form>
   );

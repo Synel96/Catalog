@@ -7,10 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { registerUser } from "@/src/services/authService";
 import type { ApiError } from "@/src/types/api";
 import { formValues } from "./formValues";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 const REDIRECT_DELAY_MS = 2000;
 
 export function RegisterForm() {
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,17 +29,17 @@ export function RegisterForm() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("auth.passwordMismatch"));
       return;
     }
 
     setIsSubmitting(true);
     try {
       await registerUser(formData);
-      toast.success("Registration successful! Please check your email to activate your account.");
-      setTimeout(() => void navigate("/login"), REDIRECT_DELAY_MS);
+      toast.success(t("auth.registerSuccess"));
+      setTimeout(() => void navigate(localePath("/login")), REDIRECT_DELAY_MS);
     } catch (err) {
-      setError((err as ApiError).detail || "Registration failed.");
+      setError((err as ApiError).detail || t("auth.registerFailed"));
       setIsSubmitting(false);
     }
   };
@@ -43,38 +47,38 @@ export function RegisterForm() {
   return (
     <Card className="w-full gap-6 p-4 shadow-lg sm:w-[400px]">
       <CardHeader>
-        <CardTitle className="text-center text-2xl">Register</CardTitle>
+        <CardTitle className="text-center text-2xl">{t("auth.register")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <FormField
-            label="Slavename"
+            label={t("auth.slavename")}
             name="username"
-            placeholder="Enter your username"
+            placeholder={t("auth.usernamePlaceholder")}
             autoComplete="username"
             required
           />
           <FormField
-            label="Email"
+            label={t("auth.email")}
             type="email"
             name="email"
-            placeholder="Enter your email"
+            placeholder={t("auth.emailPlaceholder")}
             autoComplete="email"
             required
           />
           <FormField
-            label="Password"
+            label={t("auth.password")}
             type="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder={t("auth.passwordPlaceholder")}
             autoComplete="new-password"
             required
           />
           <FormField
-            label="Confirm Password"
+            label={t("auth.confirmPassword")}
             type="password"
             name="confirmPassword"
-            placeholder="Confirm your password"
+            placeholder={t("auth.confirmPasswordPlaceholder")}
             autoComplete="new-password"
             required
           />
@@ -86,14 +90,14 @@ export function RegisterForm() {
           )}
 
           <Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Registering…" : "Register"}
+            {isSubmitting ? t("auth.registering") : t("auth.register")}
           </Button>
         </form>
 
         <p className="mt-4 text-center text-sm">
-          Already have an account?{" "}
-          <a href="/login" className="font-medium underline-offset-4 hover:underline">
-            Login
+          {t("auth.haveAccount")}{" "}
+          <a href={localePath("/login")} className="font-medium underline-offset-4 hover:underline">
+            {t("auth.login")}
           </a>
         </p>
       </CardContent>

@@ -15,20 +15,23 @@ import { getPostsByOverlord } from "@/src/services/postService";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useStreetStore } from "@/src/store/useStreetStore";
 import type { ApiError, Overlord, Post } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 // /overlord?id=<id> (see components/street/links.ts for why not /overlords/@id).
 export default function Page() {
+  const { t } = useTranslation();
   const mounted = useMounted();
   const { urlParsed } = usePageContext();
   const id = Number(urlParsed.search.id);
 
   // Prerendered HTML has no query string, so wait for the browser's URL.
   if (!mounted) return <OverlordSkeleton />;
-  if (!Number.isInteger(id) || id <= 0) return <NotFound message="Missing overlord id." />;
+  if (!Number.isInteger(id) || id <= 0) return <NotFound message={t("overlordPage.missingId")} />;
   return <OverlordProfile key={id} id={id} />;
 }
 
 function OverlordProfile({ id }: { id: number }) {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const streetOverlord = useStreetStore((state) => state.selectedOverlord);
   const [overlord, setOverlord] = useState<Overlord | null>(null);
@@ -50,13 +53,13 @@ function OverlordProfile({ id }: { id: number }) {
       .then((data) => {
         if (cancelled) return;
         setOverlord(data);
-        document.title = `Overlord • ${data.name}`;
+        document.title = `${t("overlordPage.title")} • ${data.name}`;
       })
       .catch((err: ApiError) => !cancelled && setError(err.detail));
     return () => {
       cancelled = true;
     };
-  }, [id, overlordVersion]);
+  }, [id, overlordVersion, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -87,9 +90,9 @@ function OverlordProfile({ id }: { id: number }) {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center gap-2">
-        <h1 className="flex-1 text-3xl font-bold">Overlord</h1>
+        <h1 className="flex-1 text-3xl font-bold">{t("overlordPage.title")}</h1>
         <Button variant="outline" size="sm" onClick={() => history.back()}>
-          <ArrowLeftIcon /> Back
+          <ArrowLeftIcon /> {t("common.back")}
         </Button>
       </div>
 
@@ -109,7 +112,7 @@ function OverlordProfile({ id }: { id: number }) {
         />
         {!streetOverlord && !isOwn && (
           <p className="text-muted-foreground mt-4 text-sm">
-            Go to the Street with one of your overlords to whisker {overlord.name}.
+            {t("overlordPage.whiskerHint", { name: overlord.name })}
           </p>
         )}
       </section>
@@ -120,7 +123,7 @@ function OverlordProfile({ id }: { id: number }) {
         </section>
       )}
 
-      <h2 className="mb-4 text-xl font-bold">Posts</h2>
+      <h2 className="mb-4 text-xl font-bold">{t("overlordPage.posts")}</h2>
       <PostFeed
         posts={posts}
         isLoading={postsLoading}
@@ -143,20 +146,26 @@ function OverlordProfile({ id }: { id: number }) {
 }
 
 function NotFound({ message }: { message: string }) {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto max-w-xl px-4 py-16">
-      <h1 className="text-destructive mb-2 text-2xl font-bold">Overlord not found</h1>
+      <h1 className="text-destructive mb-2 text-2xl font-bold">{t("overlordPage.notFound")}</h1>
       <p className="text-muted-foreground mb-6">{message}</p>
       <Button variant="outline" onClick={() => history.back()}>
-        <ArrowLeftIcon /> Back
+        <ArrowLeftIcon /> {t("common.back")}
       </Button>
     </div>
   );
 }
 
 function OverlordSkeleton() {
+  const { t } = useTranslation();
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8" aria-busy="true" aria-label="Loading overlord">
+    <div
+      className="mx-auto max-w-4xl px-4 py-8"
+      aria-busy="true"
+      aria-label={t("overlordPage.loading")}
+    >
       <Skeleton className="mb-8 h-9 w-40" />
       <div className="flex gap-6">
         <Skeleton className="size-[100px] rounded-full" />

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useOverlordsStore } from "@/src/store/useOverlordsStore";
 import type { ApiError, Overlord } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 type OverlordFormDialogProps = {
   open: boolean;
@@ -15,11 +16,12 @@ type OverlordFormDialogProps = {
 // One dialog for both creating and editing (the old Create/EditOverlordModal
 // were identical apart from the title, button label and store action).
 export function OverlordFormDialog({ open, onOpenChange, overlord }: OverlordFormDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent aria-describedby={undefined}>
         <DialogHeader>
-          <DialogTitle>{overlord ? "Edit Overlord" : "Create New Overlord"}</DialogTitle>
+          <DialogTitle>{overlord ? t("overlords.edit") : t("overlords.createNew")}</DialogTitle>
         </DialogHeader>
         <OverlordForm overlord={overlord} onDone={() => onOpenChange(false)} />
       </DialogContent>
@@ -30,6 +32,7 @@ export function OverlordFormDialog({ open, onOpenChange, overlord }: OverlordFor
 type OverlordFields = Pick<Overlord, "name" | "bio" | "breed">;
 
 function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone: () => void }) {
+  const { t } = useTranslation();
   const addOverlord = useOverlordsStore((state) => state.addOverlord);
   const updateOverlord = useOverlordsStore((state) => state.updateOverlord);
 
@@ -67,7 +70,7 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
       }
       onDone();
     } catch (err) {
-      const fallback = overlord ? "Failed to update overlord." : "Failed to create overlord.";
+      const fallback = overlord ? t("overlords.updateFailed") : t("overlords.createFailed");
       setError((err as ApiError).detail || fallback);
     } finally {
       setIsSubmitting(false);
@@ -77,7 +80,7 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
       <FormField
-        label="Name"
+        label={t("overlords.name")}
         name="name"
         value={fields.name}
         onChange={handleChange}
@@ -86,21 +89,21 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
         required
       />
       <FormField
-        label="Bio"
+        label={t("profile.bio")}
         name="bio"
         value={fields.bio}
         onChange={handleChange}
         disabled={isSubmitting}
       />
       <FormField
-        label="Breed"
+        label={t("overlords.breedLabel")}
         name="breed"
         value={fields.breed}
         onChange={handleChange}
         disabled={isSubmitting}
       />
       <FormField
-        label="Avatar"
+        label={t("profile.avatar")}
         type="file"
         name="avatar"
         accept="image/*"
@@ -115,7 +118,11 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
       )}
 
       <Button type="submit" size="lg" disabled={!fields.name.trim() || isSubmitting}>
-        {isSubmitting ? "Saving…" : overlord ? "Save Changes" : "Create"}
+        {isSubmitting
+          ? t("common.saving")
+          : overlord
+            ? t("common.saveChanges")
+            : t("common.create")}
       </Button>
     </form>
   );

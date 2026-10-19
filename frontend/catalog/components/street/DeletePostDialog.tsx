@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { deletePost } from "@/src/services/postService";
 import type { ApiError, Post } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 type DeletePostDialogProps = {
   post: Post | null;
@@ -18,6 +19,7 @@ type DeletePostDialogProps = {
 };
 
 export function DeletePostDialog({ post, onOpenChange, onDeleted }: DeletePostDialogProps) {
+  const { t } = useTranslation();
   const [error, setError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -46,11 +48,9 @@ export function DeletePostDialog({ post, onOpenChange, onDeleted }: DeletePostDi
       <DialogContent role="alertdialog" className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <TriangleAlertIcon className="text-destructive size-5" /> Delete Post
+            <TriangleAlertIcon className="text-destructive size-5" /> {t("posts.delete")}
           </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this post? This action cannot be undone.
-          </DialogDescription>
+          <DialogDescription>{t("posts.deleteConfirm")}</DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -61,10 +61,10 @@ export function DeletePostDialog({ post, onOpenChange, onDeleted }: DeletePostDi
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? "Deleting…" : "Delete"}
+            {isDeleting ? t("common.deleting") : t("common.delete")}
           </Button>
         </div>
       </DialogContent>

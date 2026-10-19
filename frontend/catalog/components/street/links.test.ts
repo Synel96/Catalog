@@ -7,7 +7,8 @@ describe("street helpers", () => {
     expect(overlordHref(42)).toBe("/overlord?id=42");
   });
 
-  it("formats post dates in Hungarian", () => {
-    expect(formatPostDate("2026-10-18T10:05:00Z")).toMatch(/^2026\. október 18\./);
+  it("formats post dates in the UI language", () => {
+    expect(formatPostDate("2026-10-18T10:05:00Z", "hu")).toMatch(/^2026\. október 18\./);
+    expect(formatPostDate("2026-10-18T10:05:00Z", "en")).toMatch(/^18 October 2026/);
   });
 });

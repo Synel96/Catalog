@@ -1,3 +1,4 @@
+import i18n from "@/src/i18n";
 import { api, toApiError } from "./api";
 import type { Post } from "@/src/types/api";
 
@@ -7,7 +8,7 @@ export async function getStreetPosts(): Promise<Post[]> {
     const response = await api.get<Post[]>("feed/posts/");
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to fetch street posts.");
+    throw toApiError(error, i18n.t("errors.fetchStreetPosts"));
   }
 }
 
@@ -16,7 +17,7 @@ export async function getPostsByOverlord(overlordId: number): Promise<Post[]> {
     const response = await api.get<Post[]>(`feed/posts/by-overlord/${overlordId}/`);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to fetch posts.");
+    throw toApiError(error, i18n.t("errors.fetchPosts"));
   }
 }
 
@@ -26,7 +27,7 @@ export async function createPost(formData: FormData): Promise<Post> {
     const response = await api.post<Post>("feed/posts/", formData);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to create post.");
+    throw toApiError(error, i18n.t("errors.createPost"));
   }
 }
 
@@ -35,7 +36,7 @@ export async function updatePost(postId: number, formData: FormData): Promise<Po
     const response = await api.patch<Post>(`feed/posts/${postId}/`, formData);
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to update post.");
+    throw toApiError(error, i18n.t("errors.updatePost"));
   }
 }
 
@@ -43,6 +44,6 @@ export async function deletePost(postId: number): Promise<void> {
   try {
     await api.delete(`feed/posts/${postId}/`);
   } catch (error) {
-    throw toApiError(error, "Failed to delete post.");
+    throw toApiError(error, i18n.t("errors.deletePost"));
   }
 }

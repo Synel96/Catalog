@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { mediaUrl } from "@/src/services/api";
 import { useStreetStore } from "@/src/store/useStreetStore";
 import type { Overlord } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
 
 const OVERLORD_PLACEHOLDER = "/media/placeholders/overlord_placeholder.png";
 
@@ -18,6 +20,8 @@ type MyOverlordsCarouselProps = {
 };
 
 export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlordsCarouselProps) {
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
   const length = overlords.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [imageOpen, setImageOpen] = useState(false);
@@ -25,14 +29,14 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
 
   const createButton = (
     <Button size="lg" onClick={onCreate} className="w-full">
-      <PlusIcon /> Create Overlord
+      <PlusIcon /> {t("overlords.create")}
     </Button>
   );
 
   if (length === 0) {
     return (
       <div className="p-8 text-center">
-        <h2 className="mb-8 text-2xl font-bold">My Overlords</h2>
+        <h2 className="mb-8 text-2xl font-bold">{t("overlords.title")}</h2>
         <div className="mx-auto max-w-xs">{createButton}</div>
       </div>
     );
@@ -42,20 +46,20 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
   const index = Math.min(currentIndex, length - 1);
   const current = overlords[index];
   const avatarUrl = mediaUrl(current.avatar, OVERLORD_PLACEHOLDER);
-  const name = current.name || "Unnamed Overlord";
+  const name = current.name || t("overlords.unnamed");
 
   const prevSlide = () => setCurrentIndex(index === 0 ? length - 1 : index - 1);
   const nextSlide = () => setCurrentIndex(index === length - 1 ? 0 : index + 1);
 
   return (
     <div className="mx-auto max-w-[360px] p-4 text-center sm:p-8">
-      <h2 className="mb-8 text-2xl font-bold tracking-wide">My Overlords</h2>
+      <h2 className="mb-8 text-2xl font-bold tracking-wide">{t("overlords.title")}</h2>
 
       <Card className="relative mx-auto w-full max-w-[320px] p-4 shadow-sm transition-[transform,box-shadow] duration-300 hover:-translate-y-2 hover:shadow-xl">
         <Button
           variant="ghost"
           size="icon"
-          aria-label={`Edit ${name}`}
+          aria-label={t("overlords.editNamed", { name })}
           onClick={() => onEdit(current)}
           className="absolute top-3 right-3"
         >
@@ -66,33 +70,45 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
           <button
             type="button"
             onClick={() => setImageOpen(true)}
-            aria-label={`View ${name}'s avatar`}
+            aria-label={t("overlords.viewAvatar", { name })}
             className="mb-2 rounded-full transition-transform duration-300 hover:scale-105"
           >
             <Avatar className="border-primary size-[120px] border-4">
-              <AvatarImage src={avatarUrl} alt={`${name}'s avatar`} />
+              <AvatarImage src={avatarUrl} alt={t("overlords.avatarAlt", { name })} />
               <AvatarFallback className="text-2xl">{name.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
           </button>
 
           <h3 className="text-lg font-bold capitalize">{name}</h3>
-          <p className="text-foreground/80 italic">Breed: {current.breed || "No breed"}</p>
+          <p className="text-foreground/80 italic">
+            {t("overlords.breed", { breed: current.breed || t("overlords.noBreed") })}
+          </p>
           <p
             className="text-muted-foreground mb-4 max-w-[260px] truncate text-sm italic"
-            title={current.bio || "No bio"}
+            title={current.bio || t("overlords.noBio")}
           >
-            {current.bio || "No bio"}
+            {current.bio || t("overlords.noBio")}
           </p>
 
           <div className="mb-2 flex items-center justify-center gap-4">
-            <Button variant="outline" size="sm" onClick={prevSlide} aria-label="Previous overlord">
-              <ChevronLeftIcon /> Prev
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={prevSlide}
+              aria-label={t("overlords.previous")}
+            >
+              <ChevronLeftIcon /> {t("overlords.prev")}
             </Button>
             <span className="text-muted-foreground text-xs" aria-live="polite">
               {index + 1} / {length}
             </span>
-            <Button variant="outline" size="sm" onClick={nextSlide} aria-label="Next overlord">
-              Next <ChevronRightIcon />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={nextSlide}
+              aria-label={t("overlords.nextLabel")}
+            >
+              {t("overlords.next")} <ChevronRightIcon />
             </Button>
           </div>
 
@@ -101,10 +117,10 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
             className="w-full"
             onClick={() => {
               goToStreet(current);
-              void navigate("/street");
+              void navigate(localePath("/street"));
             }}
           >
-            <span className="truncate">Go to the Street with {name}</span>
+            <span className="truncate">{t("overlords.goToStreet", { name })}</span>
           </Button>
         </CardContent>
       </Card>

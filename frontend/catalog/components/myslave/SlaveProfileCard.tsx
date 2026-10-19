@@ -9,10 +9,15 @@ import { updateCurrentUser } from "@/src/services/userService";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import type { User } from "@/src/types/api";
 import { EditSlaveDialog } from "./EditSlaveDialog";
+import { useTranslation } from "react-i18next";
+import { DATE_LOCALES } from "@/src/i18n/config";
+import { useLang } from "@/src/i18n/hooks";
 
 const SLAVE_PLACEHOLDER = "/media/placeholders/slave_placeholder.png";
 
 export function SlaveProfileCard({ user }: { user: User }) {
+  const { t } = useTranslation();
+  const lang = useLang();
   const refetchUser = useAuthStore((state) => state.refetchUser);
   const [editOpen, setEditOpen] = useState(false);
   const [imageOpen, setImageOpen] = useState(false);
@@ -22,7 +27,7 @@ export function SlaveProfileCard({ user }: { user: User }) {
     await updateCurrentUser(formData);
     await refetchUser();
     setEditOpen(false);
-    toast.success("Profile updated!");
+    toast.success(t("profile.updated"));
   };
 
   const avatarUrl = mediaUrl(user.avatar, SLAVE_PLACEHOLDER);
@@ -36,7 +41,7 @@ export function SlaveProfileCard({ user }: { user: User }) {
             <button
               type="button"
               onClick={() => setImageOpen(true)}
-              aria-label="View avatar"
+              aria-label={t("profile.viewAvatar")}
               className="rounded-full transition-[transform,box-shadow] duration-200 hover:scale-[1.08] hover:shadow-md"
             >
               <Avatar className="size-16">
@@ -54,14 +59,14 @@ export function SlaveProfileCard({ user }: { user: User }) {
 
           {user.bio && (
             <div>
-              <p className="text-muted-foreground mb-1 text-sm">Bio</p>
+              <p className="text-muted-foreground mb-1 text-sm">{t("profile.bio")}</p>
               <p>{user.bio}</p>
             </div>
           )}
 
           <div>
-            <p className="text-muted-foreground mb-1 text-sm">Joined</p>
-            <p>{new Date(user.date_joined).toLocaleDateString()}</p>
+            <p className="text-muted-foreground mb-1 text-sm">{t("profile.joined")}</p>
+            <p>{new Date(user.date_joined).toLocaleDateString(DATE_LOCALES[lang])}</p>
           </div>
 
           <Button
@@ -70,7 +75,7 @@ export function SlaveProfileCard({ user }: { user: User }) {
             className="mt-2 w-full"
             onClick={() => setEditOpen(true)}
           >
-            Edit Profile
+            {t("profile.edit")}
           </Button>
         </CardContent>
       </Card>
@@ -86,7 +91,7 @@ export function SlaveProfileCard({ user }: { user: User }) {
         open={imageOpen}
         onOpenChange={setImageOpen}
         src={avatarUrl}
-        alt="Full size avatar"
+        alt={t("profile.fullAvatar")}
       />
     </>
   );

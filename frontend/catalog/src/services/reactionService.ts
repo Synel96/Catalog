@@ -1,3 +1,4 @@
+import i18n from "@/src/i18n";
 import { api, toApiError } from "./api";
 import type { ReactionSummary, ReactionType, ToggleReactionResult } from "@/src/types/api";
 
@@ -15,7 +16,7 @@ export async function toggleReaction(
     });
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to react.");
+    throw toApiError(error, i18n.t("errors.react"));
   }
 }
 
@@ -26,6 +27,6 @@ export async function getPostReactions(postId: number): Promise<ReactionSummary>
     });
     return response.data;
   } catch (error) {
-    throw toApiError(error, "Failed to fetch reactions.");
+    throw toApiError(error, i18n.t("errors.fetchReactions"));
   }
 }

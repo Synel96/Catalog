@@ -3,6 +3,7 @@ import { MoonIcon, SunIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMounted } from "@/src/hooks/use-mounted";
 import { applyTheme, type Theme } from "@/src/theme";
+import { useTranslation } from "react-i18next";
 
 function readCurrentTheme(): Theme {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
@@ -10,6 +11,7 @@ function readCurrentTheme(): Theme {
 
 export function ThemeToggle() {
   const mounted = useMounted();
+  const { t } = useTranslation();
   const [override, setOverride] = useState<Theme | null>(null);
 
   if (!mounted) {
@@ -17,7 +19,7 @@ export function ThemeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        aria-label="Toggle theme"
+        aria-label={t("theme.toggle")}
         disabled
         className="text-(--brand-on-surface) hover:bg-(--brand-on-surface)/10 hover:text-(--brand-on-surface)"
       >
@@ -40,7 +42,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      aria-label="Toggle theme"
+      aria-label={t("theme.toggle")}
       onClick={toggle}
       className="text-(--brand-on-surface) hover:bg-(--brand-on-surface)/10 hover:text-(--brand-on-surface)"
     >

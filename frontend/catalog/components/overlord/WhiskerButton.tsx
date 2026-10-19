@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createWhisker, deleteWhisker, getWhiskerStatus } from "@/src/services/whiskerService";
 import type { ApiError } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 type WhiskerButtonProps = {
   fromId: number;
@@ -15,6 +16,7 @@ type WhiskerButtonProps = {
 // Whisker (follow) toggle between the user's street overlord and another one.
 // Shows the action that applies, instead of the old Whisker + Unwhisker pair.
 export function WhiskerButton({ fromId, toId, onChange }: WhiskerButtonProps) {
+  const { t } = useTranslation();
   const [whiskered, setWhiskered] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -33,10 +35,10 @@ export function WhiskerButton({ fromId, toId, onChange }: WhiskerButtonProps) {
     try {
       if (whiskered) {
         await deleteWhisker(fromId, toId);
-        toast.success("Unwhiskered this overlord.");
+        toast.success(t("whisker.unwhiskered"));
       } else {
         await createWhisker(fromId, toId);
-        toast.success("Whiskered this overlord successfully!");
+        toast.success(t("whisker.whiskered"));
       }
       setWhiskered(!whiskered);
       onChange();
@@ -56,7 +58,7 @@ export function WhiskerButton({ fromId, toId, onChange }: WhiskerButtonProps) {
       className={whiskered ? undefined : "post-pulse"}
     >
       <img src="/whisker-icon.webp" alt="" className="size-[18px] dark:invert" />
-      {whiskered ? "Unwhisker" : "Whisker"}
+      {whiskered ? t("whisker.unwhisker") : t("whisker.whisker")}
     </Button>
   );
 }

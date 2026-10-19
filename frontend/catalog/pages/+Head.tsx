@@ -3,21 +3,20 @@
 import geistFontUrl from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import { usePageContext } from "vike-react/usePageContext";
 import { SITE_URL, BRAND_NAME, SITE_DESCRIPTION } from "../components/site";
-import { buildMeta } from "../src/seo";
+import { DEFAULT_LANG, type SupportedLang } from "../src/i18n/config";
+import { buildMeta, pageMeta } from "../src/seo";
 import { THEME_BOOTSTRAP_SCRIPT } from "../src/theme";
 
 export function Head() {
   const pageContext = usePageContext() as {
     urlPathname: string;
-    config?: {
-      title?: string;
-      description?: string;
-    };
+    lang?: SupportedLang;
   };
+  const lang = pageContext.lang ?? DEFAULT_LANG;
   const meta = buildMeta({
     pathname: pageContext.urlPathname,
-    title: pageContext.config?.title,
-    description: pageContext.config?.description,
+    lang,
+    ...pageMeta(lang, pageContext.urlPathname),
   });
 
   return (
@@ -29,6 +28,9 @@ export function Head() {
       <meta name="keywords" content="cats, social network, blog, community, Catalog" />
       <link rel="icon" type="image/png" href="/catalog.png" />
       <link rel="canonical" href={meta.canonicalUrl} />
+      {meta.alternates.map((alt) => (
+        <link key={alt.hreflang} rel="alternate" hrefLang={alt.hreflang} href={alt.href} />
+      ))}
 
       {/* Open Graph / Social Media */}
       <meta property="og:type" content="website" />

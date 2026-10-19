@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getPostReactions, toggleReaction } from "@/src/services/reactionService";
 import type { ApiError, ReactionSummary, ReactionType } from "@/src/types/api";
+import { useTranslation } from "react-i18next";
 
 const REACTIONS: { type: ReactionType; label: string; icon: string }[] = [
   { type: "purrfect", label: "Purrfect", icon: "/reactions/purrfect.webp" },
@@ -20,6 +21,7 @@ type ReactionBarProps = {
 };
 
 export function ReactionBar({ postId, summary, overlordId }: ReactionBarProps) {
+  const { t } = useTranslation();
   const [counts, setCounts] = useState(summary);
   const [syncedSummary, setSyncedSummary] = useState(summary);
   const [pending, setPending] = useState(false);
@@ -48,8 +50,8 @@ export function ReactionBar({ postId, summary, overlordId }: ReactionBarProps) {
     <div
       className="flex gap-2 overflow-x-auto pt-7 pb-1 sm:gap-3"
       role="group"
-      aria-label="Reactions"
-      title={overlordId ? undefined : "Go to the Street with an overlord to react"}
+      aria-label={t("reactions.label")}
+      title={overlordId ? undefined : t("reactions.needOverlord")}
     >
       {REACTIONS.map(({ type, label, icon }) => {
         const count = counts[type] ?? 0;

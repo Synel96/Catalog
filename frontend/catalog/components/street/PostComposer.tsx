@@ -10,6 +10,7 @@ import { mediaUrl } from "@/src/services/api";
 import { createPost } from "@/src/services/postService";
 import type { ApiError, Overlord } from "@/src/types/api";
 import { OVERLORD_PLACEHOLDER } from "./media";
+import { useTranslation } from "react-i18next";
 
 type PostComposerProps = {
   overlord: Overlord;
@@ -18,6 +19,7 @@ type PostComposerProps = {
 
 // Posting form shown on the Street and on the selected overlord's own page.
 export function PostComposer({ overlord, onPosted }: PostComposerProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,8 +63,8 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Write something mew..."
-              aria-label={`Post as ${overlord.name}`}
+              placeholder={t("composer.placeholder")}
+              aria-label={t("composer.postAs", { name: overlord.name })}
               rows={2}
               disabled={isSubmitting}
             />
@@ -77,7 +79,11 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                 disabled={isSubmitting}
               />
               <Button variant="secondary" size="icon" asChild>
-                <label htmlFor={fileInputId} aria-label="Attach image" className="cursor-pointer">
+                <label
+                  htmlFor={fileInputId}
+                  aria-label={t("composer.attachImage")}
+                  className="cursor-pointer"
+                >
                   <ImageIcon />
                 </label>
               </Button>
@@ -87,7 +93,7 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                   <Button
                     variant="ghost"
                     size="icon-xs"
-                    aria-label="Remove image"
+                    aria-label={t("composer.removeImage")}
                     onClick={() => setImage(null)}
                   >
                     <XIcon />
@@ -100,7 +106,7 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                 disabled={!canSubmit}
                 className="post-pulse ml-auto rounded-full px-4"
               >
-                <PawPrintIcon /> {isSubmitting ? "Posting…" : "Post"}
+                <PawPrintIcon /> {isSubmitting ? t("composer.posting") : t("composer.post")}
               </Button>
             </div>
           </div>

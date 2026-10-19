@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/push-drawer";
 import { BRAND_NAME } from "./site";
 import { useNavLinks } from "./useNavLinks";
+import { useTranslation } from "react-i18next";
+import { useLocalePath } from "@/src/i18n/hooks";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 type NavbarProps = {
   // Optional so the navbar still works standalone; the layout passes these
@@ -49,6 +52,8 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
   const goHome = useStreetStore((state) => state.goHome);
   const clearNotifications = useNotificationsStore((state) => state.clear);
   const links = useNavLinks();
+  const { t } = useTranslation();
+  const localePath = useLocalePath();
 
   const isActive = (href: string) =>
     href === "/" ? urlPathname === href : urlPathname.startsWith(href);
@@ -68,16 +73,20 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
     goHome();
     clearNotifications();
     setOpen(false);
-    await navigate("/login");
+    await navigate(localePath("/login"));
   };
 
   return (
     <header className="sticky top-0 z-40 border-b border-(--brand-on-surface)/10 bg-(--brand-surface) text-(--brand-on-surface) backdrop-blur supports-backdrop-filter:bg-[color-mix(in_oklch,var(--brand-surface),transparent_5%)]">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6">
-        <a href="/" className="shrink-0" aria-label={`${BRAND_NAME} home`}>
+        <a
+          href={localePath("/")}
+          className="shrink-0"
+          aria-label={t("nav.home", { brand: BRAND_NAME })}
+        >
           <img
             src="/brand.png"
-            alt={`${BRAND_NAME} logo`}
+            alt={t("nav.logo", { brand: BRAND_NAME })}
             className="h-10 w-[110px] rounded-md bg-[#ffe6e6] object-contain shadow-sm transition-transform duration-200 hover:scale-105 hover:shadow-md sm:h-[60px] sm:w-[200px]"
           />
         </a>
@@ -85,10 +94,10 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
         {onStreet ? (
           <StreetBar />
         ) : (
-          <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
+          <nav aria-label={t("nav.main")} className="hidden items-center gap-6 md:flex">
             {links.map((item) => (
-              <a key={item.href} href={item.href} className={navLinkClass(item.href)}>
-                {item.label}
+              <a key={item.href} href={localePath(item.href)} className={navLinkClass(item.href)}>
+                {t(item.labelKey)}
               </a>
             ))}
           </nav>
@@ -98,13 +107,13 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
           {isAuthenticated && (
             <>
               <span className={onStreet ? "hidden" : "mr-2 hidden text-sm font-medium lg:inline"}>
-                Welcome, {user?.username}!
+                {t("nav.welcome", { name: user?.username })}
               </span>
               <NotificationBell className={onStreet ? "hidden sm:block" : undefined} />
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Logout"
+                aria-label={t("nav.logout")}
                 onClick={handleLogout}
                 className={`hidden ${onStreet ? "" : "md:inline-flex"} ${iconButtonClass}`}
               >
@@ -112,6 +121,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
               </Button>
             </>
           )}
+          <LanguageSwitcher className="hidden md:flex" />
           <ThemeToggle />
           <div className={onStreet ? undefined : "md:hidden"}>
             {mounted ? (
@@ -120,7 +130,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="Open menu"
+                    aria-label={t("nav.openMenu")}
                     className={iconButtonClass}
                   >
                     <span className="relative size-5">
@@ -139,28 +149,30 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
                 </PushDrawerTrigger>
                 <PushDrawerContent
                   open={open}
-                  closeLabel="Close menu"
+                  closeLabel={t("nav.closeMenu")}
                   aria-describedby={undefined}
                   className="border-l-(--brand-on-surface)/10 bg-(--brand-surface) text-(--brand-on-surface)"
                 >
                   {/* Kept for screen readers (Radix requires an accessible dialog title) but not shown visually. */}
-                  <PushDrawerTitle className="sr-only">Navigation menu</PushDrawerTitle>
+                  <PushDrawerTitle className="sr-only">{t("nav.navigationMenu")}</PushDrawerTitle>
 
                   <nav className="mt-12 flex flex-col gap-1 px-4 pb-6">
                     {isAuthenticated && (
-                      <p className="px-3 pb-2 text-sm font-medium">Welcome, {user?.username}!</p>
+                      <p className="px-3 pb-2 text-sm font-medium">
+                        {t("nav.welcome", { name: user?.username })}
+                      </p>
                     )}
                     {links.map((item) => (
                       <PushDrawerClose asChild key={item.href}>
                         <a
-                          href={item.href}
+                          href={localePath(item.href)}
                           className={`rounded-md px-3 py-2 text-sm ${
                             isActive(item.href)
                               ? "bg-(--brand-on-surface)/15 font-medium text-(--brand-on-surface)"
                               : "text-(--brand-on-surface)/75 hover:bg-(--brand-on-surface)/10 hover:text-(--brand-on-surface)"
                           }`}
                         >
-                          {item.label}
+                          {t(item.labelKey)}
                         </a>
                       </PushDrawerClose>
                     ))}
@@ -170,17 +182,18 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
                         onClick={handleLogout}
                         className="rounded-md px-3 py-2 text-left text-sm text-(--brand-on-surface)/75 hover:bg-(--brand-on-surface)/10 hover:text-(--brand-on-surface)"
                       >
-                        Logout
+                        {t("nav.logout")}
                       </button>
                     )}
                   </nav>
+                  <LanguageSwitcher className="mx-4 border-t border-(--brand-on-surface)/10 pt-4" />
                 </PushDrawerContent>
               </PushDrawer>
             ) : (
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Open menu"
+                aria-label={t("nav.openMenu")}
                 disabled
                 className={iconButtonClass}
               >

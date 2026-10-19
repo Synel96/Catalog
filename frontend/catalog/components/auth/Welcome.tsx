@@ -1,6 +1,7 @@
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 // The frame is 3:2 like the slides (1536×1024). The square logo image is
 // letterboxed on its own background colour instead of being cropped.
@@ -16,6 +17,7 @@ const SLIDES = [
 const AUTOPLAY_MS = 5000;
 
 export function Welcome() {
+  const { t } = useTranslation();
   const [current, setCurrent] = useState(0);
   const length = SLIDES.length;
 
@@ -32,12 +34,12 @@ export function Welcome() {
 
   return (
     <div className="w-full p-4 text-center sm:p-8">
-      <h2 className="mb-4 text-3xl font-bold">Have a mice day!</h2>
+      <h2 className="mb-4 text-3xl font-bold">{t("welcome.title")}</h2>
 
       <div className="relative mx-auto aspect-[3/2] w-full max-w-[900px] overflow-hidden rounded-xl bg-[#2c2e30] shadow-md">
         <img
           src={SLIDES[current].src}
-          alt={`Slide ${current + 1} of ${length}`}
+          alt={t("welcome.slide", { current: current + 1, total: length })}
           className={`block size-full ${
             SLIDES[current].fit === "contain" ? "object-contain" : "object-cover"
           }`}
@@ -45,7 +47,7 @@ export function Welcome() {
         <Button
           variant="secondary"
           size="icon"
-          aria-label="Previous slide"
+          aria-label={t("welcome.previous")}
           onClick={prevSlide}
           className="absolute top-1/2 left-2 -translate-y-1/2 opacity-75 hover:opacity-100"
         >
@@ -54,7 +56,7 @@ export function Welcome() {
         <Button
           variant="secondary"
           size="icon"
-          aria-label="Next slide"
+          aria-label={t("welcome.next")}
           onClick={nextSlide}
           className="absolute top-1/2 right-2 -translate-y-1/2 opacity-75 hover:opacity-100"
         >

@@ -1,6 +1,7 @@
 import "./Layout.css";
 import { useState } from "react";
 import { usePageContext } from "vike-react/usePageContext";
+import { I18nProvider } from "../components/I18nProvider";
 import { StoreHydrator } from "../components/StoreHydrator";
 import { Footer } from "../components/Footer";
 import { MockModeBanner } from "../components/MockModeBanner";
@@ -8,9 +9,27 @@ import { Navbar } from "../components/Navbar";
 import { PageLoading } from "../components/PageLoading";
 import { PushDrawerBody } from "../components/ui/push-drawer";
 import { Toaster } from "../components/ui/sonner";
+import { useTranslation } from "react-i18next";
+import { useConfig } from "vike-react/useConfig";
+import { useLang } from "../src/i18n/hooks";
+import { pageMeta } from "../src/seo";
 
+// The provider must sit above everything that translates, so it applies
+// the URL's language before they render.
 export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <I18nProvider>
+      <LayoutInner>{children}</LayoutInner>
+    </I18nProvider>
+  );
+}
+
+function LayoutInner({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { urlPathname } = usePageContext();
+  const lang = useLang();
+  // <title> and the meta description in the page's language.
+  useConfig()(pageMeta(lang, urlPathname));
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPathname, setMenuPathname] = useState(urlPathname);
 
@@ -26,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
       <a href="#page-content" className="skip-link">
-        Skip to content
+        {t("a11y.skipToContent")}
       </a>
       <StoreHydrator />
       <MockModeBanner />
