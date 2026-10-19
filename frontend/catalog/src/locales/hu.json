@@ -251,6 +251,10 @@
     "mews": {
       "title": "Nyávhírek",
       "description": "Hírek a Catalogról, a közösségi oldalról, ahol a macskák uralkodnak."
+    },
+    "offline": {
+      "title": "Offline",
+      "description": "Nincs internetkapcsolat."
     }
   },
   "errors": {
@@ -354,5 +358,20 @@
       "missing": "Ezen az eszközön nem található kamera.",
       "failed": "Nem sikerült elindítani a kamerát. Lehet, hogy egy másik alkalmazás használja."
     }
+  },
+  "offline": {
+    "title": "Nincs internet",
+    "body": "A macskák átrágták a kábelt. Vagy csak offline vagy. Ellenőrizd a kapcsolatot, és próbáld újra.",
+    "retry": "Újrapróbálom"
+  },
+  "install": {
+    "title": "Töltsd le az appot",
+    "body": "A jobb felhasználói élményért töltsd le a Catalogot: a kezdőképernyőről indul, mint bármelyik app, teljes képernyőn és gyorsan.",
+    "button": "App letöltése",
+    "installed": "A Catalog telepítve. Keresd a kezdőképernyőn!",
+    "iosTitle": "Add hozzá a Catalogot a kezdőképernyőhöz",
+    "iosSteps": "Safariban koppints a <b>Megosztás</b> gombra (négyzet felfelé mutató nyíllal), majd válaszd a <b>Főképernyőhöz adás</b> lehetőséget.",
+    "otherTitle": "A Catalog telepítése",
+    "otherSteps": "Nyisd meg a böngésző menüjét, és válaszd az <b>Alkalmazás telepítése</b> vagy a <b>Hozzáadás a kezdőképernyőhöz</b> lehetőséget. Chrome-ban vagy Edge-ben a telepítés ikon a címsorban is lehet."
   }
 }

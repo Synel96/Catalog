@@ -175,6 +175,21 @@ to search + "Go Home". The choice is persisted like the auth store.
   static host, since the id is only read in the browser.
 - Mock mode covers all of it, including the websocket.
 
+## Installable app (PWA)
+
+- `public/manifest.webmanifest` + icons in `public/icons/` (generated from
+  `public/catalog.png`, incl. maskable and Apple touch icons), linked from
+  `pages/+Head.tsx` with `theme-color`.
+- `public/sw.js`, registered by `src/pwa.ts` (production builds only, from
+  `pages/+client.ts`): pages network first, hashed build files cache first,
+  images/fonts stale-while-revalidate; `/api/` and other origins are never
+  touched. With no network, unseen pages get `/offline` (precached with its
+  code, EN and HU). Bump `VERSION` in `sw.js` to drop all caches.
+- The home page's "Get the app" card installs through the browser's prompt
+  where there is one (Chrome, Edge, Android) and explains Add to Home Screen
+  elsewhere (iOS). Launched from the home screen, a logged-in user goes
+  straight to My Slave.
+
 ## Deploying
 
 `vercel.json` deploys `dist/client` as a static site and sets security

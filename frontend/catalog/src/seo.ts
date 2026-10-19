@@ -21,6 +21,7 @@ const ROUTE_META: Record<string, string> = {
   "/street": "street",
   "/overlord": "overlord",
   "/mews": "mews",
+  "/offline": "offline",
 };
 
 export function pageMeta(

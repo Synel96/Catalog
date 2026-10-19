@@ -251,6 +251,10 @@
     "mews": {
       "title": "Mews",
       "description": "News from Catalog, the social network where cats rule."
+    },
+    "offline": {
+      "title": "Offline",
+      "description": "You're offline."
     }
   },
   "errors": {
@@ -354,5 +358,20 @@
       "missing": "No camera found on this device.",
       "failed": "The camera couldn't be started. It may be in use by another app."
     }
+  },
+  "offline": {
+    "title": "No internet",
+    "body": "The cats chewed through the cable. Or you're just offline. Check your connection and try again.",
+    "retry": "Try again"
+  },
+  "install": {
+    "title": "Get the app",
+    "body": "For the best experience, install Catalog: it opens from your home screen like any app, full screen and fast.",
+    "button": "Download the app",
+    "installed": "Catalog is installed. Find it on your home screen!",
+    "iosTitle": "Add Catalog to your Home Screen",
+    "iosSteps": "In Safari, tap the <b>Share</b> button (the square with an arrow), then <b>Add to Home Screen</b>.",
+    "otherTitle": "Install Catalog",
+    "otherSteps": "Open your browser's menu and choose <b>Install app</b> or <b>Add to Home screen</b>. In Chrome or Edge, the install icon may also be in the address bar."
   }
 }

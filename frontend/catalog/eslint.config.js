@@ -23,5 +23,10 @@ export default tseslint.config(
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
     },
+  },
+  {
+    // The service worker is plain JS, served as is from public/.
+    files: ["public/sw.js"],
+    languageOptions: { ecmaVersion: 2022, sourceType: "script", globals: globals.serviceworker },
   }
 );

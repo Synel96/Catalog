@@ -27,6 +27,15 @@ export function Head() {
       <meta name="author" content="Szilveszter Németh" />
       <meta name="keywords" content="cats, social network, blog, community, Catalog" />
       <link rel="icon" type="image/png" href="/catalog.png" />
+
+      {/* Installable app (PWA): public/manifest.webmanifest, public/sw.js */}
+      <link rel="manifest" href="/manifest.webmanifest" />
+      <meta name="theme-color" content="#ffe6e6" media="(prefers-color-scheme: light)" />
+      <meta name="theme-color" content="#2a1d20" media="(prefers-color-scheme: dark)" />
+      <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+      <meta name="apple-mobile-web-app-title" content={BRAND_NAME} />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <link rel="canonical" href={meta.canonicalUrl} />
       {meta.alternates.map((alt) => (
         <link key={alt.hreflang} rel="alternate" hrefLang={alt.hreflang} href={alt.href} />
