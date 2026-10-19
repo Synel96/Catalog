@@ -169,3 +169,18 @@ class CommentAndNotificationTests(APITestCase):
         self.assertEqual(response.data, {'updated': 2})
         self.assertFalse(self.notifications().filter(is_read=False).exists())
         self.assertFalse(Notification.objects.get(message='not mine').is_read)
+
+    def test_notifications_of_one_overlord(self):
+        Notification.objects.create(overlord=self.mirci, message='for mirci')
+        Notification.objects.create(overlord=self.cirmi, message='for cirmi')
+        login(self.client, self.me)
+
+        response = self.client.get(reverse('notification-list'), {'overlord': self.mirci.id})
+        self.assertEqual([n['message'] for n in response.data], ['for mirci'])
+
+        url = f"{reverse('notification-mark-all-read')}?overlord={self.mirci.id}"
+        self.assertEqual(self.client.post(url).data, {'updated': 1})
+        self.assertFalse(Notification.objects.get(message='for cirmi').is_read)
+
+        bad = self.client.get(reverse('notification-list'), {'overlord': 'mirci'})
+        self.assertEqual(bad.status_code, status.HTTP_400_BAD_REQUEST)

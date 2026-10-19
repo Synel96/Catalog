@@ -48,7 +48,8 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
   const logout = useAuthStore((state) => state.logout);
   // Out on the Street the centre of the bar is the street controls, and the
   // page links move into the menu (on every screen size).
-  const onStreet = useStreetStore((state) => state.selectedOverlord !== null) && isAuthenticated;
+  const streetOverlord = useStreetStore((state) => state.selectedOverlord);
+  const onStreet = streetOverlord !== null && isAuthenticated;
   const clearNotifications = useNotificationsStore((state) => state.clear);
   const links = useNavLinks();
   const { t } = useTranslation();
@@ -77,7 +78,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-(--brand-on-surface)/10 bg-(--brand-surface) text-(--brand-on-surface) backdrop-blur supports-backdrop-filter:bg-[color-mix(in_oklch,var(--brand-surface),transparent_5%)]">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-20 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-2 px-4 sm:h-20 sm:gap-4 sm:px-6">
         <a
           href={localePath("/")}
           className="shrink-0"
@@ -86,7 +87,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
           <img
             src="/brand.png"
             alt={t("nav.logo", { brand: BRAND_NAME })}
-            className="h-10 w-[110px] rounded-md bg-[#ffe6e6] object-contain shadow-sm transition-transform duration-200 hover:scale-105 hover:shadow-md sm:h-[60px] sm:w-[200px]"
+            className="h-10 w-24 rounded-md bg-[#ffe6e6] object-contain shadow-sm transition-transform duration-200 hover:scale-105 hover:shadow-md min-[400px]:w-[110px] sm:h-[60px] sm:w-[200px]"
           />
         </a>
 
@@ -108,7 +109,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
               <span className={onStreet ? "hidden" : "mr-2 hidden text-sm font-medium lg:inline"}>
                 {t("nav.welcome", { name: user?.username })}
               </span>
-              <NotificationBell className={onStreet ? "hidden sm:block" : undefined} />
+              {onStreet && <NotificationBell overlord={streetOverlord} />}
               <Button
                 variant="ghost"
                 size="icon"
@@ -121,7 +122,10 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
             </>
           )}
           <LanguageSwitcher className="hidden md:flex" />
-          <ThemeToggle />
+          {/* The narrowest phones need the room for the Street controls. */}
+          <div className={onStreet ? "contents max-[359px]:hidden" : "contents"}>
+            <ThemeToggle />
+          </div>
           <div className={onStreet ? undefined : "md:hidden"}>
             {mounted ? (
               <PushDrawer open={open} onOpenChange={setOpen}>

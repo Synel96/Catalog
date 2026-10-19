@@ -17,8 +17,7 @@ test("comments, and the post's owner fires back", async ({ page }) => {
   await expect(card.getByText(/^@Mirci /)).toBeVisible({ timeout: 10_000 });
 });
 
-test("a new post draws comments, a reaction and notifications", async ({ page, isMobile }) => {
-  test.skip(isMobile, "the bell is hidden on phones while on the Street");
+test("a new post draws comments, a reaction and notifications", async ({ page }) => {
   await expect(bell(page)).toHaveAccessibleName("Notifications (3 unread)");
 
   await page.getByLabel("Post as Mirci").fill("Testing the live chatter!");
@@ -36,10 +35,28 @@ test("a new post draws comments, a reaction and notifications", async ({ page, i
   await expect(bell(page)).toHaveAccessibleName("Notifications");
 });
 
-test("opening a notification follows its link", async ({ page, isMobile }) => {
-  test.skip(isMobile, "the bell is hidden on phones while on the Street");
+test("opening a notification follows its link", async ({ page }) => {
   await bell(page).click();
   await page.getByRole("button", { name: /Crookshanks started whiskering Mirci/ }).click();
   await expect(page).toHaveURL(/\/overlord\?id=5$/);
   await expect(page.getByRole("heading", { name: "Crookshanks" })).toBeVisible();
+});
+
+test("the bell is on the Street only and rings for the cat out there", async ({ page }) => {
+  await expect(bell(page)).toHaveAccessibleName("Notifications (3 unread)");
+
+  await page.getByRole("link", { name: "Go Home" }).click();
+  await expect(page).toHaveURL(/\/my-slave$/);
+  await expect(bell(page)).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Next overlord" }).click();
+  await page.getByRole("link", { name: "Go to the Street with Cirmi" }).click();
+  await expect(page).toHaveURL(/\/street$/);
+  await expect(bell(page)).toHaveAccessibleName("Notifications (1 unread)");
+  await bell(page).click();
+  await expect(page.getByText("For Cirmi")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Duchess commented/ })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Crookshanks started whiskering Mirci/ })
+  ).toHaveCount(0);
 });

@@ -182,9 +182,15 @@ class NotificationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(overlord__slave=self.request.user).order_by(
-            "-created_at"
-        )
+        queryset = Notification.objects.filter(overlord__slave=self.request.user)
+        # `?overlord=<id>` narrows the list (and mark-all-read) to one cat:
+        # the frontend shows the notifications of the overlord on the Street.
+        overlord = self.request.query_params.get("overlord")
+        if overlord is not None:
+            if not overlord.isdigit():
+                raise ValidationError({"overlord": "Must be an overlord id."})
+            queryset = queryset.filter(overlord_id=overlord)
+        return queryset.order_by("-created_at")
 
     @action(detail=False, methods=["post"], url_path="mark-all-read")
     def mark_all_read(self, request):

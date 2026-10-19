@@ -5,23 +5,25 @@ import { Button } from "@/components/ui/button";
 import { formatPostDate } from "@/components/street/media";
 import { cn } from "@/lib/utils";
 import { useNotificationsStore } from "@/src/store/useNotificationsStore";
-import type { Notification } from "@/src/types/api";
+import type { Notification, Overlord } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
 import { useLocalePath } from "@/src/i18n/hooks";
 import { useLang } from "@/src/i18n/hooks";
 
 const POLL_MS = 30_000;
 
-type NotificationBellProps = { className?: string };
+type NotificationBellProps = { overlord: Overlord; className?: string };
 
-// Polls the user's notifications (every 30 s and when the tab regains
-// focus) and lists them in a dropdown. Only rendered while logged in.
-export function NotificationBell({ className }: NotificationBellProps) {
+// Polls the notifications of the overlord out on the Street (every 30 s and
+// when the tab regains focus) and lists them in a dropdown. Only rendered
+// on the Street, where it's clear whose they are.
+export function NotificationBell({ overlord, className }: NotificationBellProps) {
   const { t } = useTranslation();
   const lang = useLang();
   const localePath = useLocalePath();
-  const notifications = useNotificationsStore((state) => state.notifications);
-  const loaded = useNotificationsStore((state) => state.loaded);
+  const ownerId = useNotificationsStore((state) => state.overlordId);
+  const allNotifications = useNotificationsStore((state) => state.notifications);
+  const loaded = useNotificationsStore((state) => state.loaded) && ownerId === overlord.id;
   const fetchNotifications = useNotificationsStore((state) => state.fetch);
   const markRead = useNotificationsStore((state) => state.markRead);
   const markAllRead = useNotificationsStore((state) => state.markAllRead);
@@ -29,18 +31,21 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const panelId = useId();
 
+  // Until the switch to this cat lands, the store may still hold another's.
+  const notifications = ownerId === overlord.id ? allNotifications : [];
   const unread = notifications.filter((n) => !n.is_read).length;
 
   useEffect(() => {
-    void fetchNotifications();
-    const timer = setInterval(() => void fetchNotifications(), POLL_MS);
-    const onVisible = () => document.visibilityState === "visible" && void fetchNotifications();
+    const refresh = () => void fetchNotifications(overlord.id);
+    refresh();
+    const timer = setInterval(refresh, POLL_MS);
+    const onVisible = () => document.visibilityState === "visible" && refresh();
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [fetchNotifications]);
+  }, [fetchNotifications, overlord.id]);
 
   useEffect(() => {
     if (!open) return;
@@ -90,7 +95,12 @@ export function NotificationBell({ className }: NotificationBellProps) {
           className="bg-popover text-popover-foreground ring-foreground/10 fixed inset-x-2 top-16 z-50 overflow-hidden rounded-xl shadow-lg ring-1 sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-96"
         >
           <div className="flex items-center justify-between border-b px-4 py-2">
-            <h2 className="font-display font-bold">{t("notifications.label")}</h2>
+            <div className="min-w-0">
+              <h2 className="font-display font-bold">{t("notifications.label")}</h2>
+              <p className="text-muted-foreground truncate text-xs">
+                {t("notifications.for", { name: overlord.name })}
+              </p>
+            </div>
             {unread > 0 && (
               <Button variant="ghost" size="sm" onClick={() => void markAllRead()}>
                 <CheckCheckIcon /> {t("notifications.markAllRead")}
@@ -124,7 +134,6 @@ export function NotificationBell({ className }: NotificationBellProps) {
                   <span className="min-w-0">
                     <span className="block">{notification.message}</span>
                     <span className="text-muted-foreground block text-xs">
-                      {t("notifications.for", { name: notification.overlord_name })} ·{" "}
                       {formatPostDate(notification.created_at, lang)}
                       {!notification.is_read && (
                         <span className="sr-only"> {t("notifications.unread")}</span>

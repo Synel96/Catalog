@@ -181,7 +181,7 @@ const NOTIFICATIONS: [number, number, string, number, boolean, number][] = [
     2,
     "Duchess commented on your post: \u201cA box? How terribly common. I only sit in...\u201d",
     2,
-    true,
+    false,
     7,
   ],
   [6, 1, "Crookshanks started whiskering Mirci.", 5, true, 20],

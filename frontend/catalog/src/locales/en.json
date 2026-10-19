@@ -323,7 +323,7 @@
       },
       "notifications": {
         "title": "The bell",
-        "body": "The bell tells you when someone comments on, reacts to or whiskers your overlords. To switch cats, press <b>Go Home</b> and send another one out."
+        "body": "The bell tells you when someone comments on, reacts to or whiskers the overlord you came out with; each cat has its own. To switch cats, press <b>Go Home</b> and send another one out."
       }
     }
   }

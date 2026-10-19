@@ -171,7 +171,7 @@
     "labelUnread": "Értesítések ({{count}} olvasatlan)",
     "markAllRead": "Mind olvasott",
     "empty": "Még nincs értesítés. A nagyuraidat egyelőre ignorálják. Egyelőre.",
-    "for": "Neki: {{name}}",
+    "for": "{{name}} részére",
     "unread": "(olvasatlan)"
   },
   "whisker": {
@@ -323,7 +323,7 @@
       },
       "notifications": {
         "title": "A csengő",
-        "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja a nagyuraidat. Macskát váltani a <b>Haza</b> gombbal tudsz: küldj ki egy másikat."
+        "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja azt a nagyurat, akivel kint vagy; minden macskának saját csengője van. Macskát váltani a <b>Haza</b> gombbal tudsz: küldj ki egy másikat."
       }
     }
   }

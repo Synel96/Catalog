@@ -43,6 +43,12 @@ const announce = (overlordId: number, postId: number) => {
   );
 };
 
+// `?overlord=<id>`: one overlord's notifications (see NotificationViewSet).
+function overlordParam(request: Request): number | null {
+  const value = new URL(request.url).searchParams.get("overlord");
+  return value === null ? null : Number(value);
+}
+
 const isMine = (overlordId: number) =>
   db.overlords.some((o) => o.id === overlordId && o.slave === ME);
 
@@ -394,21 +400,23 @@ const commentHandlers = [
 ];
 
 const notificationHandlers = [
-  http.get(`${API}/feed/notifications/`, () => {
+  http.get(`${API}/feed/notifications/`, ({ request }) => {
     if (!db.loggedIn) return unauthorized();
+    const onlyFor = overlordParam(request);
     return HttpResponse.json(
       db.notifications
-        .filter((n) => isMine(n.overlord))
+        .filter((n) => isMine(n.overlord) && (onlyFor === null || n.overlord === onlyFor))
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
         .map(toNotification)
     );
   }),
 
-  http.post(`${API}/feed/notifications/mark-all-read/`, () => {
+  http.post(`${API}/feed/notifications/mark-all-read/`, ({ request }) => {
     if (!db.loggedIn) return unauthorized();
+    const onlyFor = overlordParam(request);
     let updated = 0;
     for (const n of db.notifications) {
-      if (isMine(n.overlord) && !n.is_read) {
+      if (isMine(n.overlord) && (onlyFor === null || n.overlord === onlyFor) && !n.is_read) {
         n.is_read = true;
         updated++;
       }
