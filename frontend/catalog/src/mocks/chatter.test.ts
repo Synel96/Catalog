@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { addComment, counterComment, notify, reactToNewPost } from "./chatter";
+import { addComment, counterComment, notify, reactToNewPost, toggleHeart } from "./chatter";
 import { db, resetMockDb } from "./db";
 
 // Seed: Mirci (1) and Cirmi (2) are the user's; Garfield (3) is jon's.
@@ -70,5 +70,22 @@ describe("mock chatter", () => {
     expect(counter).toMatchObject({ overlord: 3, post: 1 });
     expect(counter?.content.startsWith("@Mirci ")).toBe(true);
     expect(broadcast).toHaveBeenCalledOnce();
+  });
+
+  it("has the post's owner heart the user's comment, which notifies", () => {
+    const mine = addComment(1, 1, "Mondays fear ME.");
+    const before = db.notifications.length;
+    counterComment(1, 1, vi.fn(), mine.id);
+    vi.advanceTimersByTime(2500);
+
+    expect(db.hearts).toContainEqual({ overlord: 3, comment: mine.id });
+    expect(db.notifications.slice(before).map((n) => n.message)).toContainEqual(
+      "Garfield hearted your comment: “Mondays fear ME.”"
+    );
+  });
+
+  it("toggles hearts", () => {
+    expect(toggleHeart(1, 4)).toEqual({ hearted: true, heart_count: 1 });
+    expect(toggleHeart(1, 4)).toEqual({ hearted: false, heart_count: 0 });
   });
 });

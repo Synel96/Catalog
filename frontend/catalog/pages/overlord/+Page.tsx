@@ -61,16 +61,17 @@ function OverlordProfile({ id }: { id: number }) {
     };
   }, [id, overlordVersion, t]);
 
+  const actingId = streetOverlord?.id ?? null;
   useEffect(() => {
     let cancelled = false;
-    getPostsByOverlord(id)
+    getPostsByOverlord(id, actingId)
       .then((data) => !cancelled && setPosts(data))
       .catch((err) => console.error("Failed to load posts:", err))
       .finally(() => !cancelled && setPostsLoading(false));
     return () => {
       cancelled = true;
     };
-  }, [id, postsVersion]);
+  }, [id, postsVersion, actingId]);
 
   useFeedSocket(
     useCallback(

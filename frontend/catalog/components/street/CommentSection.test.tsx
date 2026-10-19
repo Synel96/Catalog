@@ -2,6 +2,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { db } from "@/src/mocks/db";
 import { useMockBackend } from "@/src/test/mock-server";
 import { CommentSection } from "./CommentSection";
 
@@ -35,6 +36,28 @@ describe("CommentSection", () => {
     const [garfield, , mirci] = await screen.findAllByRole("listitem");
     expect(within(garfield).queryByRole("button", { name: "Edit comment" })).toBeNull();
     expect(within(mirci).getByRole("button", { name: "Edit comment" })).toBeInTheDocument();
+  });
+
+  it("hearts a comment as the street overlord and takes it back", async () => {
+    renderSection();
+    const [garfield, , mirci] = await screen.findAllByRole("listitem");
+    // Seeded: Garfield and Luna hearted Mirci's reply.
+    expect(within(mirci).getByRole("button", { name: "Heart (2)" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+
+    await userEvent.click(within(garfield).getByRole("button", { name: "Heart" }));
+    const hearted = await within(garfield).findByRole("button", { name: "Heart (1)" });
+    expect(hearted).toHaveAttribute("aria-pressed", "true");
+    expect(db.hearts).toContainEqual({ overlord: 1, comment: 4 });
+
+    await userEvent.click(hearted);
+    expect(await within(garfield).findByRole("button", { name: "Heart" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+    expect(db.hearts).not.toContainEqual({ overlord: 1, comment: 4 });
   });
 
   it("posts a comment as the street overlord", async () => {

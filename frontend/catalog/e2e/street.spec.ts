@@ -36,7 +36,16 @@ test("posts with an image, edits and deletes the post", async ({ page }) => {
 test("reacts and takes the reaction back", async ({ page }) => {
   const card = postCard(page, "Monday again. I refuse.");
   await card.getByRole("button", { name: "Purrfect", exact: true }).click();
-  await expect(card.getByRole("button", { name: "Purrfect (1)" })).toBeVisible();
+  await expect(card.getByRole("button", { name: "Purrfect (1)" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  // Still marked as Mirci's after a reload (the feed sends `my_reaction`).
+  await page.reload();
+  await expect(card.getByRole("button", { name: "Purrfect (1)" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
   await card.getByRole("button", { name: "Purrfect (1)" }).click();
   await expect(card.getByRole("button", { name: "Purrfect", exact: true })).toBeVisible();
 });

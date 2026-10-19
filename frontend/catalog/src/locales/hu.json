@@ -158,7 +158,9 @@
     "edit": "Komment szerkesztése",
     "delete": "Komment törlése",
     "save": "Komment mentése",
-    "cancelEdit": "Szerkesztés megszakítása"
+    "cancelEdit": "Szerkesztés megszakítása",
+    "heart": "Szívecske",
+    "needOverlordToHeart": "Szívecskézéshez vigyél ki egy nagyurat az utcára"
   },
   "search": {
     "open": "Keresés megnyitása",
@@ -275,7 +277,8 @@
     "fetchPosts": "Nem sikerült betölteni a posztokat.",
     "createPost": "Nem sikerült közzétenni a posztot.",
     "updatePost": "Nem sikerült menteni a posztot.",
-    "deletePost": "Nem sikerült törölni a posztot."
+    "deletePost": "Nem sikerült törölni a posztot.",
+    "heartComment": "Nem sikerült szívecskézni a kommentet."
   },
   "upload": {
     "uploading": "Feltöltés…",

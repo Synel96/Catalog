@@ -2,7 +2,7 @@ import { delay, http, HttpResponse } from "msw";
 import { MOCK_FEED_EVENT } from "@/components/site";
 import type { ReactionType } from "@/src/types/api";
 import { readForm } from "./forms";
-import { addComment, counterComment, notify, reactToNewPost } from "./chatter";
+import { addComment, counterComment, notify, reactToNewPost, toggleHeart } from "./chatter";
 import {
   currentUser,
   db,
@@ -42,6 +42,13 @@ const announce = (overlordId: number, postId: number) => {
     })
   );
 };
+
+// `?overlord=<id>` naming one of the user's overlords: the one out on the
+// Street (feed/views.py ActingOverlordMixin). Others are ignored.
+function actingParam(request: Request): number | null {
+  const id = overlordParam(request);
+  return id !== null && isMine(id) ? id : null;
+}
 
 // `?overlord=<id>`: one overlord's notifications (see NotificationViewSet).
 function overlordParam(request: Request): number | null {
@@ -193,26 +200,28 @@ const byNewest = (a: { created_at: string }, b: { created_at: string }) =>
 
 const postHandlers = [
   // feed/views.py PostViewSet.get_queryset: own overlords + whiskered ones.
-  http.get(`${API}/feed/posts/`, () => {
+  http.get(`${API}/feed/posts/`, ({ request }) => {
     if (!db.loggedIn) return unauthorized();
     const own = db.overlords.filter((o) => o.slave === ME).map((o) => o.id);
     const whiskered = db.whiskers.filter((w) => own.includes(w.from)).map((w) => w.to);
     const visible = new Set([...own, ...whiskered]);
+    const acting = actingParam(request);
     return HttpResponse.json(
       db.posts
         .filter((p) => visible.has(p.overlord))
         .sort(byNewest)
-        .map(toPost)
+        .map((p) => toPost(p, acting))
     );
   }),
 
-  http.get(`${API}/feed/posts/by-overlord/:id/`, ({ params }) => {
+  http.get(`${API}/feed/posts/by-overlord/:id/`, ({ request, params }) => {
     if (!db.loggedIn) return unauthorized();
+    const acting = actingParam(request);
     return HttpResponse.json(
       db.posts
         .filter((p) => p.overlord === Number(params.id))
         .sort(byNewest)
-        .map(toPost)
+        .map((p) => toPost(p, acting))
     );
   }),
 
@@ -255,7 +264,9 @@ const postHandlers = [
       return badRequest("You can only delete posts from your own overlords.");
     db.posts = db.posts.filter((p) => p !== post);
     db.reactions = db.reactions.filter((r) => r.post !== post.id);
-    db.comments = db.comments.filter((c) => c.post !== post.id);
+    const gone = new Set(db.comments.filter((c) => c.post === post.id).map((c) => c.id));
+    db.comments = db.comments.filter((c) => !gone.has(c.id));
+    db.hearts = db.hearts.filter((h) => !gone.has(h.comment));
     persist();
     return new HttpResponse(null, { status: 204 });
   }),
@@ -357,8 +368,11 @@ const commentHandlers = [
     const comments = postId
       ? db.comments.filter((c) => c.post === postId)
       : db.comments.filter((c) => isMine(c.overlord));
+    const acting = actingParam(request);
     return HttpResponse.json(
-      [...comments].sort((a, b) => a.created_at.localeCompare(b.created_at)).map(toComment)
+      [...comments]
+        .sort((a, b) => a.created_at.localeCompare(b.created_at))
+        .map((c) => toComment(c, acting))
     );
   }),
 
@@ -375,8 +389,25 @@ const commentHandlers = [
     }
     const comment = addComment(overlord, post, content);
     persist();
-    counterComment(post, overlord, announce);
+    counterComment(post, overlord, announce, comment.id);
     return HttpResponse.json(toComment(comment), { status: 201 });
+  }),
+
+  // feed/views.py CommentViewSet.heart: any comment, own overlord only.
+  http.post(`${API}/feed/comments/:id/heart/`, async ({ request, params }) => {
+    if (!db.loggedIn) return unauthorized();
+    const comment = db.comments.find((c) => c.id === Number(params.id));
+    if (!comment) return notFound();
+    const { overlord_id } = (await request.json()) as { overlord_id?: number };
+    if (overlord_id === undefined || !isMine(overlord_id)) {
+      return HttpResponse.json(
+        { overlord_id: ["Heart with one of your own overlords."] },
+        { status: 400 }
+      );
+    }
+    const result = toggleHeart(overlord_id, comment.id);
+    persist();
+    return HttpResponse.json(result);
   }),
 
   http.patch(`${API}/feed/comments/:id/`, async ({ request, params }) => {
@@ -394,6 +425,7 @@ const commentHandlers = [
     const comment = db.comments.find((c) => c.id === Number(params.id) && isMine(c.overlord));
     if (!comment) return notFound();
     db.comments = db.comments.filter((c) => c !== comment);
+    db.hearts = db.hearts.filter((h) => h.comment !== comment.id);
     persist();
     return new HttpResponse(null, { status: 204 });
   }),

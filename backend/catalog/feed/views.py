@@ -7,7 +7,7 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db.models import Count
 
-from core.models import Post, Reaction, Comment, Whisker, Notification, Overlord
+from core.models import Post, Reaction, Comment, CommentHeart, Whisker, Notification, Overlord
 from .serializers import (
     PostSerializer,
     ReactionSerializer,
@@ -34,7 +34,20 @@ def overlord_link(overlord):
     return f"/overlord?id={overlord.id}"
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class ActingOverlordMixin:
+    """Passes `?overlord=<id>` to the serializer when it's one of the user's
+    overlords: the one out on the Street, whose reaction / hearts are
+    flagged in the response. Anything else is ignored."""
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        value = self.request.query_params.get("overlord", "")
+        if value.isdigit() and self.request.user.overlords.filter(pk=value).exists():
+            context["acting_overlord_id"] = int(value)
+        return context
+
+
+class PostViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
     serializer_class = PostSerializer
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -134,7 +147,7 @@ class ReactionCountByPostView(APIView):
         return Response(result)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     authentication_classes = [CookieJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
@@ -164,6 +177,32 @@ class CommentViewSet(viewsets.ModelViewSet):
             f"{overlord.name} commented on your post: \u201c{snippet}\u201d",
             overlord_link(comment.post.overlord),
         )
+
+    @action(detail=True, methods=["post"], url_path="heart")
+    def heart(self, request, pk=None):
+        """Toggles `overlord_id`'s heart on any comment (not only the user's
+        own, unlike the rest of this viewset's detail routes)."""
+        comment = Comment.objects.filter(pk=pk).select_related("overlord").first()
+        if comment is None:
+            return Response({"detail": "Comment not found."}, status=status.HTTP_404_NOT_FOUND)
+        overlord = Overlord.objects.filter(
+            pk=request.data.get("overlord_id"), slave=request.user
+        ).first()
+        if overlord is None:
+            raise ValidationError({"overlord_id": "Heart with one of your own overlords."})
+
+        heart, created = CommentHeart.objects.get_or_create(overlord=overlord, comment=comment)
+        if not created:
+            heart.delete()
+        else:
+            snippet = comment.content if len(comment.content) <= 60 else f"{comment.content[:57]}..."
+            notify(
+                overlord,
+                comment.overlord,
+                f"{overlord.name} hearted your comment: \u201c{snippet}\u201d",
+                overlord_link(comment.post.overlord),
+            )
+        return Response({"hearted": created, "heart_count": comment.hearts.count()})
 
     def perform_update(self, serializer):
         if serializer.instance.overlord.slave != self.request.user:

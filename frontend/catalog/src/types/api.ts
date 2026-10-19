@@ -29,6 +29,8 @@ export type Post = {
   image: string | null;
   created_at: string;
   reaction_summary: ReactionSummary;
+  // The acting overlord's own reaction (posts fetched with `?overlord=`).
+  my_reaction: ReactionType | null;
   comment_count: number;
 };
 
@@ -40,7 +42,12 @@ export type Comment = {
   post: number;
   content: string;
   created_at: string;
+  heart_count: number;
+  // Whether the acting overlord (`?overlord=`) has hearted it.
+  hearted: boolean;
 };
+
+export type ToggleHeartResult = { hearted: boolean; heart_count: number };
 
 // feed/serializers.py NotificationSerializer. `overlord` is the user's own
 // overlord the notification is for; `link` is a frontend path.

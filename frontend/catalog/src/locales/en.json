@@ -158,7 +158,9 @@
     "edit": "Edit comment",
     "delete": "Delete comment",
     "save": "Save comment",
-    "cancelEdit": "Cancel editing"
+    "cancelEdit": "Cancel editing",
+    "heart": "Heart",
+    "needOverlordToHeart": "Go to the Street with an overlord to give hearts"
   },
   "search": {
     "open": "Open search",
@@ -275,7 +277,8 @@
     "fetchPosts": "Failed to fetch posts.",
     "createPost": "Failed to create post.",
     "updatePost": "Failed to update post.",
-    "deletePost": "Failed to delete post."
+    "deletePost": "Failed to delete post.",
+    "heartComment": "Failed to heart the comment."
   },
   "upload": {
     "uploading": "Uploading…",

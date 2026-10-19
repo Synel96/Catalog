@@ -20,9 +20,11 @@ export default function Page() {
   const replacePost = useStreetStore((state) => state.replacePost);
   const removePost = useStreetStore((state) => state.removePost);
 
+  // Refetched when another overlord goes out: `my_reaction` is theirs.
+  const overlordId = overlord?.id;
   useEffect(() => {
     void fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchPosts, overlordId]);
 
   // Someone posted: reload the feed.
   useFeedSocket(useCallback(() => void fetchPosts(), [fetchPosts]));

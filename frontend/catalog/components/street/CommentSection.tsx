@@ -1,4 +1,5 @@
-import { CheckIcon, PencilIcon, SendIcon, Trash2Icon, XIcon } from "lucide-react";
+import "./street.css";
+import { CheckIcon, HeartIcon, PencilIcon, SendIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -8,12 +9,14 @@ import {
   createComment,
   deleteComment,
   getPostComments,
+  toggleCommentHeart,
   updateComment,
 } from "@/src/services/commentService";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import type { ApiError, Comment } from "@/src/types/api";
 import { overlordHref } from "./links";
 import { formatPostDate } from "./media";
+import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import { useLang } from "@/src/i18n/hooks";
 import { useLocalePath } from "@/src/i18n/hooks";
@@ -46,13 +49,13 @@ export function CommentSection({
 
   useEffect(() => {
     let cancelled = false;
-    getPostComments(postId)
+    getPostComments(postId, overlordId)
       .then((data) => !cancelled && setComments(data))
       .catch((err: ApiError) => !cancelled && setError(err.detail));
     return () => {
       cancelled = true;
     };
-  }, [postId, serverCount]);
+  }, [postId, serverCount, overlordId]);
 
   const isOwn = (comment: Comment) =>
     user?.overlords.some((o) => o.id === comment.overlord) ?? false;
@@ -83,8 +86,29 @@ export function CommentSection({
     }
   };
 
+  // An edit's response has no acting overlord, so it can't tell `hearted`.
   const replace = (comment: Comment) =>
-    setComments((prev) => prev?.map((c) => (c.id === comment.id ? comment : c)) ?? null);
+    setComments(
+      (prev) =>
+        prev?.map((c) => (c.id === comment.id ? { ...comment, hearted: c.hearted } : c)) ?? null
+    );
+
+  const heart = async (comment: Comment) => {
+    if (!overlordId) return;
+    try {
+      const result = await toggleCommentHeart(comment.id, overlordId);
+      setComments(
+        (prev) =>
+          prev?.map((c) =>
+            c.id === comment.id
+              ? { ...c, hearted: result.hearted, heart_count: result.heart_count }
+              : c
+          ) ?? null
+      );
+    } catch (err) {
+      toast.error((err as ApiError).detail);
+    }
+  };
 
   return (
     <div className="grid gap-3 border-t pt-3">
@@ -105,6 +129,8 @@ export function CommentSection({
               key={comment.id}
               comment={comment}
               canManage={isOwn(comment)}
+              canHeart={overlordId !== null}
+              onHeart={() => heart(comment)}
               onUpdated={replace}
               onDelete={() => remove(comment)}
             />
@@ -142,17 +168,33 @@ export function CommentSection({
 type CommentItemProps = {
   comment: Comment;
   canManage: boolean;
+  canHeart: boolean;
+  onHeart: () => Promise<void>;
   onUpdated: (comment: Comment) => void;
   onDelete: () => void;
 };
 
-function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemProps) {
+function CommentItem({
+  comment,
+  canManage,
+  canHeart,
+  onHeart,
+  onUpdated,
+  onDelete,
+}: CommentItemProps) {
   const { t } = useTranslation();
   const lang = useLang();
   const localePath = useLocalePath();
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(comment.content);
   const [isSaving, setIsSaving] = useState(false);
+  const [isHearting, setIsHearting] = useState(false);
+
+  const toggleHeart = async () => {
+    setIsHearting(true);
+    await onHeart();
+    setIsHearting(false);
+  };
 
   const save = async () => {
     if (!text.trim()) return;
@@ -169,7 +211,7 @@ function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemPro
 
   return (
     <li className="bg-secondary text-secondary-foreground rounded-lg px-3 py-2">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-x-2">
         <a
           href={localePath(overlordHref(comment.overlord))}
           className="text-sm font-semibold underline-offset-4 hover:underline"
@@ -179,30 +221,54 @@ function CommentItem({ comment, canManage, onUpdated, onDelete }: CommentItemPro
         <time dateTime={comment.created_at} className="text-muted-foreground text-xs">
           {formatPostDate(comment.created_at, lang)}
         </time>
-        {canManage && !editing && (
-          <div className="ml-auto flex">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={t("comments.edit")}
-              onClick={() => {
-                setText(comment.content);
-                setEditing(true);
-              }}
-            >
-              <PencilIcon />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label={t("comments.delete")}
-              onClick={onDelete}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
-        )}
+        <div className="ml-auto flex items-center">
+          <button
+            type="button"
+            onClick={toggleHeart}
+            disabled={!canHeart || isHearting}
+            aria-pressed={comment.hearted}
+            aria-label={`${t("comments.heart")}${comment.heart_count ? ` (${comment.heart_count})` : ""}`}
+            title={canHeart ? undefined : t("comments.needOverlordToHeart")}
+            className={cn(
+              "comment-heart flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60",
+              "focus-visible:ring-ring/50 outline-none focus-visible:ring-3",
+              comment.hearted
+                ? "text-rose-600 dark:text-rose-400"
+                : "text-muted-foreground [@media(hover:hover)]:hover:text-rose-500"
+            )}
+          >
+            <HeartIcon
+              key={String(comment.hearted)}
+              className={cn("size-4", comment.hearted && "comment-heart-pop fill-current")}
+              aria-hidden
+            />
+            {comment.heart_count > 0 && <span>{comment.heart_count}</span>}
+          </button>
+          {canManage && !editing && (
+            <div className="flex">
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label={t("comments.edit")}
+                onClick={() => {
+                  setText(comment.content);
+                  setEditing(true);
+                }}
+              >
+                <PencilIcon />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                aria-label={t("comments.delete")}
+                onClick={onDelete}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2Icon />
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       {editing ? (

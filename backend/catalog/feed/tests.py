@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from core.models import Overlord, Post, Reaction, Comment, Whisker, Notification
+from core.models import Overlord, Post, Reaction, Comment, CommentHeart, Whisker, Notification
 
 User = get_user_model()
 
@@ -184,3 +184,58 @@ class CommentAndNotificationTests(APITestCase):
 
         bad = self.client.get(reverse('notification-list'), {'overlord': 'mirci'})
         self.assertEqual(bad.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class HeartsAndOwnReactionTests(APITestCase):
+    """Hearts on comments, and flagging the acting overlord's own reaction."""
+
+    def setUp(self):
+        self.me = User.objects.create_user(username='me', email='me@example.com', password='pw')
+        self.other = User.objects.create_user(
+            username='other', email='other@example.com', password='pw'
+        )
+        self.mirci = Overlord.objects.create(name='Mirci', slave=self.me)
+        self.garfield = Overlord.objects.create(name='Garfield', slave=self.other)
+        self.post = Post.objects.create(overlord=self.mirci, content='Sunbeam acquired.')
+        self.comment = Comment.objects.create(
+            overlord=self.mirci, post=self.post, content='Mine now.'
+        )
+        login(self.client, self.other)
+
+    def heart(self, overlord_id):
+        return self.client.post(
+            reverse('comment-heart', args=[self.comment.id]), {'overlord_id': overlord_id}
+        )
+
+    def test_heart_toggles_and_notifies_once(self):
+        response = self.heart(self.garfield.id)
+        self.assertEqual(response.data, {'hearted': True, 'heart_count': 1})
+        notification = Notification.objects.get(overlord=self.mirci)
+        self.assertIn('Garfield hearted your comment', notification.message)
+
+        response = self.heart(self.garfield.id)
+        self.assertEqual(response.data, {'hearted': False, 'heart_count': 0})
+        self.heart(self.garfield.id)
+        # Taking a heart back and giving it again doesn't spam: one per new heart.
+        self.assertEqual(Notification.objects.filter(overlord=self.mirci).count(), 2)
+
+    def test_heart_needs_own_overlord(self):
+        response = self.heart(self.mirci.id)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(CommentHeart.objects.exists())
+
+    def test_comment_list_flags_acting_overlords_heart(self):
+        self.heart(self.garfield.id)
+        url = reverse('comment-list')
+        data = self.client.get(url, {'post': self.post.id, 'overlord': self.garfield.id}).data
+        self.assertEqual((data[0]['heart_count'], data[0]['hearted']), (1, True))
+        # Someone else's overlord as `overlord` is ignored.
+        data = self.client.get(url, {'post': self.post.id, 'overlord': self.mirci.id}).data
+        self.assertEqual((data[0]['heart_count'], data[0]['hearted']), (1, False))
+
+    def test_post_list_flags_acting_overlords_reaction(self):
+        Reaction.objects.create(overlord=self.garfield, post=self.post, type='hisss')
+        Whisker.objects.create(from_overlord=self.garfield, to_overlord=self.mirci)
+        url = reverse('post-list')
+        self.assertEqual(self.client.get(url, {'overlord': self.garfield.id}).data[0]['my_reaction'], 'hisss')
+        self.assertIsNone(self.client.get(url).data[0]['my_reaction'])

@@ -6,6 +6,7 @@ from .models import (
     Post,
     Reaction,
     Comment,
+    CommentHeart,
     Whisker,
     Notification
 )
@@ -31,5 +32,6 @@ admin.site.register(Overlord)
 admin.site.register(Post)
 admin.site.register(Reaction)
 admin.site.register(Comment)
+admin.site.register(CommentHeart)
 admin.site.register(Whisker)
 admin.site.register(Notification)

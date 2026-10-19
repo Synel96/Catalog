@@ -32,3 +32,28 @@
     animation: none !important;
   }
 }
+
+/* A heart given to a comment pops once (the icon remounts on toggle). */
+.comment-heart-pop {
+  animation: comment-heart-pop 0.35s ease-out;
+}
+
+@keyframes comment-heart-pop {
+  0% {
+    transform: scale(0.6);
+  }
+
+  60% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-heart-pop {
+    animation: none;
+  }
+}

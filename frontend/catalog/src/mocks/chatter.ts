@@ -70,6 +70,31 @@ export function addComment(overlordId: number, postId: number, content: string) 
   return comment;
 }
 
+// Toggles a heart like feed/views.py CommentViewSet.heart; a new heart
+// notifies the comment's author.
+export function toggleHeart(overlordId: number, commentId: number) {
+  const existing = db.hearts.find((h) => h.overlord === overlordId && h.comment === commentId);
+  if (existing) {
+    db.hearts = db.hearts.filter((h) => h !== existing);
+  } else {
+    db.hearts.push({ overlord: overlordId, comment: commentId });
+    const comment = db.comments.find((c) => c.id === commentId);
+    const post = db.posts.find((p) => p.id === comment?.post);
+    if (comment && post) {
+      notify(
+        overlordId,
+        comment.overlord,
+        `${overlordName(overlordId)} hearted your comment: “${snippet(comment.content)}”`,
+        post.overlord
+      );
+    }
+  }
+  return {
+    hearted: !existing,
+    heart_count: db.hearts.filter((h) => h.comment === commentId).length,
+  };
+}
+
 type Broadcast = (overlordId: number, postId: number) => void;
 
 // The user posted: another overlord comments, a third one reacts and
@@ -94,14 +119,23 @@ export function reactToNewPost(postId: number, authorId: number, broadcast: Broa
   }, REPLY_DELAY_MS * 2);
 }
 
-// The user commented on someone else's post: its owner fires back. (The
-// backend notifies only the post owner, so this one brings no notification.)
-export function counterComment(postId: number, commenterId: number, broadcast: Broadcast) {
+// The user commented on someone else's post: its owner hearts the comment
+// (which notifies the user) and fires back. (The backend notifies only the
+// post owner about comments, so the reply itself brings no notification.)
+export function counterComment(
+  postId: number,
+  commenterId: number,
+  broadcast: Broadcast,
+  commentId?: number
+) {
   const post = db.posts.find((p) => p.id === postId);
   if (!post || isMine(post.overlord)) return;
 
   setTimeout(() => {
     if (!db.posts.some((p) => p.id === postId)) return;
+    if (commentId !== undefined && db.comments.some((c) => c.id === commentId)) {
+      toggleHeart(post.overlord, commentId);
+    }
     addComment(post.overlord, postId, `@${overlordName(commenterId)} ${pick(COUNTERS)}`);
     persist();
     broadcast(post.overlord, postId);

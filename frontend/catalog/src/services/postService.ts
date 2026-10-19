@@ -2,19 +2,31 @@ import i18n from "@/src/i18n";
 import { api, toApiError } from "./api";
 import type { Post } from "@/src/types/api";
 
+// `actingOverlordId`: the overlord out on the Street, whose own reaction
+// comes back as `my_reaction`.
+const actingParams = (actingOverlordId?: number | null) =>
+  actingOverlordId ? { overlord: actingOverlordId } : undefined;
+
 // Street feed: posts of the user's own overlords and the ones they whisker.
-export async function getStreetPosts(): Promise<Post[]> {
+export async function getStreetPosts(actingOverlordId?: number | null): Promise<Post[]> {
   try {
-    const response = await api.get<Post[]>("feed/posts/");
+    const response = await api.get<Post[]>("feed/posts/", {
+      params: actingParams(actingOverlordId),
+    });
     return response.data;
   } catch (error) {
     throw toApiError(error, i18n.t("errors.fetchStreetPosts"));
   }
 }
 
-export async function getPostsByOverlord(overlordId: number): Promise<Post[]> {
+export async function getPostsByOverlord(
+  overlordId: number,
+  actingOverlordId?: number | null
+): Promise<Post[]> {
   try {
-    const response = await api.get<Post[]>(`feed/posts/by-overlord/${overlordId}/`);
+    const response = await api.get<Post[]>(`feed/posts/by-overlord/${overlordId}/`, {
+      params: actingParams(actingOverlordId),
+    });
     return response.data;
   } catch (error) {
     throw toApiError(error, i18n.t("errors.fetchPosts"));

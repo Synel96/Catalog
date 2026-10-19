@@ -95,6 +95,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
         <ReactionBar
           postId={post.id}
           summary={post.reaction_summary}
+          myReaction={post.my_reaction ?? null}
           overlordId={actingOverlord?.id ?? null}
         />
         <div>

@@ -85,6 +85,22 @@ class Comment(models.Model):
         return f"Comment by {self.overlord.name} on {self.post}"
 
 
+class CommentHeart(models.Model):
+    """An overlord's heart on a comment; one per overlord and comment."""
+
+    overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='comment_hearts')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='hearts')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['overlord', 'comment'], name='unique_overlord_comment_heart')
+        ]
+
+    def __str__(self):
+        return f"{self.overlord.name} hearted {self.comment}"
+
+
 class Whisker(models.Model):
     from_overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='whiskering')
     to_overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='whiskered_by')

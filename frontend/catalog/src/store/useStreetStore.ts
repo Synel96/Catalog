@@ -32,7 +32,7 @@ export function reconcileStreetOverlord(user: User | null) {
 
 export const useStreetStore = create<StreetState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       selectedOverlord: null,
       posts: [],
       isLoading: false,
@@ -44,7 +44,7 @@ export const useStreetStore = create<StreetState>()(
       fetchPosts: async () => {
         set({ isLoading: true, error: null });
         try {
-          const posts = await getStreetPosts();
+          const posts = await getStreetPosts(get().selectedOverlord?.id);
           set({ posts, isLoading: false });
         } catch (error) {
           set({ error: (error as ApiError).detail, isLoading: false });

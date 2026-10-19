@@ -60,3 +60,26 @@ test("the bell is on the Street only and rings for the cat out there", async ({ 
     page.getByRole("button", { name: /Crookshanks started whiskering Mirci/ })
   ).toHaveCount(0);
 });
+
+test("hearts a comment, and the post's owner hearts the user's comment", async ({ page }) => {
+  const card = postCard(page, "Monday again. I refuse.");
+  await card.getByRole("button", { name: "3 comments" }).click();
+  const nermal = card.getByRole("listitem").filter({ hasText: "Too late, already cute here." });
+  await nermal.getByRole("button", { name: "Heart", exact: true }).click();
+  await expect(nermal.getByRole("button", { name: "Heart (1)" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+
+  await card.getByLabel("Comment as Mirci").fill("Hearts for everyone.");
+  await card.getByRole("button", { name: "Send comment" }).click();
+  await expect(card.getByText(/^@Mirci /)).toBeVisible({ timeout: 10_000 });
+  const mine = card.getByRole("listitem").filter({ hasText: "Hearts for everyone." });
+  await expect(mine.getByRole("button", { name: "Heart (1)" })).toBeVisible();
+
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  await bell(page).click();
+  await expect(
+    page.getByRole("button", { name: /Garfield hearted your comment: “Hearts for everyone\.”/ })
+  ).toBeVisible();
+});

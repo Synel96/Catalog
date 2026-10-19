@@ -11,35 +11,66 @@
   pointer-events: none;
 }
 
-/* Purrfect: hearts float up */
-.reaction-btn.purrfect:hover::after {
+/*
+ * Each reaction's animation plays while hovered with a real pointer, and
+ * once after a tap or click (`.burst`, set for a moment by ReactionBar).
+ * `.calm` (after a click, until the pointer leaves) stops the hover loop,
+ * so a pressed button doesn't keep wiggling. Touch screens get no hover
+ * effects at all: there, :hover sticks until you tap somewhere else.
+ */
+@media (hover: hover) {
+  .reaction-btn.purrfect:not(.calm):hover::after {
+    content: "💖💗💓";
+    font-size: 1rem;
+    animation: reaction-float-up 1s ease-in-out infinite;
+  }
+
+  .reaction-btn.hisss:not(.calm):hover {
+    background-color: #ff4d4d;
+    box-shadow: 0 0 12px 4px rgb(255 0 0 / 60%);
+    animation: reaction-shake 0.2s infinite;
+  }
+
+  .reaction-btn.hisss:not(.calm):hover::after {
+    content: "😾!";
+    font-size: 1.2rem;
+    color: #f00;
+    animation: reaction-float-up 1s ease-in-out infinite;
+  }
+
+  .reaction-btn.ekekekek:not(.calm):hover {
+    animation: reaction-pulse 0.6s infinite;
+  }
+
+  .reaction-btn.nap:not(.calm):hover {
+    animation: reaction-relax 2s infinite;
+  }
+}
+
+/* One-shot versions after pressing. */
+.reaction-btn.purrfect.burst::after {
   content: "💖💗💓";
   font-size: 1rem;
-  animation: reaction-float-up 1s ease-in-out infinite;
+  animation: reaction-float-up 0.9s ease-in-out 1;
 }
 
-/* Hisss: red glow, shaking, angry cat */
-.reaction-btn.hisss:hover {
-  background-color: #ff4d4d;
-  box-shadow: 0 0 12px 4px rgb(255 0 0 / 60%);
-  animation: reaction-shake 0.2s infinite;
+.reaction-btn.hisss.burst {
+  animation: reaction-shake 0.2s 3;
 }
 
-.reaction-btn.hisss:hover::after {
+.reaction-btn.hisss.burst::after {
   content: "😾!";
   font-size: 1.2rem;
   color: #f00;
-  animation: reaction-float-up 1s ease-in-out infinite;
+  animation: reaction-float-up 0.9s ease-in-out 1;
 }
 
-/* Ekekekek: excited pulse */
-.reaction-btn.ekekekek:hover {
-  animation: reaction-pulse 0.6s infinite;
+.reaction-btn.ekekekek.burst {
+  animation: reaction-pulse 0.3s 2;
 }
 
-/* Overnap: slow rocking */
-.reaction-btn.nap:hover {
-  animation: reaction-relax 2s infinite;
+.reaction-btn.nap.burst {
+  animation: reaction-relax 0.9s 1;
 }
 
 @keyframes reaction-float-up {

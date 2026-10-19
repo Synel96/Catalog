@@ -17,9 +17,10 @@ type StoredOverlord = Omit<
 >;
 type StoredPost = Omit<
   Post,
-  "overlord_name" | "overlord_avatar" | "reaction_summary" | "comment_count"
+  "overlord_name" | "overlord_avatar" | "reaction_summary" | "my_reaction" | "comment_count"
 >;
-type StoredComment = Omit<Comment, "overlord_name">;
+type StoredComment = Omit<Comment, "overlord_name" | "heart_count" | "hearted">;
+type StoredHeart = { overlord: number; comment: number };
 type StoredNotification = Omit<Notification, "overlord_name">;
 type StoredReaction = { overlord: number; post: number; type: ReactionType };
 type StoredWhisker = { from: number; to: number };
@@ -34,6 +35,7 @@ export type MockDb = {
   reactions: StoredReaction[];
   whiskers: StoredWhisker[];
   comments: StoredComment[];
+  hearts: StoredHeart[];
   notifications: StoredNotification[];
   nextId: number;
 };
@@ -154,6 +156,15 @@ const COMMENTS: [number, number, number, string, number][] = [
   [18, 4, 18, "I sleep through the red dot. That's how it loses.", 10],
 ];
 
+// [overlord, comment]: hearts on comments.
+const HEARTS: [number, number][] = [
+  [3, 6],
+  [7, 6],
+  [9, 2],
+  [3, 17],
+  [11, 13],
+];
+
 // Notifications the seeded activity above would have created for the
 // user's overlords (Mirci 1, Cirmi 2), as the backend does.
 const NOTIFICATIONS: [number, number, string, number, boolean, number][] = [
@@ -228,6 +239,7 @@ function seed(): MockDb {
       content,
       created_at: hoursAgo(hours),
     })),
+    hearts: HEARTS.map(([overlord, comment]) => ({ overlord, comment })),
     notifications: NOTIFICATIONS.map(([id, overlord, message, linkTo, isRead, hours]) => ({
       id,
       overlord,
@@ -243,7 +255,8 @@ function seed(): MockDb {
 function load(): MockDb {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as MockDb;
+    // Seed first: tables added since the tab saved its copy start seeded.
+    if (raw) return { ...seed(), ...(JSON.parse(raw) as Partial<MockDb>) };
   } catch {
     // Unavailable or corrupt storage: start from the seed.
   }
@@ -292,13 +305,18 @@ export function reactionSummary(postId: number) {
   return summary;
 }
 
-export function toPost(p: StoredPost): Post {
+// `acting`: the overlord out on the Street (`?overlord=`), see
+// feed/views.py ActingOverlordMixin.
+export function toPost(p: StoredPost, acting: number | null = null): Post {
   const overlord = db.overlords.find((o) => o.id === p.overlord);
   return {
     ...p,
     overlord_name: overlord?.name ?? "?",
     overlord_avatar: overlord?.avatar ?? null,
     reaction_summary: reactionSummary(p.id),
+    my_reaction:
+      db.reactions.find((r) => r.post === p.id && acting !== null && r.overlord === acting)?.type ??
+      null,
     comment_count: db.comments.filter((c) => c.post === p.id).length,
   };
 }
@@ -309,8 +327,14 @@ export function currentUser(): User {
 
 export const overlordName = (id: number) => db.overlords.find((o) => o.id === id)?.name ?? "?";
 
-export function toComment(c: StoredComment): Comment {
-  return { ...c, overlord_name: overlordName(c.overlord) };
+export function toComment(c: StoredComment, acting: number | null = null): Comment {
+  const hearts = db.hearts.filter((h) => h.comment === c.id);
+  return {
+    ...c,
+    overlord_name: overlordName(c.overlord),
+    heart_count: hearts.length,
+    hearted: hearts.some((h) => h.overlord === acting),
+  };
 }
 
 export function toNotification(n: StoredNotification): Notification {
