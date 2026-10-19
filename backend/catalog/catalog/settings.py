@@ -10,14 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 from corsheaders.defaults import default_headers
 from datetime import timedelta
+
+import dj_database_url
+from dotenv import load_dotenv
 
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Local secrets (e.g. DATABASE_URL) can live in backend/catalog/.env, which
+# git ignores; real environment variables take precedence.
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -87,12 +95,24 @@ WSGI_APPLICATION = "catalog.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASE_URL picks the database, e.g. Neon Postgres:
+#   postgresql://USER:PASSWORD@ep-xxx-pooler.REGION.aws.neon.tech/DBNAME?sslmode=require
+# Without it, local development falls back to SQLite.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        # The app runs under ASGI (Channels), where Django's persistent
+        # connections aren't safe to reuse; pooling is left to the database
+        # side (Neon's "-pooler" endpoint, PgBouncer). Override if needed.
+        conn_max_age=int(os.environ.get("DB_CONN_MAX_AGE", "0")),
+        conn_health_checks=True,
+    )
 }
+
+if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+    # PgBouncer in transaction mode (Neon's pooled endpoint) can't keep
+    # server-side cursors open between queries.
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 
 # Password validation
