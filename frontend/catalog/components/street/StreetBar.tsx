@@ -34,6 +34,8 @@ export function StreetBar() {
       <Button
         variant="outline"
         size="sm"
+        // The label text is hidden on phones, leaving only the icon.
+        aria-label="Go Home"
         onClick={() => {
           goHome();
           void navigate("/my-slave");
