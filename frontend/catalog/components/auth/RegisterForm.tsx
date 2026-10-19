@@ -9,10 +9,12 @@ import type { ApiError } from "@/src/types/api";
 import { formValues } from "./formValues";
 import { useTranslation } from "react-i18next";
 import { useLocalePath } from "@/src/i18n/hooks";
+import { useMounted } from "@/src/hooks/use-mounted";
 
 const REDIRECT_DELAY_MS = 2000;
 
 export function RegisterForm() {
+  const mounted = useMounted();
   const { t } = useTranslation();
   const localePath = useLocalePath();
   const [error, setError] = useState("");
@@ -50,7 +52,9 @@ export function RegisterForm() {
         <CardTitle className="text-center text-2xl">{t("auth.register")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        {/* method="post": should the form ever submit natively (before
+            hydration), the credentials must not end up in the URL. */}
+        <form method="post" onSubmit={handleSubmit} className="grid gap-4">
           <FormField
             label={t("auth.slavename")}
             name="username"
@@ -89,7 +93,14 @@ export function RegisterForm() {
             </p>
           )}
 
-          <Button type="submit" size="lg" className="mt-2 w-full" disabled={isSubmitting}>
+          {/* Disabled until hydrated, which also blocks submitting with Enter;
+              what was typed meanwhile is kept (see formValues). */}
+          <Button
+            type="submit"
+            size="lg"
+            className="mt-2 w-full"
+            disabled={!mounted || isSubmitting}
+          >
             {isSubmitting ? t("auth.registering") : t("auth.register")}
           </Button>
         </form>
