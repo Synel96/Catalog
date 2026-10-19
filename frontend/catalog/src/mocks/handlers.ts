@@ -18,7 +18,8 @@ import {
 // Mirrors the Django endpoints the app calls (see src/services). Relative
 // paths match against the page's own origin, where API_URL points in mock mode.
 const API = "/api";
-const LATENCY_MS = 300;
+// Feels like a network in the demo; tests (Vitest's "test" mode) skip it.
+const LATENCY_MS = import.meta.env.MODE === "test" ? 0 : 300;
 
 // backend/catalog/feed/consumers.py: every client hears about every new post.
 const feed = ws.link(feedSocketUrl());
@@ -42,14 +43,20 @@ const announce = (overlordId: number, postId: number) =>
 const isMine = (overlordId: number) =>
   db.overlords.some((o) => o.id === overlordId && o.slave === ME);
 
-function readFile(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
+// Uploaded files become data URLs. Avoids FileReader and `instanceof
+// File` so it also works under Node (component tests), where the request's
+// File class isn't the page's.
+async function readFile(file: Blob): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  }
+  return `data:${file.type || "application/octet-stream"};base64,${btoa(binary)}`;
 }
+
+const isFile = (value: FormDataEntryValue | null): value is File =>
+  typeof value === "object" && value !== null && "arrayBuffer" in value;
 
 // Applies multipart fields the way a DRF PATCH would: only sent keys change.
 async function applyForm<T extends object>(
@@ -63,7 +70,7 @@ async function applyForm<T extends object>(
     if (typeof value === "string") Object.assign(target, { [key]: value });
   }
   const file = form.get(fileKey);
-  if (file instanceof File && file.size > 0) {
+  if (isFile(file) && file.size > 0) {
     Object.assign(target, { [fileKey]: await readFile(file) });
   }
 }

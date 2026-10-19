@@ -11,7 +11,14 @@ export default defineConfig({
     },
   },
   test: {
+    // Node by default; component tests opt into jsdom with a
+    // `// @vitest-environment jsdom` comment at the top of the file.
     environment: "node",
-    include: ["**/*.test.ts"],
+    include: ["**/*.test.{ts,tsx}"],
+    exclude: ["node_modules/**", "dist/**", "e2e/**"],
+    setupFiles: ["./src/test/setup.ts"],
+    // Component tests run against the mock backend (src/mocks), which
+    // mock mode points the API client at.
+    env: { VITE_API_MOCKS: "true" },
   },
 });

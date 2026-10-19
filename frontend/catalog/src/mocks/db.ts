@@ -252,6 +252,12 @@ function load(): MockDb {
 
 export const db: MockDb = load();
 
+// Back to the seed, e.g. between tests.
+export function resetMockDb() {
+  Object.assign(db, seed());
+  persist();
+}
+
 export function persist() {
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(db));

@@ -153,3 +153,7 @@ cdk.out
 
 # Mock-mode stand-ins for the backend's media/placeholders (ignored at the repo root)
 !public/media/
+
+# Playwright
+/test-results/
+/playwright-report/

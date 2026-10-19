@@ -41,16 +41,35 @@ Validated with zod in `src/env.ts` (the app throws on startup if invalid):
 | `npm run lint:css`     | Stylelint over `.css`                               |
 | `npm run format`       | Prettier, write mode                                |
 | `npm run format:check` | Prettier, check-only (used in CI)                   |
-| `npm run test`         | Vitest                                              |
+| `npm run test`         | Vitest: unit + component tests                      |
+| `npm run test:e2e`     | Playwright: browser tests on a mock-mode build      |
 | `npm run check`        | Runs all of the above (typecheck → lint → test → …) |
 
 A pre-commit hook (Husky + lint-staged) formats/lints staged files; CI
 (`.github/workflows/frontend-ci.yml` at the repo root) runs the full check
 list plus a build.
 
+## Tests
+
+- **Unit** (`*.test.ts`, Node): API error handling, media URLs, the feed
+  socket URL, mock notification rules and chatter.
+- **Component** (`*.test.tsx`, jsdom via `// @vitest-environment jsdom`):
+  real components with Testing Library against the mock backend's own MSW
+  handlers, served in Node (`src/test/mock-server.ts` resets the seed per
+  test).
+- **End-to-end** (`e2e/`, Playwright, desktop + Pixel 7): builds in mock
+  mode, serves it and drives the real app: auth, Street, posts, reactions,
+  search, whiskers, comments, live chatter and notifications.
+  `npx playwright install chromium` once; set `PW_CHROMIUM_PATH` to use a
+  Chromium that's already installed instead.
+
+CI runs the Vitest suite in the `check` job and Playwright in its own
+`e2e` job.
+
 ## Structure
 
 ```
+e2e/                   Playwright tests
 pages/                 Vike pages (filesystem routing) + layout/head
   index/  login/       Login (both `/` and `/login`)
   register/            Registration
