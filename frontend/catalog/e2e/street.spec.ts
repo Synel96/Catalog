@@ -57,7 +57,7 @@ test("searches an overlord and whiskers them", async ({ page, isMobile }) => {
 });
 
 test("goes home and leaves street mode", async ({ page }) => {
-  await page.getByRole("button", { name: /Go Home/ }).click();
+  await page.getByRole("link", { name: /Go Home/ }).click();
   await expect(page).toHaveURL(/\/my-slave$/);
   await expect(page.getByRole("combobox")).toHaveCount(0);
 });

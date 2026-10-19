@@ -31,9 +31,29 @@ test.describe("a new tab after an old session", () => {
     await expect(page).toHaveURL(/\/my-slave$/);
     await expect(page.getByText(/On the Street with/)).toHaveCount(0);
 
-    await page.getByRole("button", { name: "Go to the Street with Mirci" }).click();
+    await page.getByRole("link", { name: "Go to the Street with Mirci" }).click();
     await expect(page).toHaveURL(/\/street$/);
     await expect(page.getByLabel("Post as Mirci")).toBeVisible();
     await context.close();
   });
+});
+
+test("Go to the Street still works when client-side navigation fails", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("Username").fill("t");
+  await page.getByLabel("Password").fill("x");
+  await page.getByRole("button", { name: "Login" }).click();
+  await expect(page).toHaveURL(/\/my-slave$/);
+
+  // Break Vike's client-side route change by failing the Street page's code
+  // once; the link must then still get the browser to /street.
+  let failed = false;
+  await page.route(/\/assets\/entries\/pages_street\./, (route) => {
+    if (failed) return route.continue();
+    failed = true;
+    return route.abort();
+  });
+  await page.getByRole("link", { name: "Go to the Street with Mirci" }).click();
+  await expect(page).toHaveURL(/\/street$/);
+  await expect(page.getByLabel("Post as Mirci")).toBeVisible();
 });

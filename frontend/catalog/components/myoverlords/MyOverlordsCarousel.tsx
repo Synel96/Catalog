@@ -1,6 +1,5 @@
 import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { navigate } from "vike/client/router";
 import { ImageViewerDialog } from "@/components/common/ImageViewerDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -112,15 +111,13 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
             </Button>
           </div>
 
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={() => {
-              goToStreet(current);
-              void navigate(localePath("/street"));
-            }}
-          >
-            <span className="truncate">{t("overlords.goToStreet", { name })}</span>
+          {/* A real link: Vike turns it into a client-side navigation, and if
+              that ever fails the browser still follows the href. The click
+              handler runs first and picks the street overlord. */}
+          <Button size="lg" className="w-full" asChild>
+            <a href={localePath("/street")} onClick={() => goToStreet(current)}>
+              <span className="truncate">{t("overlords.goToStreet", { name })}</span>
+            </a>
           </Button>
         </CardContent>
       </Card>

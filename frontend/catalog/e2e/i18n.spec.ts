@@ -31,7 +31,7 @@ test("Hungarian sticks while logging in and going to the Street", async ({ page 
   await expect(page.getByText("Sikeres belépés!")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Nagyuraim" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Irány az utca: Mirci" }).click();
+  await page.getByRole("link", { name: "Irány az utca: Mirci" }).click();
   await expect(page).toHaveURL(/\/hu\/street$/);
   await expect(page.getByRole("heading", { name: "Utca" })).toBeVisible();
   await expect(page.getByLabel("Posztolás mint Mirci")).toBeVisible();
@@ -46,7 +46,7 @@ test("a notification link keeps the language", async ({ page, isMobile }) => {
   await page.getByLabel("Felhasználónév").fill("cicamama");
   await page.getByLabel("Jelszó").fill("x");
   await page.getByRole("button", { name: "Belépés" }).click();
-  await page.getByRole("button", { name: "Irány az utca: Mirci" }).click();
+  await page.getByRole("link", { name: "Irány az utca: Mirci" }).click();
 
   await page.getByRole("button", { name: /^Értesítések/ }).click();
   await page.getByRole("button", { name: /Crookshanks started whiskering Mirci/ }).click();

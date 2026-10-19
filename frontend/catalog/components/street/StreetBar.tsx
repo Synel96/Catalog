@@ -1,5 +1,4 @@
 import { HomeIcon } from "lucide-react";
-import { navigate } from "vike/client/router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { mediaUrl } from "@/src/services/api";
@@ -35,17 +34,16 @@ export function StreetBar() {
           {t("street.onStreetWith", { name: overlord.name })}
         </span>
       </a>
-      <Button
-        variant="outline"
-        size="sm"
-        // The label text is hidden on phones, leaving only the icon.
-        aria-label={t("street.goHome")}
-        onClick={() => {
-          goHome();
-          void navigate(localePath("/my-slave"));
-        }}
-      >
-        <HomeIcon /> <span className="hidden sm:inline">{t("street.goHome")}</span>
+      {/* A real link, like "Go to the Street" (see MyOverlordsCarousel). */}
+      <Button variant="outline" size="sm" asChild>
+        <a
+          href={localePath("/my-slave")}
+          onClick={goHome}
+          // The label text is hidden on phones, leaving only the icon.
+          aria-label={t("street.goHome")}
+        >
+          <HomeIcon /> <span className="hidden sm:inline">{t("street.goHome")}</span>
+        </a>
       </Button>
     </div>
   );

@@ -12,7 +12,7 @@ export async function login(page: Page, username = "tester") {
 
 export async function goToStreetWithMirci(page: Page) {
   await login(page);
-  await page.getByRole("button", { name: "Go to the Street with Mirci" }).click();
+  await page.getByRole("link", { name: "Go to the Street with Mirci" }).click();
   await expect(page).toHaveURL(/\/street$/);
   await expect(page.getByText("Monday again. I refuse.")).toBeVisible();
 }
