@@ -49,7 +49,6 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
   // Out on the Street the centre of the bar is the street controls, and the
   // page links move into the menu (on every screen size).
   const onStreet = useStreetStore((state) => state.selectedOverlord !== null) && isAuthenticated;
-  const goHome = useStreetStore((state) => state.goHome);
   const clearNotifications = useNotificationsStore((state) => state.clear);
   const links = useNavLinks();
   const { t } = useTranslation();
@@ -69,8 +68,8 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
     } catch (error) {
       console.error("Logout error:", error);
     }
+    // Also clears the street overlord (see useAuthStore).
     logout();
-    goHome();
     clearNotifications();
     setOpen(false);
     await navigate(localePath("/login"));

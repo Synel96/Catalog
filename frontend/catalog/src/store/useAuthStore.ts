@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getCurrentUser } from "@/src/services/userService";
+import { reconcileStreetOverlord, useStreetStore } from "@/src/store/useStreetStore";
 import type { User } from "@/src/types/api";
 
 type AuthState = {
@@ -17,18 +18,28 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
-      login: (user) => set({ user, isAuthenticated: true }),
+      // A new session starts at home, not out on the Street with whatever
+      // overlord an earlier session left selected.
+      login: (user) => {
+        useStreetStore.getState().goHome();
+        set({ user, isAuthenticated: true });
+      },
 
-      logout: () => set({ user: null, isAuthenticated: false }),
+      logout: () => {
+        useStreetStore.getState().goHome();
+        set({ user: null, isAuthenticated: false });
+      },
 
       refetchUser: async () => {
         try {
           const user = await getCurrentUser();
           set({ user, isAuthenticated: true });
+          reconcileStreetOverlord(user);
           return user;
         } catch (error) {
           console.error("Failed to refetch user:", error);
           set({ user: null, isAuthenticated: false });
+          reconcileStreetOverlord(null);
           return null;
         }
       },
