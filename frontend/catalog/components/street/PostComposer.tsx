@@ -12,6 +12,7 @@ import { mediaUrl } from "@/src/services/api";
 import { createPost } from "@/src/services/postService";
 import { resetUploadProgress } from "@/src/store/useUploadStore";
 import type { ApiError, Overlord } from "@/src/types/api";
+import { CameraButton } from "./CameraCapture";
 import { OVERLORD_PLACEHOLDER } from "./media";
 import { useTranslation } from "react-i18next";
 
@@ -95,6 +96,7 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                   <ImageIcon />
                 </label>
               </Button>
+              <CameraButton onCapture={setImage} disabled={isSubmitting} />
               <Button
                 type="submit"
                 disabled={!canSubmit}

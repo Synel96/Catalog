@@ -9,6 +9,7 @@ import { updatePost } from "@/src/services/postService";
 import { resetUploadProgress } from "@/src/store/useUploadStore";
 import type { ApiError, Post } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
+import { CameraButton } from "./CameraCapture";
 
 type EditPostDialogProps = {
   post: Post | null;
@@ -89,6 +90,7 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
             <ImageIcon />
           </label>
         </Button>
+        <CameraButton onCapture={setImage} disabled={isSubmitting} />
         {image && (
           <UploadPreview
             file={image}

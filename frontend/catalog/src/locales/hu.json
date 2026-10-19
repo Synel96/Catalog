@@ -337,5 +337,22 @@
         "body": "A csengő szól, ha valaki kommentel, reagál vagy megbajuszolja azt a nagyurat, akivel kint vagy; minden macskának saját csengője van. Macskát váltani úgy tudsz, hogy a navbarban <b>rákoppintasz a macska képére</b>, és kiválasztasz egy másikat."
       }
     }
+  },
+  "camera": {
+    "take": "Fotó készítése",
+    "title": "Fotó készítése",
+    "preview": "Kamera előnézet",
+    "captured": "Az elkészült fotó",
+    "starting": "Ébresztjük a kamerát… Ha a böngésző rákérdez, engedélyezd a kamerát.",
+    "shoot": "Fotó elkészítése",
+    "retake": "Újra",
+    "use": "Ezt használom",
+    "switch": "Kamera váltása",
+    "chooseFile": "Inkább fájlt választok",
+    "error": {
+      "denied": "A kamera hozzáférés le van tiltva. Engedélyezd ennek az oldalnak a böngésző beállításaiban (a címsorban a kamera vagy lakat ikonnál), majd próbáld újra.",
+      "missing": "Ezen az eszközön nem található kamera.",
+      "failed": "Nem sikerült elindítani a kamerát. Lehet, hogy egy másik alkalmazás használja."
+    }
   }
 }
