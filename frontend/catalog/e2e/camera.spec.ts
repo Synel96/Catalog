@@ -38,3 +38,26 @@ test("posts a photo taken with the camera", async ({ page, isMobile }) => {
   const card = postCard(page, "Fresh from the camera");
   await expect(card.locator("img[loading=lazy]")).toBeVisible();
 });
+
+test("comments with a photo from the camera", async ({ page, isMobile }) => {
+  const card = postCard(page, "Monday again. I refuse.");
+  await card.getByRole("button", { name: "3 comments" }).click();
+  await card.getByLabel("Comment as Mirci").fill("Proof:");
+
+  if (isMobile) {
+    const chooser = page.waitForEvent("filechooser");
+    await card.getByRole("button", { name: "Take a photo" }).click();
+    await (await chooser).setFiles(fileURLToPath(new URL("./cat.png", import.meta.url)));
+  } else {
+    await card.getByRole("button", { name: "Take a photo" }).click();
+    const dialog = page.getByRole("dialog", { name: "Take a photo" });
+    const shutter = dialog.getByRole("button", { name: "Take the photo" });
+    await expect(shutter).toBeEnabled();
+    await shutter.click();
+    await dialog.getByRole("button", { name: "Use this photo" }).click();
+  }
+
+  await card.getByRole("button", { name: "Send comment" }).click();
+  const comment = card.getByRole("listitem").filter({ hasText: "Proof:" });
+  await expect(comment.getByRole("img", { name: "Picture from Mirci" })).toBeVisible();
+});

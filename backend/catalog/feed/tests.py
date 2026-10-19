@@ -313,3 +313,64 @@ class FeedPaginationTests(APITestCase):
         first = self.page(url)
         second = self.page(url, {'cursor': self.cursor(first['next'])})
         self.assertEqual((len(first['results']), len(second['results'])), (20, 5))
+
+
+def tiny_png(name='cat.png'):
+    from io import BytesIO
+    from PIL import Image
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    buffer = BytesIO()
+    Image.new('RGB', (2, 2), 'orange').save(buffer, 'PNG')
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type='image/png')
+
+
+class CommentImageTests(APITestCase):
+    """Comments can carry a picture, with or without text."""
+
+    def setUp(self):
+        import tempfile
+        from django.test import override_settings
+
+        media = override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+        media.enable()
+        self.addCleanup(media.disable)
+
+        self.me = User.objects.create_user(username='me', email='me@example.com', password='pw')
+        self.other = User.objects.create_user(
+            username='other', email='other@example.com', password='pw'
+        )
+        self.mirci = Overlord.objects.create(name='Mirci', slave=self.me)
+        self.garfield = Overlord.objects.create(name='Garfield', slave=self.other)
+        self.post = Post.objects.create(overlord=self.mirci, content='Sunbeam acquired.')
+        login(self.client, self.other)
+
+    def comment(self, **fields):
+        data = {'overlord': self.garfield.id, 'post': self.post.id, **fields}
+        return self.client.post(reverse('comment-list'), data, format='multipart')
+
+    def test_text_and_picture(self):
+        response = self.comment(content='Look at this.', image=tiny_png())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIn('/comments/other/Garfield/', response.data['image'])
+
+    def test_picture_only_notifies_with_a_camera(self):
+        response = self.comment(image=tiny_png())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['content'], '')
+        message = Notification.objects.get(overlord=self.mirci).message
+        self.assertEqual(message, 'Garfield commented on your post: \U0001F4F7')
+
+    def test_needs_text_or_picture(self):
+        response = self.comment(content='   ')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(Comment.objects.exists())
+
+    def test_editing_text_keeps_the_picture(self):
+        comment_id = self.comment(image=tiny_png()).data['id']
+        url = reverse('comment-detail', args=[comment_id])
+        response = self.client.patch(url, {'content': 'Now with words.'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data['image'])
+        # Text can't be emptied on a picture-less comment, but can on this one.
+        self.assertEqual(self.client.patch(url, {'content': ''}, format='json').status_code, 200)

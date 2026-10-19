@@ -17,17 +17,28 @@ export async function getPostComments(
   }
 }
 
+// Multipart when there's a picture, JSON otherwise.
 export async function createComment(
   postId: number,
   overlordId: number,
-  content: string
+  content: string,
+  image: File | null = null
 ): Promise<Comment> {
+  let body: FormData | Record<string, unknown> = {
+    post: postId,
+    overlord: overlordId,
+    content,
+  };
+  if (image) {
+    const form = new FormData();
+    form.append("post", String(postId));
+    form.append("overlord", String(overlordId));
+    form.append("content", content);
+    form.append("image", image);
+    body = form;
+  }
   try {
-    const response = await api.post<Comment>("feed/comments/", {
-      post: postId,
-      overlord: overlordId,
-      content,
-    });
+    const response = await api.post<Comment>("feed/comments/", body);
     return response.data;
   } catch (error) {
     throw toApiError(error, i18n.t("errors.postComment"));

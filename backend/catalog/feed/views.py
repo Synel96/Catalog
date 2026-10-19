@@ -30,6 +30,15 @@ def notify(actor, target, message, link=None):
     Notification.objects.create(overlord=target, message=message[:255], link=link)
 
 
+def quote(comment):
+    """A comment as shown in notifications: its text, shortened, in quotes;
+    a picture-only comment as a camera."""
+    text = comment.content.strip()
+    if not text:
+        return "\U0001F4F7"
+    return f"\u201c{text if len(text) <= 60 else text[:57] + '...'}\u201d"
+
+
 def overlord_link(overlord):
     # Frontend profile route (frontend/catalog/components/street/links.ts).
     return f"/overlord?id={overlord.id}"
@@ -183,11 +192,10 @@ class CommentViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
             raise ValidationError("You can only comment with your own overlords.")
         comment = serializer.save()
 
-        snippet = comment.content if len(comment.content) <= 60 else f"{comment.content[:57]}..."
         notify(
             overlord,
             comment.post.overlord,
-            f"{overlord.name} commented on your post: \u201c{snippet}\u201d",
+            f"{overlord.name} commented on your post: {quote(comment)}",
             overlord_link(comment.post.overlord),
         )
 
@@ -208,11 +216,10 @@ class CommentViewSet(ActingOverlordMixin, viewsets.ModelViewSet):
         if not created:
             heart.delete()
         else:
-            snippet = comment.content if len(comment.content) <= 60 else f"{comment.content[:57]}..."
             notify(
                 overlord,
                 comment.overlord,
-                f"{overlord.name} hearted your comment: \u201c{snippet}\u201d",
+                f"{overlord.name} hearted your comment: {quote(comment)}",
                 overlord_link(comment.post.overlord),
             )
         return Response({"hearted": created, "heart_count": comment.hearts.count()})

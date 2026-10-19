@@ -72,6 +72,27 @@ describe("CommentSection", () => {
     expect(onCountChange).toHaveBeenCalledWith(1);
   });
 
+  it("posts a picture-only comment", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:paw");
+    URL.revokeObjectURL = vi.fn();
+    renderSection();
+    await screen.findAllByRole("listitem");
+    const send = screen.getByRole("button", { name: "Send comment" });
+    expect(send).toBeDisabled();
+
+    await userEvent.upload(
+      screen.getByLabelText("Add a picture"),
+      new File(["meow"], "paw.png", { type: "image/png" })
+    );
+    expect(screen.getByText("paw.png")).toBeInTheDocument();
+    await userEvent.click(send);
+
+    expect(await screen.findByRole("img", { name: "Picture from Mirci" })).toBeInTheDocument();
+    expect(db.comments.at(-1)).toMatchObject({ overlord: 1, post: 2, content: "" });
+    expect(db.comments.at(-1)?.image).toMatch(/^data:image\/png/);
+    expect(screen.queryByText("paw.png")).toBeNull();
+  });
+
   it("edits and deletes an own comment", async () => {
     const onCountChange = vi.fn();
     renderSection(onCountChange);

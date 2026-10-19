@@ -13,6 +13,9 @@ def overlord_avatar_upload_path(self, filename):
 def post_image_upload_path(instance, filename):
     return f'posts/{instance.overlord.slave.username}/{instance.overlord.name}/{filename}'
 
+def comment_image_upload_path(instance, filename):
+    return f'comments/{instance.overlord.slave.username}/{instance.overlord.name}/{filename}'
+
 
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
@@ -78,7 +81,9 @@ class Reaction(models.Model):
 class Comment(models.Model):
     overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='comments')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
-    content = models.TextField()
+    # A comment has text, a picture, or both.
+    content = models.TextField(blank=True)
+    image = models.ImageField(upload_to=comment_image_upload_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

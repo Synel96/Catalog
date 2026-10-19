@@ -1,7 +1,7 @@
 import { delay, http, HttpResponse } from "msw";
 import { MOCK_FEED_EVENT } from "@/components/site";
 import type { ReactionType } from "@/src/types/api";
-import { readForm } from "./forms";
+import { FORM_HEADER, readForm } from "./forms";
 import { addComment, counterComment, notify, reactToNewPost, toggleHeart } from "./chatter";
 import {
   currentUser,
@@ -406,16 +406,32 @@ const commentHandlers = [
 
   http.post(`${API}/feed/comments/`, async ({ request }) => {
     if (!db.loggedIn) return unauthorized();
-    const { post, overlord, content } = (await request.json()) as {
-      post: number;
-      overlord: number;
-      content: string;
-    };
-    if (!isMine(overlord)) return badRequest("You can only comment with your own overlords.");
-    if (!content?.trim()) {
-      return HttpResponse.json({ content: ["This field may not be blank."] }, { status: 400 });
+    // JSON, or multipart when there's a picture (as the backend accepts).
+    let post: number, overlord: number, content: string;
+    let image: string | null = null;
+    if (request.headers.has(FORM_HEADER)) {
+      const form = await readForm(request);
+      post = Number(form.get("post"));
+      overlord = Number(form.get("overlord"));
+      content = String(form.get("content") ?? "");
+      const file = form.get("image");
+      if (isFile(file) && file.size > 0) image = await readFile(file);
+    } else {
+      ({
+        post,
+        overlord,
+        content = "",
+      } = (await request.json()) as {
+        post: number;
+        overlord: number;
+        content?: string;
+      });
     }
-    const comment = addComment(overlord, post, content);
+    if (!isMine(overlord)) return badRequest("You can only comment with your own overlords.");
+    if (!content.trim() && !image) {
+      return HttpResponse.json({ content: ["Write something or add a picture."] }, { status: 400 });
+    }
+    const comment = addComment(overlord, post, content, image);
     persist();
     counterComment(post, overlord, announce, comment.id);
     return HttpResponse.json(toComment(comment), { status: 201 });

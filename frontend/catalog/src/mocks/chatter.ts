@@ -31,8 +31,11 @@ const isMine = (overlordId: number) =>
 const others = (exclude: number[]) =>
   db.overlords.filter((o) => o.slave !== ME && !exclude.includes(o.id));
 
-function snippet(text: string) {
-  return text.length <= 60 ? text : `${text.slice(0, 57)}...`;
+// A comment as quoted in notifications (feed/views.py quote()).
+function quote(text: string) {
+  const trimmed = text.trim();
+  if (!trimmed) return "📷";
+  return `“${trimmed.length <= 60 ? trimmed : `${trimmed.slice(0, 57)}...`}”`;
 }
 
 export function notify(actorId: number, targetId: number, message: string, linkTo: number) {
@@ -49,12 +52,18 @@ export function notify(actorId: number, targetId: number, message: string, linkT
   });
 }
 
-export function addComment(overlordId: number, postId: number, content: string) {
+export function addComment(
+  overlordId: number,
+  postId: number,
+  content: string,
+  image: string | null = null
+) {
   const comment = {
     id: nextId(),
     overlord: overlordId,
     post: postId,
     content,
+    image,
     created_at: new Date().toISOString(),
   };
   db.comments.push(comment);
@@ -63,7 +72,7 @@ export function addComment(overlordId: number, postId: number, content: string) 
     notify(
       overlordId,
       post.overlord,
-      `${overlordName(overlordId)} commented on your post: “${snippet(content)}”`,
+      `${overlordName(overlordId)} commented on your post: ${quote(content)}`,
       post.overlord
     );
   }
@@ -84,7 +93,7 @@ export function toggleHeart(overlordId: number, commentId: number) {
       notify(
         overlordId,
         comment.overlord,
-        `${overlordName(overlordId)} hearted your comment: “${snippet(comment.content)}”`,
+        `${overlordName(overlordId)} hearted your comment: ${quote(comment.content)}`,
         post.overlord
       );
     }

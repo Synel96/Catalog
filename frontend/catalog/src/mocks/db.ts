@@ -237,6 +237,7 @@ function seed(): MockDb {
       overlord,
       post,
       content,
+      image: null,
       created_at: hoursAgo(hours),
     })),
     hearts: HEARTS.map(([overlord, comment]) => ({ overlord, comment })),

@@ -164,7 +164,10 @@
     "save": "Save comment",
     "cancelEdit": "Cancel editing",
     "heart": "Heart",
-    "needOverlordToHeart": "Go to the Street with an overlord to give hearts"
+    "needOverlordToHeart": "Go to the Street with an overlord to give hearts",
+    "attachImage": "Add a picture",
+    "image": "Picture from {{name}}",
+    "openImage": "Open {{name}}'s picture full size"
   },
   "search": {
     "open": "Open search",

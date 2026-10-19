@@ -1,7 +1,16 @@
 import "./street.css";
-import { CheckIcon, HeartIcon, PencilIcon, SendIcon, Trash2Icon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import {
+  CheckIcon,
+  HeartIcon,
+  ImageIcon,
+  PencilIcon,
+  SendIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
+import { UploadPreview } from "@/components/common/UploadPreview";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,8 +21,12 @@ import {
   toggleCommentHeart,
   updateComment,
 } from "@/src/services/commentService";
+import { shrinkImage } from "@/lib/image";
+import { mediaUrl } from "@/src/services/api";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { resetUploadProgress } from "@/src/store/useUploadStore";
 import type { ApiError, Comment } from "@/src/types/api";
+import { CameraButton } from "./CameraCapture";
 import { overlordHref } from "./links";
 import { formatPostDate } from "./media";
 import { cn } from "@/lib/utils";
@@ -45,7 +58,10 @@ export function CommentSection({
   const [comments, setComments] = useState<Comment[] | null>(null);
   const [error, setError] = useState("");
   const [draft, setDraft] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const fileInputId = useId();
+  const canSend = (draft.trim() !== "" || image !== null) && !isSending;
 
   useEffect(() => {
     let cancelled = false;
@@ -62,12 +78,15 @@ export function CommentSection({
 
   const send = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!overlordId || !draft.trim()) return;
+    if (!overlordId || !canSend) return;
     setIsSending(true);
+    resetUploadProgress();
     try {
-      const comment = await createComment(postId, overlordId, draft.trim());
+      const picture = image && (await shrinkImage(image));
+      const comment = await createComment(postId, overlordId, draft.trim(), picture);
       setComments((prev) => [...(prev ?? []), comment]);
       setDraft("");
+      setImage(null);
       onCountChange(1);
     } catch (err) {
       toast.error((err as ApiError).detail);
@@ -139,24 +158,45 @@ export function CommentSection({
       )}
 
       {overlordId ? (
-        <form onSubmit={send} className="flex items-end gap-2">
-          <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={t("comments.placeholder", { name: overlordName })}
-            aria-label={t("comments.as", { name: overlordName })}
-            rows={1}
-            className="min-h-9"
-            disabled={isSending}
-          />
-          <Button
-            type="submit"
-            size="icon"
-            aria-label={t("comments.send")}
-            disabled={!draft.trim() || isSending}
-          >
-            <SendIcon />
-          </Button>
+        <form onSubmit={send} className="grid gap-2">
+          <div className="flex items-end gap-2">
+            <Textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder={t("comments.placeholder", { name: overlordName })}
+              aria-label={t("comments.as", { name: overlordName })}
+              rows={1}
+              className="min-h-9"
+              disabled={isSending}
+            />
+            <input
+              id={fileInputId}
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              onChange={(e) => {
+                setImage(e.target.files?.[0] ?? null);
+                e.target.value = "";
+              }}
+              disabled={isSending}
+            />
+            <Button variant="secondary" size="icon" asChild>
+              <label
+                htmlFor={fileInputId}
+                aria-label={t("comments.attachImage")}
+                className="cursor-pointer"
+              >
+                <ImageIcon />
+              </label>
+            </Button>
+            <CameraButton onCapture={setImage} disabled={isSending} />
+            <Button type="submit" size="icon" aria-label={t("comments.send")} disabled={!canSend}>
+              <SendIcon />
+            </Button>
+          </div>
+          {image && (
+            <UploadPreview file={image} uploading={isSending} onRemove={() => setImage(null)} />
+          )}
         </form>
       ) : (
         <p className="text-muted-foreground text-sm">{t("comments.needOverlord")}</p>
@@ -294,7 +334,23 @@ function CommentItem({
           </Button>
         </div>
       ) : (
-        <p className="mt-0.5 text-sm whitespace-pre-wrap">{comment.content}</p>
+        comment.content && <p className="mt-0.5 text-sm whitespace-pre-wrap">{comment.content}</p>
+      )}
+      {comment.image && (
+        <a
+          href={mediaUrl(comment.image, "")}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 block w-fit"
+          aria-label={t("comments.openImage", { name: comment.overlord_name })}
+        >
+          <img
+            src={mediaUrl(comment.image, "")}
+            alt={t("comments.image", { name: comment.overlord_name })}
+            loading="lazy"
+            className="max-h-64 max-w-full rounded-md object-contain"
+          />
+        </a>
       )}
     </li>
   );

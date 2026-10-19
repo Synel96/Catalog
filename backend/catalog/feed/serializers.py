@@ -55,6 +55,15 @@ class CommentSerializer(serializers.ModelSerializer):
     overlord_name = serializers.CharField(source='overlord.name', read_only=True)
     heart_count = serializers.IntegerField(source='hearts.count', read_only=True)
     hearted = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    def validate(self, attrs):
+        # On an edit, what isn't sent stays as it was.
+        content = attrs.get('content', getattr(self.instance, 'content', '')) or ''
+        image = attrs.get('image', getattr(self.instance, 'image', None))
+        if not content.strip() and not image:
+            raise serializers.ValidationError({'content': 'Write something or add a picture.'})
+        return attrs
 
     def get_hearted(self, obj):
         overlord_id = acting_overlord_id(self)
@@ -63,7 +72,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = [
-            'id', 'overlord', 'overlord_name', 'post', 'content', 'created_at',
+            'id', 'overlord', 'overlord_name', 'post', 'content', 'image', 'created_at',
             'heart_count', 'hearted',
         ]
 

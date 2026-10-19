@@ -164,7 +164,10 @@
     "save": "Komment mentése",
     "cancelEdit": "Szerkesztés megszakítása",
     "heart": "Szívecske",
-    "needOverlordToHeart": "Szívecskézéshez vigyél ki egy nagyurat az utcára"
+    "needOverlordToHeart": "Szívecskézéshez vigyél ki egy nagyurat az utcára",
+    "attachImage": "Kép hozzáadása",
+    "image": "{{name}} képe",
+    "openImage": "{{name}} képének megnyitása teljes méretben"
   },
   "search": {
     "open": "Keresés megnyitása",

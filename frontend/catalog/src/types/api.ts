@@ -48,7 +48,9 @@ export type Comment = {
   overlord: number;
   overlord_name: string;
   post: number;
+  // Text, a picture, or both.
   content: string;
+  image: string | null;
   created_at: string;
   heart_count: number;
   // Whether the acting overlord (`?overlord=`) has hearted it.
