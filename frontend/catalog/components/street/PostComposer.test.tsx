@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { db } from "@/src/mocks/db";
+import { useUploadStore } from "@/src/store/useUploadStore";
 import { useMockBackend } from "@/src/test/mock-server";
 import type { Overlord } from "@/src/types/api";
 import { PostComposer } from "./PostComposer";
@@ -41,5 +42,7 @@ describe("PostComposer", () => {
     expect(box).toHaveValue("");
     expect(db.posts.at(-1)).toMatchObject({ overlord: 1, content: "The red dot is back." });
     expect(db.posts.at(-1)?.image).toMatch(/^data:image\/png/);
+    // The upload reported its progress all the way.
+    expect(useUploadStore.getState().progress).toBe(1);
   });
 });

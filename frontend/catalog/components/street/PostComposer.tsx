@@ -1,13 +1,16 @@
 import "./street.css";
-import { ImageIcon, PawPrintIcon, XIcon } from "lucide-react";
+import { ImageIcon, PawPrintIcon } from "lucide-react";
 import { useId, useState } from "react";
 import { toast } from "sonner";
+import { UploadPreview } from "@/components/common/UploadPreview";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { shrinkImage } from "@/lib/image";
 import { mediaUrl } from "@/src/services/api";
 import { createPost } from "@/src/services/postService";
+import { resetUploadProgress } from "@/src/store/useUploadStore";
 import type { ApiError, Overlord } from "@/src/types/api";
 import { OVERLORD_PLACEHOLDER } from "./media";
 import { useTranslation } from "react-i18next";
@@ -31,13 +34,14 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
     e.preventDefault();
     if (!canSubmit) return;
     setIsSubmitting(true);
-
-    const formData = new FormData();
-    formData.append("overlord", String(overlord.id));
-    formData.append("content", content);
-    if (image) formData.append("image", image);
+    resetUploadProgress();
 
     try {
+      const formData = new FormData();
+      formData.append("overlord", String(overlord.id));
+      formData.append("content", content);
+      if (image) formData.append("image", await shrinkImage(image));
+
       await createPost(formData);
       setContent("");
       setImage(null);
@@ -75,7 +79,11 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                 type="file"
                 accept="image/*"
                 className="sr-only"
-                onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  setImage(e.target.files?.[0] ?? null);
+                  // Lets the same file be picked again after removing it.
+                  e.target.value = "";
+                }}
                 disabled={isSubmitting}
               />
               <Button variant="secondary" size="icon" asChild>
@@ -87,20 +95,6 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                   <ImageIcon />
                 </label>
               </Button>
-              {image && (
-                <span className="text-muted-foreground flex min-w-0 items-center gap-1 text-sm">
-                  <span className="truncate">{image.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    aria-label={t("composer.removeImage")}
-                    onClick={() => setImage(null)}
-                  >
-                    <XIcon />
-                  </Button>
-                </span>
-              )}
-
               <Button
                 type="submit"
                 disabled={!canSubmit}
@@ -109,6 +103,14 @@ export function PostComposer({ overlord, onPosted }: PostComposerProps) {
                 <PawPrintIcon /> {isSubmitting ? t("composer.posting") : t("composer.post")}
               </Button>
             </div>
+
+            {image && (
+              <UploadPreview
+                file={image}
+                uploading={isSubmitting}
+                onRemove={() => setImage(null)}
+              />
+            )}
           </div>
         </form>
       </CardContent>

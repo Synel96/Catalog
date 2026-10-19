@@ -1,9 +1,12 @@
 import { ImageIcon, SaveIcon } from "lucide-react";
 import { useId, useState } from "react";
+import { UploadPreview } from "@/components/common/UploadPreview";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { shrinkImage } from "@/lib/image";
 import { updatePost } from "@/src/services/postService";
+import { resetUploadProgress } from "@/src/store/useUploadStore";
 import type { ApiError, Post } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
 
@@ -39,12 +42,12 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
-
-    const formData = new FormData();
-    formData.append("content", content);
-    if (image) formData.append("image", image);
+    resetUploadProgress();
 
     try {
+      const formData = new FormData();
+      formData.append("content", content);
+      if (image) formData.append("image", await shrinkImage(image));
       onUpdated(await updatePost(post.id, formData));
     } catch (err) {
       setError((err as ApiError).detail);
@@ -62,6 +65,7 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
         aria-label={t("posts.content")}
         rows={3}
         autoFocus
+        disabled={isSubmitting}
       />
 
       <div className="flex items-center gap-3">
@@ -70,7 +74,11 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
           type="file"
           accept="image/*"
           className="sr-only"
-          onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+          onChange={(e) => {
+            setImage(e.target.files?.[0] ?? null);
+            e.target.value = "";
+          }}
+          disabled={isSubmitting}
         />
         <Button variant="secondary" size="icon" asChild>
           <label
@@ -81,7 +89,14 @@ function EditPostForm({ post, onUpdated }: { post: Post; onUpdated: (post: Post)
             <ImageIcon />
           </label>
         </Button>
-        {image && <span className="text-muted-foreground truncate text-sm">{image.name}</span>}
+        {image && (
+          <UploadPreview
+            file={image}
+            uploading={isSubmitting}
+            onRemove={() => setImage(null)}
+            className="flex-1"
+          />
+        )}
       </div>
 
       {error && (

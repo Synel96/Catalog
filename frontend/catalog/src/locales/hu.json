@@ -272,5 +272,10 @@
     "createPost": "Nem sikerült közzétenni a posztot.",
     "updatePost": "Nem sikerült menteni a posztot.",
     "deletePost": "Nem sikerült törölni a posztot."
+  },
+  "upload": {
+    "uploading": "Feltöltés…",
+    "percent": "Feltöltés… {{percent}}%",
+    "finishing": "Mindjárt kész, a macska még megszagolja…"
   }
 }

@@ -71,3 +71,48 @@ test("fits the phone screen without sideways scrolling", async ({ page, isMobile
   const bar = page.getByRole("group", { name: "Reactions" }).first();
   expect(await bar.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0);
 });
+
+test("shows upload progress and shrinks a big photo before posting it", async ({ page }) => {
+  test.slow();
+  // A noisy JPEG compresses badly, much like a phone photo.
+  const photo = await page.evaluate(async () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 2400;
+    canvas.height = 1800;
+    const ctx = canvas.getContext("2d")!;
+    const pixels = ctx.createImageData(canvas.width, canvas.height);
+    for (let i = 0; i < pixels.data.length; i++) pixels.data[i] = Math.random() * 256;
+    ctx.putImageData(pixels, 0, 0);
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95)
+    );
+    const dataUrl = await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+    return dataUrl.split(",")[1];
+  });
+  const buffer = Buffer.from(photo, "base64");
+  expect(buffer.length).toBeGreaterThan(1_000_000);
+
+  await page.getByLabel("Post as Mirci").fill("Big photo incoming");
+  await page
+    .getByLabel("Attach image")
+    .setInputFiles({ name: "IMG_0001.jpg", mimeType: "image/jpeg", buffer });
+  await expect(page.getByText("IMG_0001.jpg")).toBeVisible();
+
+  await page.getByRole("button", { name: /^Post$/ }).click();
+  await expect(page.getByRole("progressbar")).toBeVisible();
+
+  const image = postCard(page, "Big photo incoming").locator("img[loading=lazy]");
+  await expect(image).toBeVisible();
+  await expect(page.getByRole("progressbar")).toHaveCount(0);
+  const { width, height, length } = await image.evaluate((img: HTMLImageElement) => ({
+    width: img.naturalWidth,
+    height: img.naturalHeight,
+    length: img.src.length,
+  }));
+  expect([width, height]).toEqual([1600, 1200]);
+  expect(length).toBeLessThan(buffer.length);
+});

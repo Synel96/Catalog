@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { FormField } from "@/components/common/FormField";
+import { UploadPreview } from "@/components/common/UploadPreview";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { ApiError, User } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
+import { shrinkImage } from "@/lib/image";
+import { resetUploadProgress } from "@/src/store/useUploadStore";
 
 type EditSlaveDialogProps = {
   open: boolean;
@@ -52,14 +55,14 @@ function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
+    resetUploadProgress();
 
     const payload = new FormData();
     for (const [key, value] of Object.entries(fields)) {
       if (value !== "") payload.append(key, value);
     }
-    if (avatar) payload.append("avatar", avatar);
-
     try {
+      if (avatar) payload.append("avatar", await shrinkImage(avatar));
       await onSave(payload);
     } catch (err) {
       setError((err as ApiError).detail || t("profile.updateFailed"));
@@ -103,6 +106,7 @@ function EditSlaveForm({ slave, onSave }: Pick<EditSlaveDialogProps, "slave" | "
         accept="image/*"
         onChange={(e) => setAvatar(e.target.files?.[0] ?? null)}
       />
+      {avatar && <UploadPreview file={avatar} uploading={isSubmitting} />}
 
       {error && (
         <p role="alert" className="text-destructive text-sm">

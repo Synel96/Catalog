@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_URL } from "@/components/site";
+import { useUploadStore } from "@/src/store/useUploadStore";
 import type { ApiError } from "@/src/types/api";
 
 // Auth lives in HttpOnly cookies set by the backend, so every request must
@@ -16,6 +17,16 @@ if (import.meta.env.VITE_API_MOCKS === "true") {
   api.defaults.adapter = async (config) =>
     (await import("@/src/mocks/adapter")).mockAdapter(config);
 }
+
+// Multipart requests (image uploads) report their progress to the upload
+// indicator.
+api.interceptors.request.use((config) => {
+  if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+    config.onUploadProgress ??= (event) =>
+      useUploadStore.getState().setProgress(event.progress ?? null);
+  }
+  return config;
+});
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 

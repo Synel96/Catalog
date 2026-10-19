@@ -272,5 +272,10 @@
     "createPost": "Failed to create post.",
     "updatePost": "Failed to update post.",
     "deletePost": "Failed to delete post."
+  },
+  "upload": {
+    "uploading": "Uploading…",
+    "percent": "Uploading… {{percent}}%",
+    "finishing": "Almost there, the cat is inspecting it…"
   }
 }

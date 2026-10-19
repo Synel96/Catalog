@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { FormField } from "@/components/common/FormField";
+import { UploadPreview } from "@/components/common/UploadPreview";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useOverlordsStore } from "@/src/store/useOverlordsStore";
 import type { ApiError, Overlord } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
+import { shrinkImage } from "@/lib/image";
+import { resetUploadProgress } from "@/src/store/useUploadStore";
 
 type OverlordFormDialogProps = {
   open: boolean;
@@ -54,15 +57,15 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
+    resetUploadProgress();
 
     const payload = new FormData();
     for (const [key, value] of Object.entries(fields)) {
       const trimmed = value.trim();
       if (trimmed) payload.append(key, trimmed);
     }
-    if (avatar) payload.append("avatar", avatar);
-
     try {
+      if (avatar) payload.append("avatar", await shrinkImage(avatar));
       if (overlord) {
         await updateOverlord(overlord.id, payload);
       } else {
@@ -110,6 +113,7 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
         onChange={(e) => setAvatar(e.target.files?.[0] ?? null)}
         disabled={isSubmitting}
       />
+      {avatar && <UploadPreview file={avatar} uploading={isSubmitting} />}
 
       {error && (
         <p role="alert" className="text-destructive text-sm">
