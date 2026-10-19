@@ -38,12 +38,47 @@ test("works offline once the service worker is in", async ({ page, context }) =>
   await context.setOffline(false);
 });
 
-test("the home page offers the app for download", async ({ page }) => {
+// Chrome's install prompt, faked: the page gets it like the real one.
+async function offerInstall(page: import("@playwright/test").Page) {
+  await page.evaluate(() => {
+    const event = new Event("beforeinstallprompt", { cancelable: true }) as Event & {
+      prompt: () => Promise<void>;
+      userChoice: Promise<{ outcome: string }>;
+    };
+    event.prompt = async () => {
+      (window as unknown as { prompted: boolean }).prompted = true;
+    };
+    event.userChoice = Promise.resolve({ outcome: "accepted" });
+    window.dispatchEvent(event);
+  });
+}
+
+test("the home page offers the app for download", async ({ page, isMobile }) => {
   await page.goto("/");
   const card = page.getByRole("region", { name: "Get the app" });
   await expect(card).toContainText("For the best experience");
-  // Headless Chromium never offers its install prompt: the button explains
-  // how to install instead.
+
+  // No install prompt from the browser (yet): the steps for the platform.
   await card.getByRole("button", { name: "Download the app" }).click();
-  await expect(page.getByRole("dialog", { name: "Install Catalog" })).toBeVisible();
+  const help = page.getByRole("dialog", { name: "Install Catalog" });
+  await expect(help).toContainText(isMobile ? "menu at the top right of Chrome" : "browser's menu");
+
+  // The prompt arriving while the steps are open: install from there.
+  await offerInstall(page);
+  await help.getByRole("button", { name: "Install now" }).click();
+  await expect(page.getByText("Catalog is installed")).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { prompted: boolean }).prompted)).toBe(
+    true
+  );
+  await expect(card).toHaveCount(0);
+});
+
+test("the download button installs right away when the browser allows it", async ({ page }) => {
+  await page.goto("/");
+  const card = page.getByRole("region", { name: "Get the app" });
+  await expect(card).toBeVisible();
+  await offerInstall(page);
+  await card.getByRole("button", { name: "Download the app" }).click();
+  await expect(page.getByText("Catalog is installed")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Install Catalog" })).toHaveCount(0);
 });

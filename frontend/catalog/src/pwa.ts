@@ -25,6 +25,9 @@ export const isIos = () =>
   (/iphone|ipad|ipod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
+export const isAndroid = () =>
+  typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+
 // Shows the browser's install dialog; true when the user installed.
 export async function promptInstall(): Promise<boolean> {
   const event = usePwaStore.getState().installPrompt;

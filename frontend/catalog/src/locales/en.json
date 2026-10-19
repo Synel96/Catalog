@@ -372,6 +372,8 @@
     "iosTitle": "Add Catalog to your Home Screen",
     "iosSteps": "In Safari, tap the <b>Share</b> button (the square with an arrow), then <b>Add to Home Screen</b>.",
     "otherTitle": "Install Catalog",
-    "otherSteps": "Open your browser's menu and choose <b>Install app</b> or <b>Add to Home screen</b>. In Chrome or Edge, the install icon may also be in the address bar."
+    "otherSteps": "Open your browser's menu and choose <b>Install app</b> or <b>Add to Home screen</b>. In Chrome or Edge, the install icon may also be in the address bar.",
+    "androidSteps": "Tap the <b>⋮</b> menu at the top right of Chrome, then <b>Install app</b> (or <b>Add to Home screen</b>). Opened the page from another app, like Messenger? Open it in Chrome first; incognito tabs can't install apps either.",
+    "now": "Install now"
   }
 }

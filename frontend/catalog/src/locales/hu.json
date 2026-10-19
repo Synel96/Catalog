@@ -372,6 +372,8 @@
     "iosTitle": "Add hozzá a Catalogot a kezdőképernyőhöz",
     "iosSteps": "Safariban koppints a <b>Megosztás</b> gombra (négyzet felfelé mutató nyíllal), majd válaszd a <b>Főképernyőhöz adás</b> lehetőséget.",
     "otherTitle": "A Catalog telepítése",
-    "otherSteps": "Nyisd meg a böngésző menüjét, és válaszd az <b>Alkalmazás telepítése</b> vagy a <b>Hozzáadás a kezdőképernyőhöz</b> lehetőséget. Chrome-ban vagy Edge-ben a telepítés ikon a címsorban is lehet."
+    "otherSteps": "Nyisd meg a böngésző menüjét, és válaszd az <b>Alkalmazás telepítése</b> vagy a <b>Hozzáadás a kezdőképernyőhöz</b> lehetőséget. Chrome-ban vagy Edge-ben a telepítés ikon a címsorban is lehet.",
+    "androidSteps": "Koppints a Chrome jobb felső sarkában a <b>⋮</b> menüre, majd válaszd az <b>Alkalmazás telepítése</b> (vagy a <b>Hozzáadás a kezdőképernyőhöz</b>) lehetőséget. Egy másik appból (pl. Messengerből) nyitottad meg az oldalt? Előbb nyisd meg Chrome-ban; inkognitó lapon sem lehet appot telepíteni.",
+    "now": "Telepítés most"
   }
 }
