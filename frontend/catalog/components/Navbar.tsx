@@ -154,7 +154,7 @@ export function Navbar({ menuOpen, onMenuOpenChange }: NavbarProps = {}) {
                   open={open}
                   closeLabel={t("nav.closeMenu")}
                   aria-describedby={undefined}
-                  className="border-l-(--brand-on-surface)/10 bg-(--brand-surface) text-(--brand-on-surface)"
+                  className="paw-pattern border-l-(--brand-on-surface)/10 bg-(--brand-surface) text-(--brand-on-surface)"
                 >
                   {/* Kept for screen readers (Radix requires an accessible dialog title) but not shown visually. */}
                   <PushDrawerTitle className="sr-only">{t("nav.navigationMenu")}</PushDrawerTitle>

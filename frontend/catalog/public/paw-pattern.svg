@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140" fill="#000">
+  <g transform="translate(28 30) rotate(-20) scale(1.0)">
+    <path d="M-9 8 Q-11 0 -5 -2 Q0 -5 5 -2 Q11 0 9 8 Q7 13 3.5 11 Q0 14 -3.5 11 Q-7 13 -9 8 Z"/>
+    <ellipse cx="-10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(-25 -10.5 -8)"/>
+    <ellipse cx="-3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(-8 -3.8 -13.5)"/>
+    <ellipse cx="3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(8 3.8 -13.5)"/>
+    <ellipse cx="10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(25 10.5 -8)"/>
+  </g>
+  <g transform="translate(98 46) rotate(25) scale(0.8)">
+    <path d="M-9 8 Q-11 0 -5 -2 Q0 -5 5 -2 Q11 0 9 8 Q7 13 3.5 11 Q0 14 -3.5 11 Q-7 13 -9 8 Z"/>
+    <ellipse cx="-10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(-25 -10.5 -8)"/>
+    <ellipse cx="-3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(-8 -3.8 -13.5)"/>
+    <ellipse cx="3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(8 3.8 -13.5)"/>
+    <ellipse cx="10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(25 10.5 -8)"/>
+  </g>
+  <g transform="translate(52 96) rotate(10) scale(0.9)">
+    <path d="M-9 8 Q-11 0 -5 -2 Q0 -5 5 -2 Q11 0 9 8 Q7 13 3.5 11 Q0 14 -3.5 11 Q-7 13 -9 8 Z"/>
+    <ellipse cx="-10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(-25 -10.5 -8)"/>
+    <ellipse cx="-3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(-8 -3.8 -13.5)"/>
+    <ellipse cx="3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(8 3.8 -13.5)"/>
+    <ellipse cx="10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(25 10.5 -8)"/>
+  </g>
+  <g transform="translate(118 112) rotate(-35) scale(1.05)">
+    <path d="M-9 8 Q-11 0 -5 -2 Q0 -5 5 -2 Q11 0 9 8 Q7 13 3.5 11 Q0 14 -3.5 11 Q-7 13 -9 8 Z"/>
+    <ellipse cx="-10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(-25 -10.5 -8)"/>
+    <ellipse cx="-3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(-8 -3.8 -13.5)"/>
+    <ellipse cx="3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(8 3.8 -13.5)"/>
+    <ellipse cx="10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(25 10.5 -8)"/>
+  </g>
+  <g transform="translate(14 128) rotate(40) scale(0.7)">
+    <path d="M-9 8 Q-11 0 -5 -2 Q0 -5 5 -2 Q11 0 9 8 Q7 13 3.5 11 Q0 14 -3.5 11 Q-7 13 -9 8 Z"/>
+    <ellipse cx="-10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(-25 -10.5 -8)"/>
+    <ellipse cx="-3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(-8 -3.8 -13.5)"/>
+    <ellipse cx="3.8" cy="-13.5" rx="3.3" ry="4.5" transform="rotate(8 3.8 -13.5)"/>
+    <ellipse cx="10.5" cy="-8" rx="3.3" ry="4.2" transform="rotate(25 10.5 -8)"/>
+  </g>
+</svg>

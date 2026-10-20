@@ -135,3 +135,20 @@ h3,
 h4 {
   font-family: var(--font-display);
 }
+
+/* Faint scattered paw prints behind the mobile menu. The SVG is only a
+   mask, so the paws take the menu's text colour in light and dark mode. */
+.paw-pattern {
+  isolation: isolate;
+}
+
+.paw-pattern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: currentcolor;
+  opacity: 0.07;
+  mask: url("/paw-pattern.svg") 0 0 / 140px 140px repeat;
+}
