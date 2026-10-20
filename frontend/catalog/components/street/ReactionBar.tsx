@@ -69,7 +69,10 @@ export function ReactionBar({ postId, summary, myReaction, overlordId }: Reactio
 
   return (
     <div
-      className="flex gap-1 overflow-x-auto pt-7 pb-1 sm:gap-3"
+      // Phones: big buttons in a row you swipe through, snapping into place
+      // (the half-visible one at the edge shows there's more). From sm up
+      // the whole row fits.
+      className="flex snap-x snap-mandatory [scrollbar-width:none] gap-2 overflow-x-auto overscroll-x-contain pt-7 pb-1 sm:snap-none sm:gap-3 [&::-webkit-scrollbar]:hidden"
       role="group"
       aria-label={t("reactions.label")}
       title={overlordId ? undefined : t("reactions.needOverlord")}
@@ -87,7 +90,7 @@ export function ReactionBar({ postId, summary, myReaction, overlordId }: Reactio
             aria-pressed={selected}
             aria-label={`${label}${count ? ` (${count})` : ""}`}
             className={cn(
-              "reaction-btn relative flex h-12 min-w-[50px] shrink-0 items-center justify-center rounded-xl px-1 transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-[72px] sm:min-w-[100px] sm:px-2",
+              "reaction-btn relative flex h-16 min-w-[84px] shrink-0 snap-start items-center justify-center rounded-xl px-1.5 transition-colors disabled:cursor-not-allowed disabled:opacity-60 sm:h-[72px] sm:min-w-[100px] sm:px-2",
               "focus-visible:ring-ring/50 outline-none focus-visible:ring-3",
               selected
                 ? "bg-primary/15 ring-primary/60 dark:bg-primary/20 ring-2"
@@ -100,7 +103,7 @@ export function ReactionBar({ postId, summary, myReaction, overlordId }: Reactio
             <img
               src={icon}
               alt=""
-              className="h-7 w-11 object-contain sm:h-14 sm:w-[88px] dark:invert"
+              className="h-11 w-[72px] object-contain sm:h-14 sm:w-[88px] dark:invert"
             />
             {count > 0 && (
               <span className="bg-primary text-primary-foreground absolute top-0.5 right-0.5 min-w-[18px] rounded-full px-1.5 text-center text-[10px] leading-[1.4] font-bold">
