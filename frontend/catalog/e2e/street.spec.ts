@@ -71,14 +71,23 @@ test("goes home and leaves street mode", async ({ page }) => {
   await expect(page.getByRole("combobox")).toHaveCount(0);
 });
 
-test("fits the phone screen without sideways scrolling", async ({ page, isMobile }) => {
+test("fits the phone screen; the reactions swipe sideways", async ({ page, isMobile }) => {
   test.skip(!isMobile, "mobile layout check");
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth
   );
   expect(overflow).toBeLessThanOrEqual(0);
+
+  // The reactions are big there and swipe sideways, snapping into place.
   const bar = page.getByRole("group", { name: "Reactions" }).first();
-  expect(await bar.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0);
+  const { scrollable, snap } = await bar.evaluate((el) => ({
+    scrollable: el.scrollWidth > el.clientWidth,
+    snap: getComputedStyle(el).scrollSnapType,
+  }));
+  expect(scrollable).toBe(true);
+  expect(snap).toContain("x mandatory");
+  await bar.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+  await expect(bar.getByRole("button", { name: /^Bury/ })).toBeInViewport();
 });
 
 test("shows upload progress and shrinks a big photo before posting it", async ({ page }) => {
