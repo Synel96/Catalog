@@ -29,8 +29,26 @@ class CustomUser(AbstractUser):
 
 
 class Overlord(models.Model):
+    # Titles a slave can give their overlord, shown under its name. The
+    # frontend translates the keys (src/locales, "titles").
+    TITLE_CHOICES = [
+        ('moms_favourite', "Mom's Favourite"),
+        ('sofa_lord', 'Lord of the Sofa'),
+        ('zoomie_champion', '3 a.m. Zoomie Champion'),
+        ('box_inspector', 'Chief Box Inspector'),
+        ('tuna_connoisseur', 'Tuna Connoisseur'),
+        ('keyboard_warmer', 'Keyboard Warmer'),
+        ('gravity_tester', 'Gravity Tester'),
+        ('sunbeam_collector', 'Sunbeam Collector'),
+        ('professional_napper', 'Professional Napper'),
+        ('door_critic', 'Door Critic'),
+        ('red_dot_hunter', 'Red Dot Hunter'),
+        ('escape_artist', 'Escape Artist'),
+    ]
+
     slave = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='overlords')
     name = models.CharField(max_length=100)
+    title = models.CharField(max_length=32, choices=TITLE_CHOICES, blank=True)
 
    
 

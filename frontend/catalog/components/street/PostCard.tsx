@@ -8,6 +8,7 @@ import type { Post } from "@/src/types/api";
 import { formatPostDate, OVERLORD_PLACEHOLDER } from "./media";
 import { overlordHref } from "./links";
 import { CommentSection } from "./CommentSection";
+import { OverlordTitle } from "@/components/overlord/OverlordTitle";
 import { ReactionBar } from "./ReactionBar";
 import { useTranslation } from "react-i18next";
 import { useLang } from "@/src/i18n/hooks";
@@ -49,6 +50,7 @@ export function PostCard({ post, actingOverlord, canManage, onEdit, onDelete }: 
           <a href={profileHref} className="font-bold underline-offset-4 hover:underline">
             {post.overlord_name}
           </a>
+          <OverlordTitle title={post.overlord_title} className="-mt-0.5" />
           <p className="text-muted-foreground text-xs">
             <time dateTime={post.created_at}>{formatPostDate(post.created_at, lang)}</time>
           </p>

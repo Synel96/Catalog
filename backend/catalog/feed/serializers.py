@@ -24,6 +24,7 @@ def require_text_or_picture(serializer, attrs):
 class PostSerializer(serializers.ModelSerializer):
     overlord_name = serializers.CharField(source='overlord.name', read_only=True)
     overlord_avatar = serializers.ImageField(source='overlord.avatar', read_only=True)
+    overlord_title = serializers.CharField(source='overlord.title', read_only=True)
     reaction_summary = serializers.SerializerMethodField()
     my_reaction = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
@@ -52,7 +53,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'overlord', 'overlord_name', 'overlord_avatar', 'content', 'image', 'created_at', 'reaction_summary', 'my_reaction', 'comment_count']
+        fields = ['id', 'overlord', 'overlord_name', 'overlord_avatar', 'overlord_title', 'content', 'image', 'created_at', 'reaction_summary', 'my_reaction', 'comment_count']
 
 
 class ReactionSerializer(serializers.ModelSerializer):

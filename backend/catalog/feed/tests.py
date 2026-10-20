@@ -424,3 +424,26 @@ class PostTextOrPictureTests(APITestCase):
         text_only = self.post(content='Just words.').data['id']
         url = reverse('post-detail', args=[text_only])
         self.assertEqual(self.client.patch(url, {'content': ''}, format='json').status_code, 400)
+
+
+class OverlordTitleTests(APITestCase):
+    """Overlords can wear one of the fixed titles; the feed shows it."""
+
+    def setUp(self):
+        self.me = User.objects.create_user(username='me', email='me@example.com', password='pw')
+        self.mirci = Overlord.objects.create(name='Mirci', slave=self.me)
+        Post.objects.create(overlord=self.mirci, content='Sunbeam acquired.')
+        login(self.client, self.me)
+
+    def set_title(self, title):
+        url = reverse('overlord-detail', args=[self.mirci.id])
+        return self.client.patch(url, {'title': title}, format='json')
+
+    def test_title_shows_on_the_overlord_and_in_the_feed(self):
+        self.assertEqual(self.set_title('sofa_lord').data['title'], 'sofa_lord')
+        post = self.client.get(reverse('post-list')).data['results'][0]
+        self.assertEqual(post['overlord_title'], 'sofa_lord')
+
+    def test_only_known_titles_and_none(self):
+        self.assertEqual(self.set_title('emperor').status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.set_title('').data['title'], '')

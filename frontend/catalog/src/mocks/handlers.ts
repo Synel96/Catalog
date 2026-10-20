@@ -172,8 +172,16 @@ const profileHandlers = [
 
   http.post(`${API}/profiles/overlords/`, async ({ request }) => {
     if (!db.loggedIn) return unauthorized();
-    const overlord = { id: nextId(), name: "", avatar: null, bio: "", breed: "", slave: ME };
-    await applyForm(overlord, await readForm(request), ["name", "bio", "breed"], "avatar");
+    const overlord = {
+      id: nextId(),
+      name: "",
+      avatar: null,
+      bio: "",
+      breed: "",
+      title: "",
+      slave: ME,
+    };
+    await applyForm(overlord, await readForm(request), ["name", "bio", "breed", "title"], "avatar");
     if (!overlord.name) {
       return HttpResponse.json({ name: ["This field is required."] }, { status: 400 });
     }
@@ -186,7 +194,7 @@ const profileHandlers = [
     if (!db.loggedIn) return unauthorized();
     const overlord = db.overlords.find((o) => o.id === Number(params.id) && o.slave === ME);
     if (!overlord) return notFound();
-    await applyForm(overlord, await readForm(request), ["name", "bio", "breed"], "avatar");
+    await applyForm(overlord, await readForm(request), ["name", "bio", "breed", "title"], "avatar");
     persist();
     return HttpResponse.json(toOverlord(overlord));
   }),

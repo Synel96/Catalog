@@ -54,6 +54,18 @@ const SLAVES: Record<number, string> = {
 };
 
 // [id, name, breed, bio, slave]; ids 1-2 belong to the logged-in user.
+// Titles some of the seeded overlords wear (core.models.Overlord).
+const SEED_TITLES: Record<number, string> = {
+  1: "sofa_lord",
+  3: "tuna_connoisseur",
+  4: "professional_napper",
+  6: "gravity_tester",
+  7: "zoomie_champion",
+  8: "red_dot_hunter",
+  9: "moms_favourite",
+  12: "box_inspector",
+};
+
 const OVERLORDS: [number, string, string, string, number][] = [
   [1, "Mirci", "Tabby", "Rules the sofa with an iron paw.", ME],
   [2, "Cirmi", "British Shorthair", "Knocks things off tables for science.", ME],
@@ -222,6 +234,7 @@ function seed(): MockDb {
       name,
       breed,
       bio,
+      title: SEED_TITLES[id] ?? "",
       slave,
       avatar: null,
     })),
@@ -316,6 +329,7 @@ export function toPost(p: StoredPost, acting: number | null = null): Post {
     ...p,
     overlord_name: overlord?.name ?? "?",
     overlord_avatar: overlord?.avatar ?? null,
+    overlord_title: overlord?.title ?? "",
     reaction_summary: reactionSummary(p.id),
     my_reaction:
       db.reactions.find((r) => r.post === p.id && acting !== null && r.overlord === acting)?.type ??

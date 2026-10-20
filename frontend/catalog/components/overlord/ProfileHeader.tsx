@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { mediaUrl } from "@/src/services/api";
 import type { Overlord } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
+import { OverlordTitle } from "./OverlordTitle";
 
 type ProfileHeaderProps = {
   overlord: Overlord;
@@ -38,7 +39,10 @@ export function ProfileHeader({ overlord, whisker, onEdit }: ProfileHeaderProps)
 
       <div className="min-w-0 flex-1">
         <div className="mb-2 flex flex-wrap items-center gap-3">
-          <h2 className="text-3xl leading-tight font-bold">{overlord.name}</h2>
+          <div>
+            <h2 className="text-3xl leading-tight font-bold">{overlord.name}</h2>
+            <OverlordTitle title={overlord.title} className="text-sm" />
+          </div>
           <div className="ml-auto flex flex-wrap items-center gap-2">
             {whisker}
             {onEdit && (

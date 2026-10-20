@@ -6,6 +6,8 @@ export type Overlord = {
   avatar: string | null;
   bio: string;
   breed: string;
+  // A key of core.models.Overlord.TITLE_CHOICES, or "" for none.
+  title?: string;
   slave: number;
   slave_name?: string;
   whiskered_by_count?: number;
@@ -25,6 +27,7 @@ export type Post = {
   overlord: number;
   overlord_name: string;
   overlord_avatar: string | null;
+  overlord_title?: string;
   content: string;
   image: string | null;
   created_at: string;

@@ -108,7 +108,9 @@
     "goToStreet": "Go to the Street with {{name}}",
     "createFailed": "Failed to create overlord.",
     "updateFailed": "Failed to update overlord.",
-    "loading": "Loading overlords"
+    "loading": "Loading overlords",
+    "titleLabel": "Title",
+    "noTitle": "No title"
   },
   "street": {
     "title": "Street",
@@ -378,5 +380,19 @@
     "otherSteps": "Open your browser's menu and choose <b>Install app</b> or <b>Add to Home screen</b>. In Chrome or Edge, the install icon may also be in the address bar.",
     "androidSteps": "Tap the <b>⋮</b> menu at the top right of Chrome, then <b>Install app</b> (or <b>Add to Home screen</b>). Opened the page from another app, like Messenger? Open it in Chrome first; incognito tabs can't install apps either.",
     "now": "Install now"
+  },
+  "titles": {
+    "moms_favourite": "Mom's Favourite",
+    "sofa_lord": "Lord of the Sofa",
+    "zoomie_champion": "3 a.m. Zoomie Champion",
+    "box_inspector": "Chief Box Inspector",
+    "tuna_connoisseur": "Tuna Connoisseur",
+    "keyboard_warmer": "Keyboard Warmer",
+    "gravity_tester": "Gravity Tester",
+    "sunbeam_collector": "Sunbeam Collector",
+    "professional_napper": "Professional Napper",
+    "door_critic": "Door Critic",
+    "red_dot_hunter": "Red Dot Hunter",
+    "escape_artist": "Escape Artist"
   }
 }

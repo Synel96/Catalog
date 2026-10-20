@@ -108,7 +108,9 @@
     "goToStreet": "Irány az utca: {{name}}",
     "createFailed": "Nem sikerült létrehozni a nagyurat.",
     "updateFailed": "Nem sikerült menteni a nagyurat.",
-    "loading": "Nagyurak betöltése"
+    "loading": "Nagyurak betöltése",
+    "titleLabel": "Titulus",
+    "noTitle": "Nincs titulus"
   },
   "street": {
     "title": "Utca",
@@ -378,5 +380,19 @@
     "otherSteps": "Nyisd meg a böngésző menüjét, és válaszd az <b>Alkalmazás telepítése</b> vagy a <b>Hozzáadás a kezdőképernyőhöz</b> lehetőséget. Chrome-ban vagy Edge-ben a telepítés ikon a címsorban is lehet.",
     "androidSteps": "Koppints a Chrome jobb felső sarkában a <b>⋮</b> menüre, majd válaszd az <b>Alkalmazás telepítése</b> (vagy a <b>Hozzáadás a kezdőképernyőhöz</b>) lehetőséget. Egy másik appból (pl. Messengerből) nyitottad meg az oldalt? Előbb nyisd meg Chrome-ban; inkognitó lapon sem lehet appot telepíteni.",
     "now": "Telepítés most"
+  },
+  "titles": {
+    "moms_favourite": "Anya kedvence",
+    "sofa_lord": "A kanapé ura",
+    "zoomie_champion": "Hajnali száguldó",
+    "box_inspector": "Főkartondoboz-felügyelő",
+    "tuna_connoisseur": "Tonhal-ínyenc",
+    "keyboard_warmer": "Billentyűzet-melegítő",
+    "gravity_tester": "Gravitációtesztelő",
+    "sunbeam_collector": "Napfényvadász",
+    "professional_napper": "Hivatásos szundító",
+    "door_critic": "Ajtókritikus",
+    "red_dot_hunter": "Lézerpötty-vadász",
+    "escape_artist": "Szabadulóművész"
   }
 }

@@ -19,6 +19,7 @@ class OverlordSerializer(serializers.ModelSerializer):
             "avatar",
             "bio",
             "breed",
+            "title",
             "slave",
             "slave_name",
             "whiskered_by_count",

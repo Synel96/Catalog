@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { FormField } from "@/components/common/FormField";
 import { UploadPreview } from "@/components/common/UploadPreview";
+import { OVERLORD_TITLES } from "@/components/overlord/titles";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useOverlordsStore } from "@/src/store/useOverlordsStore";
 import type { ApiError, Overlord } from "@/src/types/api";
@@ -44,6 +46,8 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
     bio: overlord?.bio ?? "",
     breed: overlord?.breed ?? "",
   });
+  const [title, setTitle] = useState(overlord?.title ?? "");
+  const titleId = useId();
   const [avatar, setAvatar] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,6 +68,8 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
       const trimmed = value.trim();
       if (trimmed) payload.append(key, trimmed);
     }
+    // Always sent, so choosing "No title" clears it.
+    payload.append("title", title);
     try {
       if (avatar) payload.append("avatar", await shrinkImage(avatar));
       if (overlord) {
@@ -105,6 +111,23 @@ function OverlordForm({ overlord, onDone }: { overlord?: Overlord | null; onDone
         onChange={handleChange}
         disabled={isSubmitting}
       />
+      <div className="grid gap-2">
+        <Label htmlFor={titleId}>{t("overlords.titleLabel")}</Label>
+        <select
+          id={titleId}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={isSubmitting}
+          className="border-input focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 h-9 w-full rounded-lg border bg-transparent px-3 text-base outline-none focus-visible:ring-3 disabled:opacity-50 md:text-sm"
+        >
+          <option value="">{t("overlords.noTitle")}</option>
+          {OVERLORD_TITLES.map((key) => (
+            <option key={key} value={key}>
+              {t(`titles.${key}`)}
+            </option>
+          ))}
+        </select>
+      </div>
       <FormField
         label={t("profile.avatar")}
         type="file"

@@ -9,6 +9,7 @@ import { useStreetStore } from "@/src/store/useStreetStore";
 import type { Overlord } from "@/src/types/api";
 import { useTranslation } from "react-i18next";
 import { useLocalePath } from "@/src/i18n/hooks";
+import { OverlordTitle } from "@/components/overlord/OverlordTitle";
 
 const OVERLORD_PLACEHOLDER = "/media/placeholders/overlord_placeholder.png";
 
@@ -79,6 +80,7 @@ export function MyOverlordsCarousel({ overlords, onEdit, onCreate }: MyOverlords
           </button>
 
           <h3 className="text-lg font-bold capitalize">{name}</h3>
+          <OverlordTitle title={current.title} className="-mt-1 mb-1 text-sm" />
           <p className="text-foreground/80 italic">
             {t("overlords.breed", { breed: current.breed || t("overlords.noBreed") })}
           </p>
