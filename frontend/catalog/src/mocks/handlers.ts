@@ -325,9 +325,13 @@ const reactionHandlers = [
       db.reactions.push({ post: post_id, overlord: overlord_id, type });
       status = "reacted";
       const post = db.posts.find((p) => p.id === post_id);
-      const label = { purrfect: "Purrfect", hisss: "Hisss", ekekekek: "Ekekekek", nap: "Overnap" }[
-        type
-      ];
+      const label = {
+        purrfect: "Purrfect",
+        hisss: "Hisss",
+        ekekekek: "Ekekekek",
+        nap: "Overnap",
+        bury: "Bury",
+      }[type];
       if (post) {
         const name = db.overlords.find((o) => o.id === overlord_id)?.name;
         notify(overlord_id, post.overlord, `${name} reacted ${label} to your post.`, post.overlord);

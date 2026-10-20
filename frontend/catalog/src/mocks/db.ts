@@ -112,6 +112,8 @@ const REACTIONS: [number, number, ReactionType][] = [
   [6, 11, "hisss"],
   [3, 13, "ekekekek"],
   [6, 14, "purrfect"],
+  [12, 10, "bury"],
+  [9, 13, "bury"],
 ];
 
 // [from, to]: Mirci and Cirmi whisker a few others so the Street feed has

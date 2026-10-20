@@ -15,7 +15,7 @@ export type Overlord = {
 };
 
 // Keys of core.models.Reaction.REACTION_CHOICES.
-export type ReactionType = "purrfect" | "hisss" | "ekekekek" | "nap";
+export type ReactionType = "purrfect" | "hisss" | "ekekekek" | "nap" | "bury";
 
 export type ReactionSummary = Partial<Record<ReactionType, number>>;
 

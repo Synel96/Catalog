@@ -67,6 +67,8 @@ class Reaction(models.Model):
         ('hisss', 'Hisss'),
         ('nap', 'Overnap'),
         ('ekekekek', 'Ekekekek'),
+        # A paw burying it in the litter box.
+        ('bury', 'Bury'),
     ]
     overlord = models.ForeignKey(Overlord, on_delete=models.CASCADE, related_name='reactions')
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='reactions')

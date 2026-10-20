@@ -141,6 +141,17 @@ class CommentAndNotificationTests(APITestCase):
         self.client.post(url, {**payload, 'type': 'hisss'})  # take back
         self.assertEqual(self.notifications().count(), 1)
 
+    def test_bury_reaction_and_unknown_types(self):
+        url = reverse('toggle-reaction')
+        payload = {'overlord_id': self.garfield.id, 'post_id': self.post.id}
+
+        self.assertEqual(self.client.post(url, {**payload, 'type': 'bury'}).data, {'status': 'reacted'})
+        self.assertIn('Garfield reacted Bury', self.notifications().get().message)
+
+        response = self.client.post(url, {**payload, 'type': 'lasagna'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Reaction.objects.get().type, 'bury')
+
     def test_whisker_notifies_target(self):
         self.client.post(
             reverse('whisker-list'),

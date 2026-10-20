@@ -52,6 +52,17 @@ describe("ReactionBar", () => {
     );
   });
 
+  it("buries a post in the litter box", async () => {
+    render(<ReactionBar postId={1} summary={{}} myReaction={null} overlordId={2} />);
+    expect(screen.getAllByRole("button")).toHaveLength(5);
+    await userEvent.click(screen.getByRole("button", { name: "Bury" }));
+    expect(await screen.findByRole("button", { name: "Bury (1)" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(db.reactions).toContainEqual({ overlord: 2, post: 1, type: "bury" });
+  });
+
   it("is disabled without a street overlord", () => {
     render(<ReactionBar postId={1} summary={{}} myReaction={null} overlordId={null} />);
     for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();

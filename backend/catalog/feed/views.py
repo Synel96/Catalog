@@ -340,6 +340,8 @@ class ToggleReactionAPIView(APIView):
 
         if not overlord_id or not post_id or not reaction_type:
             return Response({"error": "Missing parameters"}, status=400)
+        if reaction_type not in dict(Reaction.REACTION_CHOICES):
+            return Response({"error": "Unknown reaction"}, status=400)
 
         try:
             overlord = Overlord.objects.get(id=overlord_id, slave=request.user)

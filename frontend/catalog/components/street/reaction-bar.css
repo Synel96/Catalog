@@ -45,6 +45,16 @@
   .reaction-btn.nap:not(.calm):hover {
     animation: reaction-relax 2s infinite;
   }
+
+  .reaction-btn.bury:not(.calm):hover {
+    animation: reaction-scratch 0.35s infinite;
+  }
+
+  .reaction-btn.bury:not(.calm):hover::after {
+    content: "💩";
+    font-size: 1.1rem;
+    animation: reaction-sink 1.2s ease-in infinite;
+  }
 }
 
 /* One-shot versions after pressing. */
@@ -76,6 +86,17 @@
   animation: reaction-relax 0.9s 1;
 }
 
+/* Bury: the paw scratches and the 💩 sinks out of sight. */
+.reaction-btn.bury.burst {
+  animation: reaction-scratch 0.3s 3;
+}
+
+.reaction-btn.bury.burst::after {
+  content: "💩";
+  font-size: 1.1rem;
+  animation: reaction-sink 0.9s ease-in 1 forwards;
+}
+
 @keyframes reaction-hiss-glow {
   0%,
   60% {
@@ -86,6 +107,39 @@
   100% {
     background-color: transparent;
     box-shadow: 0 0 0 0 rgb(255 0 0 / 0%);
+  }
+}
+
+@keyframes reaction-scratch {
+  0%,
+  100% {
+    transform: rotate(0deg) translateY(0);
+  }
+
+  25% {
+    transform: rotate(-5deg) translateY(1px);
+  }
+
+  75% {
+    transform: rotate(5deg) translateY(1px);
+  }
+}
+
+/* Starts above the button and drops into it, fading out as it's buried. */
+@keyframes reaction-sink {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(1);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 34px) scale(0.6);
   }
 }
 
