@@ -390,9 +390,19 @@
     "keyboard_warmer": "Billentyűzet-melegítő",
     "gravity_tester": "Gravitációtesztelő",
     "sunbeam_collector": "Napfényvadász",
-    "professional_napper": "Hivatásos szundító",
+    "professional_napper": "Hivatásos főállású alvó",
     "door_critic": "Ajtókritikus",
     "red_dot_hunter": "Lézerpötty-vadász",
-    "escape_artist": "Szabadulóművész"
+    "escape_artist": "Szabadulóművész",
+    "paw_enforcement": "A lakás rendőre",
+    "claw_enforcement": "Karomhatósági közeg",
+    "catastrophe_manager": "Katasztrófamenedzser",
+    "meowketing_director": "Figyelemfelkeltési nagymester",
+    "chief_scratching_officer": "Fő kaparófelelős",
+    "pawlitician": "Mancspolitikus",
+    "furniture_inspector": "Bútorvizsgáló",
+    "meowsician": "Hajnali koncertművész",
+    "pawsitive_thinker": "Családi hangulatfelelős",
+    "catthlete": "Élsportoló"
   }
 }

@@ -40,10 +40,20 @@ class Overlord(models.Model):
         ('keyboard_warmer', 'Keyboard Warmer'),
         ('gravity_tester', 'Gravity Tester'),
         ('sunbeam_collector', 'Sunbeam Collector'),
-        ('professional_napper', 'Professional Napper'),
+        ('professional_napper', 'Purr-fessional Napper'),
         ('door_critic', 'Door Critic'),
         ('red_dot_hunter', 'Red Dot Hunter'),
         ('escape_artist', 'Escape Artist'),
+        ('paw_enforcement', 'Paw-enforcement Officer'),
+        ('claw_enforcement', 'Claw-enforcement Agent'),
+        ('catastrophe_manager', 'Cat-astrophe Manager'),
+        ('meowketing_director', 'Meow-keting Director'),
+        ('chief_scratching_officer', 'Chief Scratching Officer'),
+        ('pawlitician', 'Paw-litician'),
+        ('furniture_inspector', 'Fur-niture Inspector'),
+        ('meowsician', 'Meow-sician'),
+        ('pawsitive_thinker', 'Paw-sitive Thinker'),
+        ('catthlete', 'Cat-thlete'),
     ]
 
     slave = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='overlords')

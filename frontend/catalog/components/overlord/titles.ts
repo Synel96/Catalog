@@ -12,6 +12,16 @@ export const OVERLORD_TITLES = [
   "door_critic",
   "red_dot_hunter",
   "escape_artist",
+  "paw_enforcement",
+  "claw_enforcement",
+  "catastrophe_manager",
+  "meowketing_director",
+  "chief_scratching_officer",
+  "pawlitician",
+  "furniture_inspector",
+  "meowsician",
+  "pawsitive_thinker",
+  "catthlete",
 ] as const;
 
 export type OverlordTitleKey = (typeof OVERLORD_TITLES)[number];
